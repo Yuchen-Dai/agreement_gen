@@ -8,7 +8,7 @@ from exception import productNotExist
 
 class Contract:
     def __init__(self, dl, buyer, location,date = None, supplier='广州市森源电气有限公司'):
-        self.products = dl.get_products()
+        self.products = dl.get_products_list()
         self.location = location
         self.supplier = supplier
         self.buyer = buyer
@@ -31,12 +31,6 @@ class Contract:
         else:
             return self.date
 
-    def get_product(self, product_id):
-        if product_id not in self.products:
-            logging.info(f"Product id not exist: {product_id}")
-            raise productNotExist(f"Product id not exist: {product_id}")
-        return self.products[product_id]
-
     def display_table(self):
         for i, line in enumerate(self.table):
             print(i, self.products[line[0]], 'quantity:', line[1], 'discount:', line[2])
@@ -47,6 +41,16 @@ class Contract:
 
     def get_location(self):
         return self.location
+
+    def get_supplier_info(self) -> 'company_name, company_location, company_bank, account#, tax#, tel#':
+        # todo
+        return self.get_supplier(), '广州市天河区珠江新城华明路13号1404室', '广发银行广州珠江新城支行',\
+               '121106517010000603', '91440101231243376A', '020-28865488 22911611'
+
+    def get_buyer_info(self) -> 'company_name, company_location, company_bank, account#, tax#, tel#':
+        # todo
+        return self.get_buyer(), '珠海市高新区唐家湾镇科技九路88号11栋', '中国银行珠海吉大支行', \
+               '719870665575', '91440400068462957N', '0756-3399156'
 
     def get_buyer(self):
         return self.buyer
@@ -75,12 +79,59 @@ class Contract:
         pass # todo
         return ''
 
-    def get_jiaohuo(self):
+    def get_table(self):
+        return self.table
+
+    def get_zhiliang(self):  # 二、质量要求技术标准
+        pass # todo
+        return '按国家有关质量标准及需方技术要求。 '
+
+    def get_jiaohuo(self):  # 三、交（提）货时间及地点方式
         pass # todo
         return f'合同生效后10个工作日货到{self.location}。'
 
-    def get_table(self):
-        return self.table
+    def get_yunshu(self):  # 四、运输方式及到达站点和费用负担
+        pass # todo
+        return f'汽运，汽运费供方承担。'
+
+    def get_heli(self):  # 五、合理损耗及计算方法
+        pass # todo
+        return f'空白。'
+
+    def get_baozhuang(self):  # 六、包装标准，包装物的供应及回收：
+        pass # todo
+        return f'纸箱包装，包装物不回收。'
+
+    def get_yanshou(self):  # 七、验收标准及提出异议时间：
+        pass # todo
+        return f'按国家有关标准验收.如有质量问题，货到7天内书面通知供方。'
+
+    def get_biaode(self):
+        # '八、标的物所有权自供方收到货款之日起转移给需方，在需方未履行（支付款项/100%货款）义务前，
+        # 标的物仍属于供方所有，标的物毁损，灭失等风险自交付时起由需方承担。'
+        pass # todo
+        return f'空白。'
+
+    def get_jiesuan(self):  # 九、结算方式及期限
+        pass # todo
+        return f'发货前需方支付100%货款给供方。'
+
+    def get_ruxu(self):  # 十、如需提供担保，另立合同担保书，作为本合同附件
+        pass # todo
+        return f'空白。'
+
+    def get_weiyue(self):  # 十一、违约责任
+        pass # todo
+        return f'按《合同法》执行。 '
+
+    def get_jiejue(self):  # 十二、解决合同纠纷的方式
+        pass # todo
+        return f'双方协商解决，协商不成可向供方所在地人民法院提起诉讼。'
+
+    def get_qita(self):  # 十三、其它约定事情
+        pass # todo
+        return f'空白。'
+
 
     def load(self, dir):
         pass # todo
