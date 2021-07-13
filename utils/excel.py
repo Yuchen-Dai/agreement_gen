@@ -1,9 +1,9 @@
 import logging
 from dataLoader import DataLoader
 from contract import Contract
-
-import xlsxwriter, os, logging
 from pathlib import Path
+
+import xlsxwriter, os, logging, exception
 
 
 class Excel:
@@ -19,10 +19,10 @@ class Excel:
             p.mkdir(parents=True)
         workbook = xlsxwriter.Workbook(p / filename)
 
-        right_bottom = workbook.add_format({'right': border, 'bottom': border,'align': 'left',  'valign': 'vcenter'})
-        left_bottom = workbook.add_format({'left': border, 'bottom': border,'align': 'left',  'valign': 'vcenter'})
-        left = workbook.add_format({'left': border, 'align': 'left',  'valign': 'vcenter'})
-        right = workbook.add_format({'right': border, 'align': 'left',  'valign': 'vcenter'})
+        right_bottom = workbook.add_format({'right': border, 'bottom': border, 'align': 'left', 'valign': 'vcenter'})
+        left_bottom = workbook.add_format({'left': border, 'bottom': border, 'align': 'left', 'valign': 'vcenter'})
+        left = workbook.add_format({'left': border, 'align': 'left', 'valign': 'vcenter'})
+        right = workbook.add_format({'right': border, 'align': 'left', 'valign': 'vcenter'})
 
         merge_format0 = workbook.add_format({
             'bold': True,
@@ -141,13 +141,13 @@ class Excel:
         sheet1.set_column(6, 6, 15)
         sheet1.set_column(7, 7, 27)
 
-        sheet1.merge_range('A1:H1', '购销合同', merge_format0)
-        write_nonbold_bold(sheet1, 'A3:F3', merge_format4, merge_format4_bold, '供方：', c.get_supplier())
-        write_nonbold_bold(sheet1, 'A4:F4', merge_format4, merge_format4_bold, '需方：', c.get_buyer())
-        write_nonbold_bold(sheet1, 'G3:H3', merge_format4, merge_format4_bold, '合同编号：', c.get_contract_num())
-        write_nonbold_bold(sheet1, 'G4:H4', merge_format4, merge_format4_bold, '签订地点：', c.get_location())
-        write_nonbold_bold(sheet1, 'G5:H5', merge_format4, merge_format4_bold, '签订时间：', c.get_date())
-        sheet1.merge_range('A5:F5', '一、产品名称、商标、型号、厂家、数量、金额、供货时间', merge_format5)
+        sheet1.merge_range(0, 0, 0, 7, '购销合同', merge_format0)
+        write_nonbold_bold(sheet1, 2, 0, 2, 5, merge_format4, merge_format4_bold, '供方：', c.get_supplier())
+        write_nonbold_bold(sheet1, 3, 0, 3, 5, merge_format4, merge_format4_bold, '需方：', c.get_buyer())
+        write_nonbold_bold(sheet1, 2, 6, 2, 7, merge_format4, merge_format4_bold, '合同编号：', c.get_contract_num())
+        write_nonbold_bold(sheet1, 3, 6, 3, 7, merge_format4, merge_format4_bold, '签订地点：', c.get_location())
+        write_nonbold_bold(sheet1, 4, 6, 4, 7, merge_format4, merge_format4_bold, '签订时间：', c.get_date())
+        sheet1.merge_range(4, 0, 4, 5, '一、产品名称、商标、型号、厂家、数量、金额、供货时间', merge_format5)
 
         for col in range(8):
             sheet1.write(5, col, ['序号', '品牌', '规格型号', '单位', '数量', '单价', '结算金额', '备注'][col], format1_bold)
@@ -155,75 +155,75 @@ class Excel:
         for i, (brand, price) in enumerate(self.c.get_brand(), 1):
             sheet1.write(row, 0, i, format1)
             sheet1.write(row, 1, brand, format1)
-            sheet1.merge_range(f'C{row + 1}:F{row + 1}', '详见合同第二页', format1_bold)
+            sheet1.merge_range(row, 2, row, 5, '详见合同第二页', format1_bold)
             sheet1.write(row, 6, price, number_format1)
             sheet1.write(row, 7, None, format1_bold)
             row += 1
-        sheet1.merge_range(f'A{row + 1}:F{row + 1}', f'合计人民币金额（大写）：{self.c.get_total_daxie()}', merge_format3)
+
+        sheet1.merge_range(row, 0, row, 5, f'合计人民币金额（大写）：{self.c.get_total_daxie()}', merge_format3)
         sheet1.write(row, 6, self.c.get_total(), number_format2_bold)
         sheet1.write(row, 7, '含13%增值税', format1_bold)
-        write_nonbold_bold(sheet1, f'A{row + 2}:H{row + 2}', merge_format4, merge_format4_bold,
+        write_nonbold_bold(sheet1, row + 1, 0, row + 1, 7, merge_format4, merge_format4_bold,
                            '二、质量要求技术标准：', self.c.get_zhiliang())
-        write_nonbold_bold(sheet1, f'A{row + 3}:H{row + 3}', merge_format4, merge_format4_bold,
+        write_nonbold_bold(sheet1, row + 2, 0, row + 2, 7, merge_format4, merge_format4_bold,
                            '三、交（提）货时间及地点方式：', self.c.get_jiaohuo())
-        write_nonbold_bold(sheet1, f'A{row + 4}:H{row + 4}', merge_format4, merge_format4_bold,
+        write_nonbold_bold(sheet1, row + 3, 0, row + 3, 7, merge_format4, merge_format4_bold,
                            '四、运输方式及到达站点和费用负担：', self.c.get_yunshu())
-        write_nonbold_bold(sheet1, f'A{row + 5}:H{row + 5}', merge_format4, merge_format4_bold,
+        write_nonbold_bold(sheet1, row + 4, 0, row + 4, 7, merge_format4, merge_format4_bold,
                            '五、合理损耗及计算方法：', self.c.get_heli())
-        write_nonbold_bold(sheet1, f'A{row + 6}:H{row + 6}', merge_format4, merge_format4_bold,
+        write_nonbold_bold(sheet1, row + 5, 0, row + 5, 7, merge_format4, merge_format4_bold,
                            '六、包装标准，包装物的供应及回收：', self.c.get_baozhuang())
-        write_nonbold_bold(sheet1, f'A{row + 7}:H{row + 7}', merge_format4, merge_format4_bold,
+        write_nonbold_bold(sheet1, row + 6, 0, row + 6, 7, merge_format4, merge_format4_bold,
                            '七、验收标准及提出异议时间：', self.c.get_yanshou())
-        sheet1.merge_range(f'A{row + 8}:H{row + 9}', '八、标的物所有权自供方收到货款之日起转移给需方，在需方未履行（支付款项/100%货款）义务前，'
-                                                     '标的物仍属于供方所有，标的物毁损，灭失等风险自交付时起由需方承担。', merge_format4)
-        write_nonbold_bold(sheet1, f'A{row + 10}:H{row + 10}', merge_format4, merge_format4_bold,
+        sheet1.merge_range(row + 7, 0, row + 8, 7, '八、标的物所有权自供方收到货款之日起转移给需方，在需方未履行（支付款项/100%货款）义务前，'
+                                                   '标的物仍属于供方所有，标的物毁损，灭失等风险自交付时起由需方承担。', merge_format4)
+        write_nonbold_bold(sheet1, row + 9, 0, row + 9, 7, merge_format4, merge_format4_bold,
                            '九、结算方式及期限：', self.c.get_jiesuan())
-        write_nonbold_bold(sheet1, f'A{row + 11}:H{row + 11}', merge_format4, merge_format4_bold,
+        write_nonbold_bold(sheet1, row + 10, 0, row + 10, 7, merge_format4, merge_format4_bold,
                            '十、如需提供担保，另立合同担保书，作为本合同附件：', self.c.get_ruxu())
-        write_nonbold_bold(sheet1, f'A{row + 12}:H{row + 12}', merge_format4, merge_format4_bold,
+        write_nonbold_bold(sheet1, row + 11, 0, row + 11, 7, merge_format4, merge_format4_bold,
                            '十一、违约责任：', self.c.get_weiyue())
-        write_nonbold_bold(sheet1, f'A{row + 13}:H{row + 13}', merge_format4, merge_format4_bold,
+        write_nonbold_bold(sheet1, row + 12, 0, row + 12, 7, merge_format4, merge_format4_bold,
                            '十二、解决合同纠纷的方式：', self.c.get_jiejue())
-        row += 13
-        write_nonbold_bold(sheet1, f'A{row + 1}:H{row + 1}', merge_format4, merge_format4_bold,
+        write_nonbold_bold(sheet1, row + 13, 0, row + 13, 7, merge_format4, merge_format4_bold,
                            '十三、其它约定事情:', self.c.get_qita())
-        row += 2
-        sheet1.merge_range(f'A{row + 1}:C{row + 1}', '供方', format1_left_top)
-        sheet1.merge_range(f'D{row + 1}:H{row + 1}', '需方', format1_right_top)
-        row += 1
+
+        row += 15
         supplier_info = self.c.get_supplier_info()
         buyer_info = self.c.get_buyer_info()
-        write_nonbold_bold(sheet1, f'A{row + 1}:C{row + 1}', merge_format4, merge_format4,
+        sheet1.merge_range(row, 0, row, 2, '供方', format1_left_top)
+        sheet1.merge_range(row, 3, row, 7, '需方', format1_right_top)
+        write_nonbold_bold(sheet1, row + 1, 0, row + 1, 2, merge_format4, merge_format4,
                            '单位名称（章）：', supplier_info[0], left)
-        write_nonbold_bold(sheet1, f'D{row + 1}:H{row + 1}', merge_format4, merge_format4,
+        write_nonbold_bold(sheet1, row + 1, 3, row + 1, 7, merge_format4, merge_format4,
                            '单位名称（章）：', buyer_info[0], right)
-        write_nonbold_bold(sheet1, f'A{row + 2}:C{row + 2}', merge_format4, merge_format4,
+        write_nonbold_bold(sheet1, row + 2, 0, row + 2, 2, merge_format4, merge_format4,
                            '单位地址：', supplier_info[1], left)
-        write_nonbold_bold(sheet1, f'D{row + 2}:H{row + 2}', merge_format4, merge_format4,
+        write_nonbold_bold(sheet1, row + 2, 3, row + 2, 7, merge_format4, merge_format4,
                            '单位地址：', buyer_info[1], right)
-        sheet1.merge_range(f'A{row + 3}:C{row + 3}', '法定代表人：', left)
-        sheet1.merge_range(f'D{row + 3}:H{row + 3}', '法定代表人：', right)
-        sheet1.merge_range(f'A{row + 4}:C{row + 4}', '委托代表人：', left)
-        sheet1.merge_range(f'D{row + 4}:H{row + 4}', '委托代表人：', right)
-        sheet1.merge_range(f'A{row + 5}:C{row + 5}', '签字日期：', left)
-        sheet1.merge_range(f'D{row + 5}:H{row + 5}', '签字日期：', right)
-        write_nonbold_bold(sheet1, f'A{row + 6}:C{row + 6}', merge_format4, merge_format4,
+        sheet1.merge_range(row + 3, 0, row + 3, 2, '法定代表人：', left)
+        sheet1.merge_range(row + 3, 3, row + 3, 7, '法定代表人：', right)
+        sheet1.merge_range(row + 4, 0, row + 4, 2, '委托代表人：', left)
+        sheet1.merge_range(row + 4, 3, row + 4, 7, '委托代表人：', right)
+        sheet1.merge_range(row + 5, 0, row + 5, 2, '签字日期：', left)
+        sheet1.merge_range(row + 5, 3, row + 5, 7, '签字日期：', right)
+        write_nonbold_bold(sheet1, row + 6, 0, row + 6, 2, merge_format4, merge_format4,
                            '开户银行', supplier_info[2], left)
-        write_nonbold_bold(sheet1, f'D{row + 6}:H{row + 6}', merge_format4, merge_format4,
+        write_nonbold_bold(sheet1, row + 6, 3, row + 6, 7, merge_format4, merge_format4,
                            '开户银行：', buyer_info[2], right)
-        write_nonbold_bold(sheet1, f'A{row + 7}:C{row + 7}', merge_format4, merge_format4,
+        write_nonbold_bold(sheet1, row + 7, 0, row + 7, 2, merge_format4, merge_format4,
                            '帐号：', supplier_info[3], left)
-        write_nonbold_bold(sheet1, f'D{row + 7}:H{row + 7}', merge_format4, merge_format4,
+        write_nonbold_bold(sheet1, row + 7, 3, row + 7, 7, merge_format4, merge_format4,
                            '帐号：', buyer_info[3], right)
-        write_nonbold_bold(sheet1, f'A{row + 8}:C{row + 8}', merge_format4, merge_format4,
+        write_nonbold_bold(sheet1, row + 8, 0, row + 8, 2, merge_format4, merge_format4,
                            '税证号码：', supplier_info[4], left)
-        write_nonbold_bold(sheet1, f'D{row + 8}:H{row + 8}', merge_format4, merge_format4,
+        write_nonbold_bold(sheet1, row + 8, 3, row + 8, 7, merge_format4, merge_format4,
                            '税证号码：', buyer_info[4], right)
-        write_nonbold_bold(sheet1, f'A{row + 9}:C{row + 9}', merge_format4, merge_format4,
+        write_nonbold_bold(sheet1, row + 9, 0, row + 9, 2, merge_format4, merge_format4,
                            '电话：', supplier_info[5], left_bottom)
-        write_nonbold_bold(sheet1, f'D{row + 9}:H{row + 9}', merge_format4,
-                           merge_format4, '电话：', buyer_info[5], right_bottom) # todo
-        sheet1.insert_image(f'A{row + 2}', 'data\\stamp1.png', {'x_offset': 40})
+        write_nonbold_bold(sheet1, row + 9, 3, row + 9, 7, merge_format4,
+                           merge_format4, '电话：', buyer_info[5], right_bottom)  # todo
+        sheet1.insert_image(row + 1, 0, 'data\\stamp1.png', {'x_offset': 40})
 
         for i in range(1, row + 11):
             sheet1.set_row(i, 20)
@@ -236,15 +236,14 @@ class Excel:
         sheet2.set_column(2, 2, 30)
         sheet2.set_column(3, 10, 10)
 
-        sheet2.merge_range('A1:K1', '购销合同清单', merge_format1)
-        sheet2.merge_range('A2:K2', f'合同编号：{self.c.get_contract_num()}', merge_format2)
+        sheet2.merge_range(0, 0, 0, 10, '购销合同清单', merge_format1)
+        sheet2.merge_range(1, 0, 1, 10, f'合同编号：{self.c.get_contract_num()}', merge_format2)
 
         for col in range(11):
             sheet2.write(2, col, ['序号', '产品名称', '型号及规格', '单位', '数量', '面价', '折扣',
                                   '附件', '单价', '金额', '备注'][col], format1_bold)
         row, col = 3, 0
-        for product_id, number, discount in self.c.get_table():
-            product = self.dl.get_product(product_id)
+        for product, number, discount in self.c.get_table():
             sheet2.write(row, col, row - 2, format1)  # 序号
             sheet2.write(row, col + 1, product.get_name(), format1)  # 产品名称
             sheet2.write(row, col + 2, product.get_specs(), format1)  # 型号及规格
@@ -262,27 +261,26 @@ class Excel:
         sheet2.write(row, col + 1, '合计', format1_bold)
         sheet2.write_formula(row, col + 4, f'=SUM(E4:E{row})', format1_bold)
         sheet2.write_formula(row, col + 9, f'=SUM(J4:J{row})', number_format2_bold)
-        sheet2.merge_range(f'A{row + 2}:K{row + 2}', f'合计人民币金额（大写）：{self.c.get_total_daxie()}', merge_format3)
-        write_nonbold_bold(sheet2, f'A{row + 4}:D{row + 4}', merge_format4, merge_format4_bold, '单位名称（章）：',
+        sheet2.merge_range(row + 1, 0, row + 1, 10, f'合计人民币金额（大写）：{self.c.get_total_daxie()}', merge_format3)
+        write_nonbold_bold(sheet2, row + 3, 0, row + 3, 3, merge_format4, merge_format4_bold, '单位名称（章）：',
                            c.get_supplier())
-        write_nonbold_bold(sheet2, f'E{row + 4}:K{row + 4}', merge_format4, merge_format4_bold, '单位名称（章）：',
+        write_nonbold_bold(sheet2, row + 3, 4, row + 3, 10, merge_format4, merge_format4_bold, '单位名称（章）：',
                            c.get_buyer())
-        sheet2.merge_range(f'A{row + 6}:D{row + 6}', '日期：', merge_format4)
-        sheet2.merge_range(f'E{row + 6}:K{row + 6}', '日期：', merge_format4)
-        sheet2.insert_image(f'B{row + 1}', 'data\\stamp1.png')
+        sheet2.merge_range(row + 5, 0, row + 5, 3, '日期：', merge_format4)
+        sheet2.merge_range(row + 5, 4, row + 5, 10, '日期：', merge_format4)
+        sheet2.insert_image(row, 1, 'data\\stamp1.png')
         for i in range(2, row + 7):
             sheet2.set_row(i, 20)
         workbook.close()
 
 
-def write_nonbold_bold(sheet, mRange, format_nonbold, format_bold, s1, s2, merge_format=None):
+def write_nonbold_bold(sheet, frow, fcol, lrow, lcol, format_nonbold, format_bold, s1, s2, merge_format=None):
     if not merge_format:
-        sheet.merge_range(mRange, None, format_nonbold)
-        sheet.write_rich_string(mRange[:mRange.find(':')], format_nonbold, s1, format_bold, s2)
+        sheet.merge_range(frow, fcol, lrow, lcol, None, format_nonbold)
+        sheet.write_rich_string(frow, fcol, format_nonbold, s1, format_bold, s2)
     else:
-        sheet.merge_range(mRange,None, merge_format)
-        sheet.write_rich_string(mRange[:mRange.find(':')], format_nonbold, s1, format_bold, s2, merge_format)
-
+        sheet.merge_range(frow, fcol, lrow, lcol, None, merge_format)
+        sheet.write_rich_string(frow, fcol, format_nonbold, s1, format_bold, s2, merge_format)
 
 
 if __name__ == '__main__':
@@ -292,9 +290,16 @@ if __name__ == '__main__':
     dl = DataLoader()
     dl.load()
 
-    c = Contract(dl, '中山市湘华电力科技有限公司', '广州')
-    c.add_item(1, 20, 0.8)
-    c.add_item(0, 10, 0.9)
+    try:
+        dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-630S/3310', current='500A')
+        dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-400S/3310', current='350A')
+        dl.save()
+    except exception.productAlreadyExist:
+        pass
+
+    c = Contract('广州市森源电气有限公司', '中山市湘华电力科技有限公司', '广州')
+    c.add_item(dl[1], 20, 0.8)
+    c.add_item(dl[0], 10, 0.9)
 
     test = Excel(c, dl)
     test.run()

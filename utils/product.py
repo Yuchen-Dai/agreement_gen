@@ -29,6 +29,9 @@ class Product:
     def update_adjunct_price(self,p):
         self.adjunct_price = p
 
+    def __eq__(self, other):
+        return self.specs == other.specs
+
     def __repr__(self):
         return f'Product(name = {self.name}, specs = {self.specs}, unit = {self.unit}, ' \
                f'raw_price = {self.raw_price}, adjunct_price = {self.adjunct_price})'

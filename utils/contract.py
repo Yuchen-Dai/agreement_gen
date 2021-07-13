@@ -1,25 +1,22 @@
 import logging
 import os
 import time
-
+import exception
+from pathlib import Path
 from dataLoader import DataLoader
-from exception import productNotExist
+
 
 
 class Contract:
-    def __init__(self, dl, buyer, location,date = None, supplier='广州市森源电气有限公司'):
-        self.products = dl.get_products_list()
+    def __init__(self,supplier, buyer, location,date = None, ):
         self.location = location
         self.supplier = supplier
         self.buyer = buyer
         self.date = date
         self.table = []  # [(product_id, quantity, discount)]
 
-    def add_item(self, product_id, quantity, discount=1):
-        if product_id not in self.products:
-            logging.info(f"Product id not exist: {product_id}")
-            raise productNotExist(f"Product id not exist: {product_id}")
-        self.table.append((product_id, quantity, discount))
+    def add_item(self, product, quantity, discount=1):
+        self.table.append((product, quantity, discount))
 
     def del_item(self, line_number):
         logging.info(f"Del line: {line_number}")
@@ -33,10 +30,10 @@ class Contract:
 
     def display_table(self):
         for i, line in enumerate(self.table):
-            print(i, self.products[line[0]], 'quantity:', line[1], 'discount:', line[2])
+            print(i, line[0], 'quantity:', line[1], 'discount:', line[2])
 
     def get_contract_num(self):
-        pass # todo
+        pass  # todo
         return '21051425'
 
     def get_location(self):
@@ -61,7 +58,7 @@ class Contract:
     def get_total(self):
         total = 0
         for line in self.table:
-            p = self.products[line[0]]
+            p = line[0]
             total += line[1] * (p.get_raw_price() * line[2] + p.get_adjunct_price())
         return total
 
@@ -134,11 +131,15 @@ class Contract:
 
 
     def load(self, dir):
-        pass # todo
+        pass  # todo
 
 
     def save(self, dir):
-        pass # todo
+        pass  # todo
+
+    @staticmethod
+    def delete(self, dir):
+        pass  # todo
 
 
 def numToBig(num):
@@ -200,12 +201,18 @@ if __name__ == '__main__':
                         level=logging.WARNING)
     dl = DataLoader()
     dl.load()
-    c = Contract(dl,'中山市湘华电力科技有限公司', '广州')
-    c.add_item(1, 20, 0.8)
-    c.add_item(0, 10, 0.9)
+    try:
+        dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-630S/3310', current='500A')
+        dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-400S/3310', current='350A')
+        dl.save()
+    except exception.productAlreadyExist:
+        pass
+    c = Contract('广州市森源电气有限公司', '中山市湘华电力科技有限公司', '广州')
+    c.add_item(dl[0], 20, 0.8)
+    c.add_item(dl[1], 10, 0.9)
     c.display_table()
     print()
-    c.del_item(0)
+    c.del_item(1)
     c.display_table()
-    c.add_item(0,10,0.9)
+    c.add_item(dl[1], 10,0.9)
     print(c.get_total_daxie())
