@@ -4,10 +4,51 @@ import tkinter.font
 import tkinter.ttk
 
 
+class MultipleBar:
+    def __init__(self, master, bg, width=None, event=None, **data):
+        self.data = data
+        self.event = event
+        self.items = list()
+        self.display_list = list()
+        if width is None:
+            self.canvas = tkinter.Canvas(master=master, bg=bg, bd=0, highlightbackground=bg, height=30)
+        else:
+            self.canvas = tkinter.Canvas(master=master, bg=bg, bd=0, highlightbackground=bg, height=30, width=width)
+
+    def draw(self):
+        pass
+
+    def add_item(self, name):
+        self.items.append(name)
+        self.draw()
+
+    def delete_item(self, name):
+        self.items.remove(name)
+        self.draw()
+
+    def get_canvas(self):
+        return self.canvas
+
+
+class StandardBar(MultipleBar):
+    def draw(self):
+        self.canvas.delete("all")
+        now_x = 0
+        for i in self.items:
+            length = 0
+            for char in i:
+                if u'\u4e00' <= char <= u'\u9fff':
+                    length += 20
+                else:
+                    length += 10
+            text = self.canvas.create_text((now_x + length / 2, 15), text=i, font="宋体 14")
+            now_x += length
+
+
 class Window:
     def __init__(self, width=1260, height=900):
         self.window = tkinter.Tk()
-        self.window.option_add("*Font", "宋体")
+        self.window.option_add("*Font", "黑体 15")
         self.window.title("合同生成器")
         self.window.geometry("%sx%s" % (width, height))
         self.window.minsize(900, 500)
@@ -15,6 +56,37 @@ class Window:
         self.window.update()
         self.gui_init(self.window)
         self.window.mainloop()
+
+    def gui_init(self, window):
+        pass
+
+
+class ChildWindow:
+    count = 0
+
+    @staticmethod
+    def check():
+        return __class__.count == 0
+
+    def __init__(self, master, width=1260, height=900, minsize_x=400, minsize_y=400, resizable=False):
+        if self.check():
+            __class__.count += 1
+            self.window = tkinter.Toplevel(master=master)
+            self.window.option_add("*Font", "黑体 15")
+            self.window.title("合同生成器")
+            self.window.resizable(width=resizable, height=resizable)
+            self.window.geometry("%sx%s" % (width, height))
+            self.window.minsize(minsize_x, minsize_y)
+            self.window.configure(bg="#323232")
+            self.window.update()
+            self.window.protocol("WM_DELETE_WINDOW", self.close)
+            self.data = dict()
+            self.gui_init(self.window)
+            self.window.mainloop()
+
+    def close(self):
+        __class__.count -= 1
+        self.window.destroy()
 
     def gui_init(self, window):
         pass
@@ -38,10 +110,6 @@ class MainWindow(Window):
         super().__init__()
 
     def gui_init(self, window):
-        default_font = tkinter.font.nametofont("TkDefaultFont")
-        default_font.configure(family="黑体", size=15)
-        self.window.option_add("*Font", default_font)
-
         info_canvas = tkinter.Canvas(window, bg="#323232", scrollregion=(0, 0, 0, 1800))
         info_canvas.place(relx=1, x=-500, y=67, width=500, height=-64, relheight=1)
         info_frame = tkinter.Frame(info_canvas, bg="#323232", bd=20, highlightbackground="#323232")
@@ -354,12 +422,16 @@ class MainWindow(Window):
         self.get_menu_click(0)(None)
         self.info_frame.update()
 
+        self.setting_button.bind("<Button-1>", self.open_setting_menu)
         self.window.bind("<Configure>", self.size_change)
         self.tem_canvas.bind("<MouseWheel>", self.canvas_wheel)
         self.info_canvas.bind("<MouseWheel>", self.canvas_wheel)
         for i in self.info_list:
             if type(self.info_list[i]) is tkinter.Entry or type(self.info_list[i]) is tkinter.Text:
                 self.info_list[i].bind("<KeyPress>", self.info_change)
+
+    def open_setting_menu(self, evt):
+        setting_menu = SettingWindow(master=self.window, width=1100, height=700, resizable=True)
 
     def choose_file(self, file_id):
         self.info_list["info_menu_save"].config(image=self.info_list["save_disabled_img"], cursor="arrow")
@@ -516,6 +588,123 @@ class MainWindow(Window):
             evt.widget.yview("scroll", -3, "units")
         elif evt.delta < 0:
             evt.widget.yview("scroll", 3, "units")
+
+
+class SettingWindow(ChildWindow):
+    def gui_init(self, window):
+        menu_frame = tkinter.Frame(self.window, bg="#262626", bd=0)
+        menu_frame.place(width=160, relheight=1)
+
+        choice_001 = tkinter.Label(menu_frame, bg="#262626", text="基础设置", fg="#649AFA", height=3, cursor="hand2")
+        choice_001.pack(fill="x", side="top")
+        choice_002 = tkinter.Label(menu_frame, bg="#262626", text="产品管理", fg="#9A9A9A", height=3, cursor="hand2")
+        choice_002.pack(fill="x", side="top")
+        choice_003 = tkinter.Label(menu_frame, bg="#262626", text="附件管理", fg="#9A9A9A", height=3, cursor="hand2")
+        choice_003.pack(fill="x", side="top")
+
+        def choose_001(evt):
+            choice_001.config(fg="#649AFA")
+            choice_002.config(fg="#9A9A9A")
+            choice_003.config(fg="#9A9A9A")
+            self.change_panel("base_setting")
+
+        def choose_002(evt):
+            choice_001.config(fg="#9A9A9A")
+            choice_002.config(fg="#649AFA")
+            choice_003.config(fg="#9A9A9A")
+            self.change_panel("product_manager")
+
+        def choose_003(evt):
+            choice_001.config(fg="#9A9A9A")
+            choice_002.config(fg="#9A9A9A")
+            choice_003.config(fg="#649AFA")
+            self.change_panel("enclosure_manager")
+
+        choice_001.bind("<Button-1>", choose_001)
+        choice_002.bind("<Button-1>", choose_002)
+        choice_003.bind("<Button-1>", choose_003)
+        choice_001.bind("<Enter>", self.choice_enter)
+        choice_002.bind("<Enter>", self.choice_enter)
+        choice_003.bind("<Enter>", self.choice_enter)
+        choice_001.bind("<Leave>", self.choice_leave)
+        choice_002.bind("<Leave>", self.choice_leave)
+        choice_003.bind("<Leave>", self.choice_leave)
+
+        panel_list = dict()
+        base_setting_frame = tkinter.Frame(self.window, bg="#323232", bd=0, padx=20, pady=20)
+        base_setting_label = tkinter.Label(base_setting_frame, text="无可用设置", font="黑体 25", fg="#646464",
+                                           bg="#323232")
+        base_setting_label.pack()
+        panel_list["base_setting"] = base_setting_frame
+
+        product_manager_frame = tkinter.Frame(self.window, bg="#323232", bd=0, padx=20, pady=20)
+        product_input_frame = tkinter.Frame(product_manager_frame, bg="#464646", bd=0, padx=20, pady=10)
+        product_detail_frame = tkinter.Frame(product_manager_frame, bg="#464646", bd=0, padx=20, pady=20)
+        product_input_frame.place(relwidth=1, height=100)
+        product_detail_frame.place(relwidth=1, y=120, relheight=1, height=-120)
+        product_input_button = tkinter.Label(product_input_frame, bg="#646464", fg="#9A9A9A", cursor="hand2",
+                                             text="添加", width=8)
+        product_input_button.bind("<Enter>", self.button_enter)
+        product_input_button.bind("<Leave>", self.button_leave)
+        product_standard_canvas = StandardBar(master=product_input_frame, bg="#323232")
+        product_standard_canvas.add_item("测试字符")
+        product_standard_canvas.add_item("test")
+        product_standard_canvas.add_item("测试12jbh字符")
+        product_standard_canvas.add_item("tesasdft")
+        product_standard_canvas.add_item("测3试字1符")
+        product_standard_canvas.add_item("te测试st")
+        product_standard_canvas.add_item("测试符")
+        product_standard_canvas.add_item("test")
+        product_name_label = tkinter.Label(product_input_frame, bg="#464646", fg="#A0A0A0", text="产品名称:")
+        product_name_entry = tkinter.Text(product_input_frame, bg="#646464", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                          highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                          insertbackground="#A0A0A0",
+                                          height=1, width=20, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+        product_type_label = tkinter.Label(product_input_frame, bg="#464646", fg="#A0A0A0", text="型号:")
+        product_type_entry = tkinter.Text(product_input_frame, bg="#646464", fg="#A0A0A0",
+                                          highlightbackground="#A0A0A0",
+                                          highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                          insertbackground="#A0A0A0",
+                                          height=1, width=20, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+        product_input_button.pack(side="right", fill="y")
+        product_standard_canvas.get_canvas().pack(side="bottom", fill="x")
+        product_name_label.pack(side="left")
+        product_name_entry.pack(side="left")
+        tkinter.Frame(product_input_frame, bg="#464646", width=15).pack(side="left")
+        product_type_label.pack(side="left")
+        product_type_entry.pack(side="left")
+        panel_list["product_manager"] = product_manager_frame
+
+        enclosure_manager_frame = tkinter.Frame(self.window, bg="#323232", bd=0, padx=20, pady=20)
+        enclosure_manager_label = tkinter.Label(enclosure_manager_frame, text="附件管理", font="黑体 25", fg="#646464",
+                                                bg="#323232")
+        enclosure_manager_label.pack()
+        panel_list["enclosure_manager"] = enclosure_manager_frame
+
+        self.data["panel_list"] = panel_list
+
+        self.change_panel("base_setting")
+
+    @staticmethod
+    def button_enter(evt):
+        evt.widget.config(bg="#545454")
+
+    @staticmethod
+    def button_leave(evt):
+        evt.widget.config(bg="#646464")
+
+    @staticmethod
+    def choice_enter(evt):
+        evt.widget.config(bg="#3A3A3A")
+
+    @staticmethod
+    def choice_leave(evt):
+        evt.widget.config(bg="#262626")
+
+    def change_panel(self, panel):
+        for i in self.data["panel_list"]:
+            self.data["panel_list"][i].place_forget()
+        self.data["panel_list"][panel].place(x=160, relwidth=1, width=-160, relheight=1)
 
 
 if __name__ == "__main__":
