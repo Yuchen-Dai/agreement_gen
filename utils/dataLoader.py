@@ -36,7 +36,7 @@ class DataLoader:
             logging.info(f"Product id not exist: {pid}")
             raise productNotExist(f"Product id not exist: {pid}")
         else:
-            logging.info(f"Delete product id: {pid}, {self.data['products'][pid]}") # todo
+            logging.info(f"Delete product id: {pid}, {self.data['products'][pid]}")
             del self.data['products'][pid]
 
     def save(self, data_dir='data'):
@@ -49,14 +49,19 @@ class DataLoader:
         with p.open('wb') as f:
             pickle.dump(self.data, f)
 
-    def load(self, data_dir='data'):
+    @staticmethod
+    def load(data_dir='data'):
         p = Path(data_dir)/'products.data'
+        dl = DataLoader()
         if p.exists():
-            logging.info(f"Load data from file: {p.resolve()}")
+            dl = DataLoader()
             with p.open('rb') as pkl_file:
-                self.data = pickle.load(pkl_file)
+                dl.data = pickle.load(pkl_file)
+            logging.info(f"Load data from file: {p.resolve()}")
+            return dl
         else:
             logging.info(f'No existing dir: use empty dataloader')
+        return dl
 
     def __str__(self):
         result = ''
@@ -72,8 +77,7 @@ if __name__ == '__main__':
     os.chdir('../')
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
                         level=logging.DEBUG)
-    dl = DataLoader()
-    dl.load()
+    dl = DataLoader.load()
 
     # dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-630S/3310', current='500A')
     # dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-400S/3310', current='350A')

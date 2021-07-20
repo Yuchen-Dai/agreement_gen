@@ -58,6 +58,7 @@ class Excel:
 
         merge_format4_bold = workbook.add_format({
             'bold': True,
+            'valign': 'vcenter',
             'font': '宋体',  # 字体
             'font_size': 11,
         })
@@ -65,6 +66,7 @@ class Excel:
 
         merge_format4 = workbook.add_format({
             'font': '宋体',  # 字体
+            'valign': 'vcenter',
             'font_size': 11,
         })
         merge_format4.set_text_wrap()
@@ -175,8 +177,10 @@ class Excel:
                            '六、包装标准，包装物的供应及回收：', self.c.get_baozhuang())
         write_nonbold_bold(sheet1, row + 6, 0, row + 6, 7, merge_format4, merge_format4_bold,
                            '七、验收标准及提出异议时间：', self.c.get_yanshou())
-        sheet1.merge_range(row + 7, 0, row + 8, 7, '八、标的物所有权自供方收到货款之日起转移给需方，在需方未履行（支付款项/100%货款）义务前，'
-                                                   '标的物仍属于供方所有，标的物毁损，灭失等风险自交付时起由需方承担。', merge_format4)
+        sheet1.merge_range(row + 7, 0, row + 7, 7, '八、标的物所有权自供方收到货款之日起转移给需方，在需方未履行（支付款项/100%货款）义务前，',
+                                                   merge_format4)
+        sheet1.merge_range(row + 8, 0, row + 8, 7, '    标的物仍属于供方所有，标的物毁损，灭失等风险自交付时起由需方承担。',
+                                                   merge_format4)
         write_nonbold_bold(sheet1, row + 9, 0, row + 9, 7, merge_format4, merge_format4_bold,
                            '九、结算方式及期限：', self.c.get_jiesuan())
         write_nonbold_bold(sheet1, row + 10, 0, row + 10, 7, merge_format4, merge_format4_bold,
@@ -185,10 +189,18 @@ class Excel:
                            '十一、违约责任：', self.c.get_weiyue())
         write_nonbold_bold(sheet1, row + 12, 0, row + 12, 7, merge_format4, merge_format4_bold,
                            '十二、解决合同纠纷的方式：', self.c.get_jiejue())
-        write_nonbold_bold(sheet1, row + 13, 0, row + 13, 7, merge_format4, merge_format4_bold,
-                           '十三、其它约定事情:', self.c.get_qita())
+        row += 13
+        flag = True
+        for i in self.c.get_qita():
+            if flag:
+                write_nonbold_bold(sheet1, row, 0, row, 7, merge_format4, merge_format4_bold,
+                                   '十三、其它约定事情:', i)
+                flag = False
+            else:
+                sheet1.merge_range(row, 0, row, 7, f'                 {i}', merge_format4_bold)
+            row += 1
 
-        row += 15
+        row += 1
         supplier_info = self.c.get_supplier_info()
         buyer_info = self.c.get_buyer_info()
         sheet1.merge_range(row, 0, row, 2, '供方', format1_left_top)
@@ -222,8 +234,8 @@ class Excel:
         write_nonbold_bold(sheet1, row + 9, 0, row + 9, 2, merge_format4, merge_format4,
                            '电话：', supplier_info[5], left_bottom)
         write_nonbold_bold(sheet1, row + 9, 3, row + 9, 7, merge_format4,
-                           merge_format4, '电话：', buyer_info[5], right_bottom)  # todo
-        sheet1.insert_image(row + 1, 0, 'data\\stamp1.png', {'x_offset': 40})
+                           merge_format4, '电话：', buyer_info[5], right_bottom)
+        sheet1.insert_image(row + 1, 0, 'img\\stamp1.png', {'x_offset': 40})
 
         for i in range(1, row + 11):
             sheet1.set_row(i, 20)
@@ -268,7 +280,7 @@ class Excel:
                            c.get_buyer())
         sheet2.merge_range(row + 5, 0, row + 5, 3, '日期：', merge_format4)
         sheet2.merge_range(row + 5, 4, row + 5, 10, '日期：', merge_format4)
-        sheet2.insert_image(row, 1, 'data\\stamp1.png')
+        sheet2.insert_image(row, 1, 'img\\stamp1.png')
         for i in range(2, row + 7):
             sheet2.set_row(i, 20)
         workbook.close()
@@ -287,8 +299,8 @@ if __name__ == '__main__':
     os.chdir('../')
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
                         level=logging.WARNING)
-    dl = DataLoader()
-    dl.load()
+    dl = DataLoader.load()
+
 
     try:
         dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-630S/3310', current='500A')
