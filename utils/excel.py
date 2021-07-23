@@ -301,7 +301,6 @@ if __name__ == '__main__':
                         level=logging.WARNING)
     dl = DataLoader.load()
 
-
     try:
         dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-630S/3310', current='500A')
         dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-400S/3310', current='350A')

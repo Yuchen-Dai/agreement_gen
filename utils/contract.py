@@ -16,8 +16,8 @@ class Contract:
         self.table = []  # [(product_id, quantity, discount)]
 
     def add_item(self, product, quantity, discount=1):
-        p = Product(product.name, product.specs, product.unit, product.raw_price, product.adjunct_price)
-        self.table.append((p, quantity, discount))
+        assert type(product) == Product
+        self.table.append((product, quantity, discount))
 
     def del_item(self, line_number):
         logging.info(f"Del line: {line_number}")
@@ -220,8 +220,8 @@ if __name__ == '__main__':
     os.chdir('../')
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
                         level=logging.WARNING)
-    dl = DataLoader()
-    dl.load()
+    dl = DataLoader.load()
+
     try:
         dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-630S/3310', current='500A')
         dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-400S/3310', current='350A')
