@@ -1,7 +1,12 @@
 import tkinter
 import math
+import re
 import tkinter.font
 import tkinter.ttk
+from dataLoader import DataLoader
+from excel import Excel
+from contract import Contract
+from product import Product
 
 
 class MultipleBar:
@@ -144,15 +149,16 @@ product_type = {'框架断路器': ['RMW1', 'RMW2', 'ME', 'RMW3'],
 
 
 class ChildWindow:
-    count = 0
+    # count = 0
 
     @staticmethod
     def check():
-        return __class__.count == 0
+        return True
+        # return __class__.count == 0
 
-    def __init__(self, master, width=1260, height=900, minsize_x=400, minsize_y=400, resizable=False):
+    def __init__(self, master, width=1260, height=900, minsize_x=400, minsize_y=400, resizable=False, **data):
         if self.check():
-            __class__.count += 1
+            # __class__.count += 1
             self.window = tkinter.Toplevel(master=master)
             self.window.option_add("*Font", "黑体 15")
             self.window.title("合同生成器")
@@ -162,20 +168,40 @@ class ChildWindow:
             self.window.configure(bg="#323232")
             self.window.update()
             self.window.protocol("WM_DELETE_WINDOW", self.close)
-            self.data = dict()
+            self.data = data
             self.gui_init(self.window)
             self.window.mainloop()
 
     def close(self):
-        __class__.count -= 1
+        # __class__.count -= 1
         self.window.destroy()
 
     def gui_init(self, window):
         pass
 
 
+class WarningWindow(ChildWindow):
+    def __init__(self, master, text, width=300, height=150, minsize_x=300, minsize_y=150, resizable=False):
+        self.text = text
+        super().__init__(master, width, height, minsize_x, minsize_y, resizable)
+
+    def gui_init(self, window):
+        sure_img = tkinter.PhotoImage(file="img/button_enabled.png", width=110, height=50)
+        sure_button = tkinter.Label(window, width=110, height=50, image=sure_img, text="确定",
+                                    bg="#323232", fg="#E4E4E4", compound="center", cursor="hand2")
+        self.data["sure_img"] = sure_img
+
+        def cancel(evt):
+            self.close()
+        sure_button.bind("<Button-1>", cancel)
+        tkinter.Frame(window, bg="#323232", height=15).pack(side="bottom")
+        sure_button.pack(side="bottom", fill="x")
+        label = tkinter.Label(window, text=self.text, bg="#323232", fg="#A0A0A0")
+        label.pack(expand=1)
+
+
 class MainWindow(Window):
-    def __init__(self):
+    def __init__(self, data_loader):
         self.menu_canvas = None
         self.tem_canvas = None
         self.info_frame = None
@@ -188,6 +214,7 @@ class MainWindow(Window):
         self.info_list = dict()
         self.now_size = [1260, 900]
         self.detail_data = dict()
+        self.data_loader = data_loader
 
         super().__init__()
 
@@ -513,7 +540,7 @@ class MainWindow(Window):
                 self.info_list[i].bind("<KeyPress>", self.info_change)
 
     def open_setting_menu(self, evt):
-        setting_menu = SettingWindow(master=self.window, width=1280, height=800, resizable=True)
+        setting_menu = SettingWindow(master=self.window, width=1280, height=800, resizable=True, data_loader=self.data_loader)
 
     def choose_file(self, file_id):
         self.info_list["info_menu_save"].config(image=self.info_list["save_disabled_img"], cursor="arrow")
@@ -673,7 +700,18 @@ class MainWindow(Window):
 
 
 class SettingWindow(ChildWindow):
+    setting_count = 0
+
+    @staticmethod
+    def check():
+        return __class__.setting_count < 1
+
+    def close(self):
+        __class__.setting_count -= 1
+        super().close()
+
     def gui_init(self, window):
+        __class__.setting_count += 1
         menu_frame = tkinter.Frame(self.window, bg="#262626", bd=0)
         menu_frame.place(width=160, relheight=1)
 
@@ -797,7 +835,7 @@ class SettingWindow(ChildWindow):
                                              highlightbackground="#A0A0A0",
                                              highlightcolor="#649AFA", bd=0, highlightthickness=1,
                                              insertbackground="#A0A0A0",
-                                             height=1, width=4, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+                                             height=1, width=6, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
         product_price_label = tkinter.Label(product_line01, bg="#464646", fg="#A0A0A0", text="面价:")
         product_price_entry = tkinter.Text(product_line01, bg="#646464", fg="#A0A0A0",
                                            highlightbackground="#A0A0A0",
@@ -835,7 +873,7 @@ class SettingWindow(ChildWindow):
         tkinter.Frame(product_line01, bg="#464646", width=10).pack(side="left")
         product_current_label.pack(side="left")
         product_current_entry.pack(side="left")
-        tkinter.Label(product_line01, bg="#464646", fg="#A0A0A0", text="A", font="黑体 14", padx=3).pack(side="left")
+        # tkinter.Label(product_line01, bg="#464646", fg="#A0A0A0", text="A", font="黑体 14", padx=3).pack(side="left")
         tkinter.Frame(product_line01, bg="#464646", width=10).pack(side="left")
         product_price_label.pack(side="left")
         product_price_entry.pack(side="left")
@@ -917,18 +955,17 @@ class SettingWindow(ChildWindow):
         product_list_box.column("adjunct", width=500, anchor="w")
         product_list_box.column("price", width=80, anchor="w")
         product_list_box.column("adjunctPrice", width=80, anchor="w")
-        test_name = ["智能型万能式断路器", "智能型万能式断路器", "微型断路器", "塑壳断路器", "高压真空断路器"]
-        test_type = ["RMW1-2000S/3P", "RMW2-2000S/3P", "RMC3-125", "RMM3-630S/3300", "RMVS1-12/630-25"]
-        test_adjunct = ["RMW1-2000S/3P 1250 抽屉式 bse4 控制电压:AC230V +门框 +相间隔板+配4组转换辅助触头",
-                        "RMW1-2000S/4P 1250 抽屉式 bse4 控制电压:AC230V +门框 +相间隔板+配4组转换辅助触头/延时欠电压脱扣器AC230V延时3S+2合1缆绳联锁",
-                        "", "分励AC220V", "相距210mm 固定式 合/分闸线圈/储能电机AC220V 闭锁线圈"]
-        test_price = ["16700", "21700", "330", "210", "16000"]
-        test_adjunctPrice = ["80", "80", "0", "0", "0"]
+        # test_name = ["智能型万能式断路器", "智能型万能式断路器", "微型断路器", "塑壳断路器", "高压真空断路器"]
+        # test_type = ["RMW1-2000S/3P", "RMW2-2000S/3P", "RMC3-125", "RMM3-630S/3300", "RMVS1-12/630-25"]
+        # test_adjunct = ["RMW1-2000S/3P 1250 抽屉式 bse4 控制电压:AC230V +门框 +相间隔板+配4组转换辅助触头",
+        #                 "RMW1-2000S/4P 1250 抽屉式 bse4 控制电压:AC230V +门框 +相间隔板+配4组转换辅助触头/延时欠电压脱扣器AC230V延时3S+2合1缆绳联锁",
+        #                 "", "分励AC220V", "相距210mm 固定式 合/分闸线圈/储能电机AC220V 闭锁线圈"]
+        # test_price = ["16700", "21700", "330", "210", "16000"]
+        # test_adjunctPrice = ["80", "80", "0", "0", "0"]
 
         def select(event):
             selection = product_list_box.selection()
-            id_list = self.data["product_id_list"]
-            for i in id_list:
+            for i in product_list_box.get_children():
                 if i in selection:
                     product_list_box.tag_configure(i, background="#649AFA", foreground="#E4E4E4")
                 else:
@@ -937,7 +974,8 @@ class SettingWindow(ChildWindow):
         product_list_box.bind('<<TreeviewSelect>>', select)
         self.data["product_treeview"] = product_list_box
         self.data["product_id_list"] = list()
-        self.product_list_set(test_name, test_type, test_adjunct, test_price, test_adjunctPrice)
+        self.products_read()
+        # self.product_list_set(test_name, test_type, test_adjunct, test_price, test_adjunctPrice)
 
         product_listbox_scroll = tkinter.Scrollbar(product_detail_frame, command=product_list_box.yview)
         product_list_box.configure(yscrollcommand=product_listbox_scroll.set)
@@ -976,17 +1014,20 @@ class SettingWindow(ChildWindow):
 
         screen_name_cb.bind("<<ComboboxSelected>>", self.screen_name_change)
         product_delete_lock.bind("<Button-1>", self.lock_change)
+        product_input_button.bind("<Button-1>", self.add_product)
         # product_list_delete.bind("<Button-1>", self.delete_product)
+        # product_adjunctPrice_entry.bind("<Key>", self.number_limit)
 
-    def product_list_set(self, name_list, type_list, adjunct_list, price_list, adjunctPrice_list):
-        product_id_list = list()
+    def product_list_set(self, name_list, type_list, adjunct_list, price_list, adjunctPrice_list, pid_list):
+        self.data["pid_list"] = pid_list
+        # product_id_list = list()
         for i in range(len(name_list)):
-            id_tag = "I{:0>3}".format(i + 1)
-            product_id_list.append(id_tag)
+            id_tag = str(pid_list[i])
+            # product_id_list.append(id_tag)
             self.data["product_treeview"].insert('', i,
                                                  values=(name_list[i], type_list[i], adjunct_list[i], price_list[i],
-                                                         adjunctPrice_list[i]), tags=(id_tag, "all"))
-        self.data["product_id_list"] = product_id_list
+                                                         adjunctPrice_list[i]), tags=(id_tag, "all"), iid=id_tag)
+        # self.data["product_id_list"] = product_id_list
 
     def lock_change(self, evt):
         if self.data["delete_lock"]:
@@ -1004,10 +1045,55 @@ class SettingWindow(ChildWindow):
         self.data["delete_lock"] = not self.data["delete_lock"]
 
     def delete_product(self, evt):
-        pass
+        selection = self.data["product_treeview"].selection()
+        data_loader = self.data["data_loader"]
+        for i in selection:
+            data_loader.del_data(int(i))
+        data_loader.save()
+        self.products_read()
+        self.lock_change(None)
 
     def add_product(self, evt):
-        pass
+        product_name = self.data["widget_list"]["product_name_cb"].get()
+        product_type = "%s-%s" % (self.data["widget_list"]["product_type_cb"].get(),
+                                  self.data["widget_list"]["product_type_entry"].get("1.0", 'end-1c'))
+        product_current = self.data["widget_list"]["product_current_entry"].get("1.0", 'end-1c')
+        product_price = self.data["widget_list"]["product_price_entry"].get("1.0", 'end-1c')
+        product_adjunct_list = self.data["widget_list"]["product_standard_canvas"].get_items()
+        pattern = r'^([0-9]+(A|(mA)))?$'
+        if not re.match(pattern, product_current):
+            warning_window = WarningWindow(self.window, "电流格式错误，电流应留空，或以mA或A为单位")
+            return
+        if not product_price.isnumeric():
+            warning_window = WarningWindow(self.window, "价格填写错误，应为数字，不能留空")
+            return
+        product_price = float(product_price)
+        data_loader = self.data["data_loader"]
+        new_product = Product(unit="台", raw_price=product_price, adjunct=product_adjunct_list, current=product_current,
+                              model=product_type, name=product_name)
+        data_loader.add_data(new_product)
+        data_loader.save()
+        self.products_read()
+
+    def products_read(self):
+        for i in self.data["product_treeview"].get_children():
+            self.data["product_treeview"].delete(i)
+        data_loader = self.data["data_loader"]
+        name_list = list()
+        type_list = list()
+        price_list = list()
+        adjunct_list = list()
+        adjunctPrice_list = list()
+        pid_list = list()
+        for i in data_loader.get_products_list():
+            pid_list.append(i[0])
+            product = i[1]
+            name_list.append(product.get_name())
+            type_list.append(product.get_model())
+            price_list.append(product.get_raw_price())
+            adjunct_list.append(product.get_adjunct())
+            adjunctPrice_list.append(product.get_adjunct_price())
+        self.product_list_set(name_list, type_list, adjunct_list, price_list, adjunctPrice_list, pid_list)
 
     @staticmethod
     def get_str_length(string):
@@ -1075,10 +1161,24 @@ class SettingWindow(ChildWindow):
         name = self.data["widget_list"]["product_adjunctName_entry"].get("1.0", 'end-1c')
         name = name.replace("\n", "")
         price = self.data["widget_list"]["product_adjunctPrice_entry"].get("1.0", 'end-1c')
+        if not price.isnumeric() and price != "":
+            warning_window = WarningWindow(self.window, "价格必须为数字或空")
+            return
         price = int(price) if price != "" else 0
         if name != "" and self.data["widget_list"]["product_standard_canvas"].add_item(name, price):
             self.data["widget_list"]["product_adjunctName_entry"].delete("0.0", "end")
             self.data["widget_list"]["product_adjunctPrice_entry"].delete("0.0", "end")
+
+    def number_limit(self, evt):
+        target = evt.widget
+        text = target.get("1.0", "end")
+        target_text = ""
+        for i in text:
+            if i in "123456789.":
+                target_text += i
+        if target_text != text:
+            target.delete("1.0", "end")
+            target.insert("1.0", target_text)
 
     @staticmethod
     def button_enter(evt):
@@ -1103,4 +1203,5 @@ class SettingWindow(ChildWindow):
 
 
 if __name__ == "__main__":
-    main_window = MainWindow()
+    dl = DataLoader.load()
+    main_window = MainWindow(dl)
