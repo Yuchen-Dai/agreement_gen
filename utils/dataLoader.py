@@ -61,13 +61,14 @@ class DataLoader:
         return product_list
 
     @staticmethod
-    def search(product_list, keyword):
+    def search(product_list, name=None, model=None, keyword=None):
         """ Search by keyword in products' model and products' name"""
         result = []
         for p in product_list:
-            if keyword in p[1].get_name() or keyword in p[1].get_model():
+            if (not name or name == p[1].get_name()) and (not model or model in p[1].get_model()) and \
+                    keyword in p[1].get_model():
                 result.append(p)
-        return result
+        return DataLoader.sorted(result, 'model')
 
     @staticmethod
     def load(data_dir='data'):
@@ -106,7 +107,7 @@ if __name__ == '__main__':
     dl.add_data(b)
     dl.add_data(c)
     pl = dl.get_products_list()
-    pl = DataLoader.sorted(pl, key = 'model')
-    pl = DataLoader.search(pl, '微')
+    pl = DataLoader.sorted(pl, key='model')
+    pl = DataLoader.search(pl, keyword='')
     print(pl)
     # dl.save()
