@@ -8,11 +8,29 @@ from dataLoader import DataLoader
 from product import Product
 
 class Contract:
-    def __init__(self, supplier, buyer, location, date=None):
+    def __init__(self, supplier, buyer, make, date, location, time_limit, comments, others:[],
+                 supplier_location, supplier_bank, supplier_account, supplier_tax_num, supplier_tel,
+                 buyer_location,    buyer_bank,    buyer_account,    buyer_tax_num,    buyer_tel):
         self.location = location
         self.supplier = supplier
+        self.make = make
         self.buyer = buyer
         self.date = date
+        self.time_limit = time_limit
+        self.comments = comments
+        assert type(others) == list
+        self.others = others
+        self.supplier_location = supplier_location
+        self.supplier_bank = supplier_bank
+        self.supplier_account = supplier_account
+        self.supplier_tax_num = supplier_tax_num
+        self.supplier_tel = supplier_tel
+        self.buyer_location = buyer_location
+        self.buyer_bank = buyer_bank
+        self.buyer_account = buyer_account
+        self.buyer_tax_num = buyer_tax_num
+        self.buyer_tel = buyer_tel
+
         self.table = []  # [(product_id, quantity, discount)]
 
     def add_item(self, product, quantity, discount=1):
@@ -25,7 +43,7 @@ class Contract:
 
     def get_date(self):
         if not self.date:
-            return time.strftime('%Y{y}%m{m}%d{d}').format(y='年', m='月', d='日')
+            return time.strftime('%Y{y}%m{m}%d{d}').format(y='年', m='月', d='日')  # 例：2021年7月23日
         else:
             return self.date
 
