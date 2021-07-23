@@ -148,7 +148,7 @@ class Excel:
         write_nonbold_bold(sheet1, 3, 0, 3, 5, merge_format4, merge_format4_bold, '需方：', c.get_buyer())
         write_nonbold_bold(sheet1, 2, 6, 2, 7, merge_format4, merge_format4_bold, '合同编号：', c.get_contract_num())
         write_nonbold_bold(sheet1, 3, 6, 3, 7, merge_format4, merge_format4_bold, '签订地点：', c.get_location())
-        write_nonbold_bold(sheet1, 4, 6, 4, 7, merge_format4, merge_format4_bold, '签订时间：', c.get_date())
+        write_nonbold_bold(sheet1, 4, 6, 4, 7, merge_format4, merge_format4_bold, '签订时间：', c.get_sign_date())
         sheet1.merge_range(4, 0, 4, 5, '一、产品名称、商标、型号、厂家、数量、金额、供货时间', merge_format5)
 
         for col in range(8):

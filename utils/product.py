@@ -63,4 +63,4 @@ if __name__ == '__main__':
     print(a)
     print(a.copy())
     print(a.get_adjunct_price())
-    print(a.get_specs())
+    print(a.get_model())
