@@ -101,8 +101,9 @@ if __name__ == '__main__':
 
     a = Product('塑壳断路器', 'RMM1-630S/3310', '500A', '台', 1220.00, [("抽屉式", 180), ("VC3", 30.1)])
     b = Product('交流塑壳断路', 'RMM1-100S/3300', '160A', '只', 174, [("带电剩余保护模块", 88)])
-    c = Product
+    c = Product('微型断路器', 'RMC3-63', "", "只", 94.2, [("带剩余电流保护模块AC型 30mA", 16)])
     dl.add_data(a)
     dl.add_data(b)
+    dl.add_data(c)
     print(dl)
     # dl.save()

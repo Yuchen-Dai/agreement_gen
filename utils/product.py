@@ -22,8 +22,17 @@ class Product:
         if self.current:
             result += f" {self.current}"
         if len(self.adjunct):
-            result += ' ' + ' '.join([i[0] + ':' + str(i[1]) for i in self.adjunct])
+            result += ' ' + ' '.join([i[0] for i in self.adjunct])
         return result
+
+    def get_model(self):
+        result = self.model
+        if self.current:
+            result += f' {self.current}'
+        return result
+
+    def get_adjunct(self):
+        return ' '.join([i[0] for i in self.adjunct])
 
     def get_name(self):
         return self.name
