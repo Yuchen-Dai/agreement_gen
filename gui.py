@@ -949,6 +949,7 @@ class SettingWindow(ChildWindow):
         unlock_image = tkinter.PhotoImage(file="img/unlock_icon.png", width=35, height=35)
         self.data["lock_image"] = lock_image
         self.data["unlock_image"] = unlock_image
+        self.data["delete_lock"] = True
         product_delete_lock = tkinter.Label(product_detail_line02, bg="#464646", image=lock_image, cursor="hand2")
         # product_list_delete.bind("<Enter>", self.button_enter)
         # product_list_delete.bind("<Leave>", self.button_leave)
@@ -974,7 +975,8 @@ class SettingWindow(ChildWindow):
         widget_list["product_delete_lock"] = product_delete_lock
 
         screen_name_cb.bind("<<ComboboxSelected>>", self.screen_name_change)
-        product_list_delete.bind("<Button-1>", self.delete_product)
+        product_delete_lock.bind("<Button-1>", self.lock_change)
+        # product_list_delete.bind("<Button-1>", self.delete_product)
 
     def product_list_set(self, name_list, type_list, adjunct_list, price_list, adjunctPrice_list):
         product_id_list = list()
@@ -985,6 +987,21 @@ class SettingWindow(ChildWindow):
                                                  values=(name_list[i], type_list[i], adjunct_list[i], price_list[i],
                                                          adjunctPrice_list[i]), tags=(id_tag, "all"))
         self.data["product_id_list"] = product_id_list
+
+    def lock_change(self, evt):
+        if self.data["delete_lock"]:
+            self.data["widget_list"]["product_delete_lock"].configure(image=self.data["unlock_image"])
+            self.data["widget_list"]["product_list_delete"].configure(bg="#649AFA", fg="#E4E4E4", cursor="hand2")
+            self.data["widget_list"]["product_list_delete"].bind("<Enter>", self.button_enter)
+            self.data["widget_list"]["product_list_delete"].bind("<Leave>", self.button_leave)
+            self.data["widget_list"]["product_list_delete"].bind("<Button-1>", self.delete_product)
+        else:
+            self.data["widget_list"]["product_delete_lock"].configure(image=self.data["lock_image"])
+            self.data["widget_list"]["product_list_delete"].configure(bg="#646464", fg="#A0A0A0", cursor="arrow")
+            self.data["widget_list"]["product_list_delete"].unbind("<Enter>")
+            self.data["widget_list"]["product_list_delete"].unbind("<Leave>")
+            self.data["widget_list"]["product_list_delete"].unbind("<Button-1>")
+        self.data["delete_lock"] = not self.data["delete_lock"]
 
     def delete_product(self, evt):
         pass
