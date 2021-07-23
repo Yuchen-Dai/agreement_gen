@@ -36,8 +36,8 @@ class DataLoader:
             logging.info(f"Product id not exist: {pid}")
             raise productNotExist(f"Product id not exist: {pid}")
         else:
-            del self.data['products'][pid]
             logging.info(f"Delete product id: {pid}, {self.data['products'][pid]}")
+            del self.data['products'][pid]
 
     def save(self, data_dir='data'):
         p = Path(data_dir)
@@ -105,5 +105,8 @@ if __name__ == '__main__':
     dl.add_data(a)
     dl.add_data(b)
     dl.add_data(c)
-    print(dl)
+    pl = dl.get_products_list()
+    pl = DataLoader.sorted(pl, key = 'model')
+    pl = DataLoader.search(pl, '微')
+    print(pl)
     # dl.save()
