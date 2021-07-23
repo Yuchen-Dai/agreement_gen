@@ -1,5 +1,5 @@
 from product import Product
-from exception import productNotExist,productAlreadyExist
+from exception import productNotExist, productAlreadyExist
 from pathlib import Path
 import pickle
 import os
@@ -15,19 +15,19 @@ class DataLoader:
         if pid not in self.data['products']:
             logging.info(f"Product id not exist: {pid}")
             raise productNotExist(f"Product id not exist: {pid}")
-        return self.data['products'][pid]
+        return self.data['products'][pid].copy()
 
     def get_products_list(self):
-        return self.data['products']
+        product_list = [(i, self.data['products'][i]) for i in self.data['products']]
+        return product_list
 
-    def add_data(self, name, unit, raw_price, adjunct_price, **specs):
-        new_product = Product(name, specs, unit, raw_price, adjunct_price)
-        for i in self.data['products'].values():  # todo specs需要处理
+    def add_data(self, new_product):
+        assert isinstance(new_product, Product)
+        for i in self.data['products'].values():
             if i == new_product:
                 logging.info(f'Product already exists: {i}')
                 raise productAlreadyExist(f'Product already exists: {i}')
-
-        logging.info(f'Add product: {new_product}')
+        logging.info(f'Add product pid {self.data["id_count"]}: {new_product}')
         self.data['products'][self.data['id_count']] = new_product
         self.data['id_count'] += 1
 
@@ -36,22 +36,42 @@ class DataLoader:
             logging.info(f"Product id not exist: {pid}")
             raise productNotExist(f"Product id not exist: {pid}")
         else:
-            logging.info(f"Delete product id: {pid}, {self.data['products'][pid]}")
             del self.data['products'][pid]
+            logging.info(f"Delete product id: {pid}, {self.data['products'][pid]}")
 
     def save(self, data_dir='data'):
         p = Path(data_dir)
         if not p.exists():
             logging.info(f"Create data directory: {p.resolve}")
             p.mkdir(parents=True)
-        p = p/'products.data'
+        p = p / 'products.data'
         logging.info(f"Save data: {p.resolve()}")
         with p.open('wb') as f:
             pickle.dump(self.data, f)
 
     @staticmethod
+    def sorted(product_list, key):
+        """Sort by [name] or [model]"""
+        assert key == 'name' or key == 'model'
+        if key == 'name':
+            product_list = sorted(product_list, key=lambda x: x[1].model)
+            product_list = sorted(product_list, key=lambda x: x[1].name)
+        elif key == 'model':
+            product_list = sorted(product_list, key=lambda x: x[1].model)
+        return product_list
+
+    @staticmethod
+    def search(product_list, keyword):
+        """ Search by keyword in products' model and products' name"""
+        result = []
+        for p in product_list:
+            if keyword in p[1].get_name() or keyword in p[1].get_model():
+                result.append(p)
+        return result
+
+    @staticmethod
     def load(data_dir='data'):
-        p = Path(data_dir)/'products.data'
+        p = Path(data_dir) / 'products.data'
         dl = DataLoader()
         if p.exists():
             dl = DataLoader()
@@ -69,8 +89,8 @@ class DataLoader:
             result += f'id {i}:{v}\n'
         return result
 
-    def __getitem__(self, item):
-        return self.get_product(item)
+    def __getitem__(self, pid):
+        return self.get_product(pid)
 
 
 if __name__ == '__main__':
@@ -79,9 +99,10 @@ if __name__ == '__main__':
                         level=logging.DEBUG)
     dl = DataLoader.load()
 
-    # dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-630S/3310', current='500A')
-    # dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-400S/3310', current='350A')
-    # dl.del_data(0)
-    # dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-400S/3310', current='500A')
+    a = Product('塑壳断路器', 'RMM1-630S/3310', '500A', '台', 1220.00, [("抽屉式", 180), ("VC3", 30.1)])
+    b = Product('交流塑壳断路', 'RMM1-100S/3300', '160A', '只', 174, [("带电剩余保护模块", 88)])
+    c = Product
+    dl.add_data(a)
+    dl.add_data(b)
     print(dl)
     # dl.save()
