@@ -2,14 +2,14 @@ import logging
 from dataLoader import DataLoader
 from contract import Contract
 from pathlib import Path
+from product import Product
 
 import xlsxwriter, os, logging, exception
 
 
 class Excel:
-    def __init__(self, Contract, dl):
-        self.c = Contract
-        self.dl = dl
+    def __init__(self, contract):
+        self.c = contract
 
     def run(self, filename='Expenses.xlsx', dir='output'):
         border = 1
@@ -178,9 +178,9 @@ class Excel:
         write_nonbold_bold(sheet1, row + 6, 0, row + 6, 7, merge_format4, merge_format4_bold,
                            '七、验收标准及提出异议时间：', self.c.get_yanshou())
         sheet1.merge_range(row + 7, 0, row + 7, 7, '八、标的物所有权自供方收到货款之日起转移给需方，在需方未履行（支付款项/100%货款）义务前，',
-                                                   merge_format4)
+                           merge_format4)
         sheet1.merge_range(row + 8, 0, row + 8, 7, '    标的物仍属于供方所有，标的物毁损，灭失等风险自交付时起由需方承担。',
-                                                   merge_format4)
+                           merge_format4)
         write_nonbold_bold(sheet1, row + 9, 0, row + 9, 7, merge_format4, merge_format4_bold,
                            '九、结算方式及期限：', self.c.get_jiesuan())
         write_nonbold_bold(sheet1, row + 10, 0, row + 10, 7, merge_format4, merge_format4_bold,
@@ -299,18 +299,20 @@ if __name__ == '__main__':
     os.chdir('../')
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
                         level=logging.WARNING)
-    dl = DataLoader.load()
+    dl = DataLoader()
 
-    try:
-        dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-630S/3310', current='500A')
-        dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-400S/3310', current='350A')
-        dl.save()
-    except exception.productAlreadyExist:
-        pass
+    a = Product('塑壳断路器', 'RMM1-630S/3310', '500A', '台', 1220.00, [("抽屉式", 180), ("VC3", 30.1)])
+    b = Product('交流塑壳断路', 'RMM1-100S/3300', '160A', '只', 174, [("带电剩余保护模块", 88)])
+    c = Product('微型断路器', 'RMC3-63', "", "只", 94.2, [("带剩余电流保护模块AC型 30mA", 16)])
+    dl.add_data(a)
+    dl.add_data(b)
+    dl.add_data(c)
 
-    c = Contract('广州市森源电气有限公司', '中山市湘华电力科技有限公司', '广州')
+    c = Contract(supplier='广州市森源电气有限公司', buyer='中山市湘华电力科技有限公司', brand='广州人民',
+                 sign_date=('2021', '7', '23'), location='广州',
+                 contract_number = Contract.generate_contract_num(Contract.get_today()))
     c.add_item(dl[1], 20, 0.8)
     c.add_item(dl[0], 10, 0.9)
 
-    test = Excel(c, dl)
+    test = Excel(c)
     test.run()

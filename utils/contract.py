@@ -1,21 +1,28 @@
 import logging
 import os
-import time
-import exception
+import datetime
 import pickle
 from pathlib import Path
-from dataLoader import DataLoader
+from exception import ContractNumberAlreadyExist, IllegalDate, IllegalContractNumber, FileExceed
 from product import Product
 
 class Contract:
-    def __init__(self, supplier, buyer, brand, sign_date, delivery_date, location, payment_method, comments, others:[],
-                 supplier_location, supplier_bank, supplier_account, supplier_tax_num, supplier_tel,
-                 buyer_location,    buyer_bank,    buyer_account,    buyer_tax_num,    buyer_tel):
+    def __init__(self, supplier=None, buyer=None, brand=None, sign_date=('2021', '07', '23',), delivery_date=None,
+                 location=None, payment_method=None, comments=None, others=[], supplier_location=None,
+                 supplier_bank=None, supplier_account=None, supplier_tax_num=None, supplier_tel=None,
+                 buyer_location=None, buyer_bank=None, buyer_account=None, buyer_tax_num=None, buyer_tel=None,
+                 name=None, contract_number=None):
         self.location = location
         self.supplier = supplier
         self.brand = brand
         self.buyer = buyer
-        self.sign_date = sign_date
+        assert type(sign_date) == tuple
+        assert len(sign_date) == 3
+        assert all([type(i) == str for i in sign_date])
+        try:
+            self.sign_date = datetime.datetime(int(sign_date[0]), int(sign_date[1]), int(sign_date[2]))
+        except ValueError:
+            raise IllegalDate
         self.delivery_date = delivery_date
         self.payment_method = payment_method
         self.comments = comments
@@ -31,10 +38,17 @@ class Contract:
         self.buyer_account = buyer_account
         self.buyer_tax_num = buyer_tax_num
         self.buyer_tel = buyer_tel
+        self.name = name
+        self.cid = contract_number
+        self._is_template = True
+        self._new = True
 
         self.table = []  # [(product_id, quantity, discount)]
 
-    def add_item(self, product, quantity, discount=1):
+    def get_name(self):
+        return self.name if self.name else self.get_contract_num()
+
+    def add_item(self, product, quantity, discount=1.0):
         assert type(product) == Product
         self.table.append((product, quantity, discount))
 
@@ -44,35 +58,38 @@ class Contract:
 
     def get_sign_date(self):
         if not self.sign_date:
-            return time.strftime('%Y{y}%m{m}%d{d}').format(y='年', m='月', d='日')  # 例：2021年7月23日
+            today = datetime.date.today()
+            return '{}年{:0>2d}月{:0>2d}日'.format(today.year, today.month, today.day)  # 例：2021年7月23日
         else:
-            return self.sign_date
+            return '{}年{:0>2d}月{:0>2d}日'.format(self.sign_date.year, self.sign_date.month, self.sign_date.day)
 
     def display_table(self):
         for i, line in enumerate(self.table):
             print(i, line[0], 'quantity:', line[1], 'discount:', line[2])
 
     def get_contract_num(self):
-        pass  # todo 自动获取，并且可更改
-        return '21051425'
+        return self.cid if self.cid else ' '
 
     def get_location(self):
         """签订地点"""
         return self.location
 
     def get_supplier_info(self) -> 'company_name, company_location, company_bank, account#, tax#, tel#':
-        return self.get_supplier(), self.supplier_location, self.supplier_bank, \
-               self.supplier_account, self.supplier_tax_num, self.supplier_tel
+        return self.get_supplier(), self.supplier_location if self.supplier_location else ' ', \
+               self.supplier_bank if self.supplier_bank else ' ', \
+               self.supplier_account if self.supplier_account else ' ', self.supplier_tax_num if self.supplier_tax_num\
+                   else ' ', self.supplier_tel if self.supplier_tel else ' '
 
     def get_buyer_info(self) -> 'company_name, company_location, company_bank, account#, tax#, tel#':
-        return self.get_buyer(), self.buyer_location, self.buyer_bank, \
-               self.buyer_account, self.buyer_tax_num, self.buyer_tel
+        return self.get_buyer(), self.buyer_location if self.buyer_location else ' ', self.buyer_bank if self.buyer_bank else ' ', \
+               self.buyer_account if self.buyer_account else ' ', self.buyer_tax_num if self.buyer_tax_num else ' ', \
+               self.buyer_tel if self.buyer_tel else ' '
 
     def get_buyer(self):
-        return self.buyer
+        return self.buyer if self.buyer else ' '
 
     def get_supplier(self):
-        return self.supplier
+        return self.supplier if self.supplier else ' '
 
     def get_total(self):
         total = 0
@@ -85,7 +102,7 @@ class Contract:
         return numToBig(self.get_total())
 
     def get_brand(self):
-        yield self.brand, self.get_total()
+        return [(self.brand if self.brand else ' ', self.get_total())]
 
     def get_table(self):
         return self.table
@@ -114,7 +131,7 @@ class Contract:
         return f'空白。'
 
     def get_jiesuan(self):  # 九、结算方式及期限
-        return self.payment_method
+        return self.payment_method if self.payment_method else ' '
 
     def get_ruxu(self):  # 十、如需提供担保，另立合同担保书，作为本合同附件
         return f'空白。'
@@ -128,38 +145,122 @@ class Contract:
     def get_qita(self):  # 十三、其它约定事情
         return self.others
 
-    def save(self, dir = 'data/contract'):
-        assert self.get_contract_num(), "Need to have a contract number to save"
-        cnum = self.get_contract_num()
-        p = Path(dir) / cnum[:2] / cnum[2:4]
+    def set_template(self, set_t: bool):
+        self._is_template = set_t
+
+    def save(self, dir='data/contract'):
+        p = Path(dir)
+        if self._is_template:
+            p = p / 'template'
+            if not self.cid:
+                if not p.exists():
+                    self.cid = '00000001'
+                else:
+                    check_occupy = [True] * 99
+                    for i in p.iterdir():
+                        if i.stem.startswith('0000'):
+                            check_occupy[int(i.stem[6:8]) - 1] = False
+                    last_two = None
+                    for i, not_occupy in enumerate(check_occupy):
+                        if not_occupy:
+                            last_two = i + 1
+                            break
+                    if not last_two:
+                        raise FileExceed(f'Contract for template exceed 100.')
+                    self.cid = '000000{:0>2d}'.format(last_two)
+
+        else:
+            p = p / 'contract'
+            if not isLegalCid(self.cid):
+                raise IllegalContractNumber("Not a legal contract number.")
         if not p.exists():
-            logging.info(f"Create saving directory: {p.resolve}")
+            logging.info(f"Create saving directory: {p.resolve()}")
             p.mkdir(parents=True)
-        p = p / f'{cnum}.data'
+        p = p / f'{self.cid}.data'
+        if p.exists() and self._new:
+            raise ContractNumberAlreadyExist
         logging.info(f"Save data: {p.resolve()}")
         with p.open('wb') as f:
             pickle.dump(self.__dict__, f)
 
     @staticmethod
-    def load(cnum, dir = 'data/contract'):
-        cnum = str(cnum)
-        assert len(cnum) == 8, f'Not a valid contract number{cnum}'
-        p = Path(dir) / cnum[:2] / cnum[2:4] / f'{str(cnum)}.data'
-        assert p.exists(), f"No existing file: {p}"
-        c = Contract(None,None,None)
-        with p.open('rb') as pkl_file:
-            c.__dict__ = pickle.load(pkl_file)
-        logging.info(f"Load data from file: {p.resolve()}")
+    def load(cid, dir='data/contract'):
+        c = Contract()
+        if cid.startswith('0000'):
+            p = Path(dir) / 'template' / f'{str(cid)}.data'
+            assert p.exists(), f"No existing file: {p}"
+            with p.open('rb') as pkl_file:
+                c.__dict__ = pickle.load(pkl_file)
+            logging.info(f"Load template from file: {p.resolve()}")
+        else:
+            p = Path(dir) / 'contract' / f'{str(cid)}.data'
+            assert p.exists(), f"No existing file: {p}"
+            with p.open('rb') as pkl_file:
+                c.__dict__ = pickle.load(pkl_file)
+            logging.info(f"Load contract from file: {p.resolve()}")
+        c._new = False
         return c
 
     @staticmethod
-    def delete(cnum, dir = 'data/contract'):
-        cnum = str(cnum)
-        assert len(cnum) == 8, f'Not a valid contract number{cnum}'
-        p = Path(dir) / cnum[:2] / cnum[2:4] / f'{str(cnum)}.data'
+    def get_contract_list(dir='data/contract'):
+        p = Path(dir) / 'contract'
+        if not p.exists():
+            return []
+        result = []
+        for f in p.iterdir():
+            if f.suffix == '.data' and isLegalCid(f.stem):
+                result.append(f.stem)
+        return [(i, 'contract') for i in result]
+
+    @staticmethod
+    def get_template_list(dir='data/contract'):
+        p = Path(dir) / 'template'
+        if not p.exists():
+            return []
+        result = []
+        for f in p.iterdir():
+            if f.suffix == '.data':
+                result.append(f.stem)
+        return [(i, 'template') for i in result]
+
+    @staticmethod
+    def delete(cid, dir='data/contract'):
+        cid = str(cid)
+        p = Path(dir)
+        if cid.startswith('0000'):
+            p = p / 'template'
+        else:
+            p = p / 'contract'
+        p = p / f'{str(cid)}.data'
         assert p.exists(), f"No existing file: {p}"
         logging.info(f"Delete contract: {p.resolve()}")
         p.unlink()
+
+    @staticmethod
+    def generate_contract_num(date, dir='data/contract'):
+        """date: (year, month, date)"""
+        p = Path(dir) / 'contract'
+        pre_six = '{}{:0>2d}{:0>2d}'.format(str(date[0])[-2:], int(date[1]), int(date[2]))
+        if not p.exists():
+            return pre_six + '01'
+        check_occupy = [True] * 99
+        for i in p.iterdir():
+            if i.stem.startswith(pre_six[:4]):
+                check_occupy[int(i.stem[6:8]) - 1] = False
+        last_two = None
+        for i, not_occupy in enumerate(check_occupy):
+            if not_occupy:
+                last_two = i + 1
+                break
+        if not last_two:
+            raise FileExceed(f'Contract for {pre_six} exceed 100.')
+        return '{}{:0>2d}'.format(pre_six, last_two)
+
+    @staticmethod
+    def get_today():
+        today = datetime.date.today()
+        return str(today.year), str(today.month), str(today.day)
+
 
 def numToBig(num):
     dict1 = {1: '壹', 2: '贰', 3: '叁', 4: '肆', 5: '伍', 6: '陆', 7: '柒', 8: '捌', 9: '玖', 0: '零'}
@@ -214,25 +315,42 @@ def numToBig(num):
     return money
 
 
+def isLegalCid(cid):
+    if type(cid) != str:
+        return False
+    if len(cid) < 8:
+        return False
+    if not cid[:8].isnumeric():
+        return False
+    try:
+        datetime.datetime(2000 + int(cid[:2]), int(cid[2:4]), int(cid[4:6]))
+    except ValueError:
+        return False
+    return True
+
+
 if __name__ == '__main__':
+    from dataLoader import DataLoader
+    from product import Product
+
     os.chdir('../')
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
-                        level=logging.WARNING)
-    dl = DataLoader.load()
+                        level=logging.DEBUG)
+    # dl = DataLoader()
+    #
+    # a = Product('塑壳断路器', 'RMM1-630S/3310', '500A', '台', 1220.00, [("抽屉式", 180), ("VC3", 30.1)])
+    # b = Product('交流塑壳断路', 'RMM1-100S/3300', '160A', '只', 174, [("带电剩余保护模块", 88)])
+    # c = Product('微型断路器', 'RMC3-63', "", "只", 94.2, [("带剩余电流保护模块AC型 30mA", 16)])
+    # dl.add_data(a)
+    # dl.add_data(b)
+    # dl.add_data(c)
+    #
+    # c = Contract(supplier='广州市森源电气有限公司', buyer='中山市湘华电力科技有限公司', brand='广州人民',
+    #              sign_date=('2021', '5', '7'), location='广州')
+    # c.add_item(dl[1], 20, 0.8)
+    # c.add_item(dl[0], 10, 0.9)
 
-    try:
-        dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-630S/3310', current='500A')
-        dl.add_data('塑壳断路器', '台', 1220, 130, model='RMM1-400S/3310', current='350A')
-        dl.save()
-    except exception.productAlreadyExist:
-        pass
-    c = Contract.load('21051425')
-    # c.add_item(dl[0], 20, 0.8)
-    # c.add_item(dl[1], 10, 0.9)
     # c.display_table()
-    # print()
-    # c.del_item(1)
-    # c.display_table()
-    # c.add_item(dl[1], 10, 0.9)
-    # print(c.get_total_daxie())
-    c.display_table()
+    # print(list(Contract.get_contract_list()))
+    c = Contract.load('00000001')
+    c.save()

@@ -1,5 +1,5 @@
 from product import Product
-from exception import productNotExist, productAlreadyExist
+from exception import ProductNotExist, ProductAlreadyExist
 from pathlib import Path
 import pickle
 import os
@@ -14,7 +14,7 @@ class DataLoader:
     def get_product(self, pid):
         if pid not in self.data['products']:
             logging.info(f"Product id not exist: {pid}")
-            raise productNotExist(f"Product id not exist: {pid}")
+            raise ProductNotExist(f"Product id not exist: {pid}")
         return self.data['products'][pid].copy()
 
     def get_products_list(self):
@@ -26,7 +26,7 @@ class DataLoader:
         for i in self.data['products'].values():
             if i == new_product:
                 logging.info(f'Product already exists: {i}')
-                raise productAlreadyExist(f'Product already exists: {i}')
+                raise ProductAlreadyExist(f'Product already exists: {i}')
         logging.info(f'Add product pid {self.data["id_count"]}: {new_product}')
         self.data['products'][self.data['id_count']] = new_product
         self.data['id_count'] += 1
@@ -34,7 +34,7 @@ class DataLoader:
     def del_data(self, pid):
         if pid not in self.data['products']:
             logging.info(f"Product id not exist: {pid}")
-            raise productNotExist(f"Product id not exist: {pid}")
+            raise ProductNotExist(f"Product id not exist: {pid}")
         else:
             logging.info(f"Delete product id: {pid}, {self.data['products'][pid]}")
             del self.data['products'][pid]
