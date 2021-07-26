@@ -3,15 +3,14 @@ import os
 import datetime
 import pickle
 from pathlib import Path
-from exception import ContractNumberAlreadyExist, IllegalDate, IllegalContractNumber, FileExceed
-from product import Product
+from exception import ContractNumberAlreadyExist, IllegalDate, FileExceed
 
 class Contract:
-    def __init__(self, supplier=None, buyer=None, brand=None, sign_date=('2021', '07', '23',), delivery_date=None,
-                 location=None, payment_method=None, comments=None, others=[], supplier_location=None,
-                 supplier_bank=None, supplier_account=None, supplier_tax_num=None, supplier_tel=None,
-                 buyer_location=None, buyer_bank=None, buyer_account=None, buyer_tax_num=None, buyer_tel=None,
-                 name=None, contract_number=None):
+    def __init__(self, supplier='', buyer='', brand='', sign_date=('1970', '01', '01',), delivery_date='', delivery_location = '',
+                 location='', payment_method='', comments='', others=[], supplier_location='',
+                 supplier_bank='', supplier_account='', supplier_tax_num='', supplier_tel='',
+                 buyer_location='', buyer_bank='', buyer_account='', buyer_tax_num='', buyer_tel='',
+                 name='', contract_number=''):
         self.location = location
         self.supplier = supplier
         self.brand = brand
@@ -171,8 +170,7 @@ class Contract:
 
         else:
             p = p / 'contract'
-            if not isLegalCid(self.cid):
-                raise IllegalContractNumber("Not a legal contract number.")
+
         if not p.exists():
             logging.info(f"Create saving directory: {p.resolve()}")
             p.mkdir(parents=True)
@@ -182,6 +180,18 @@ class Contract:
         logging.info(f"Save data: {p.resolve()}")
         with p.open('wb') as f:
             pickle.dump(self.__dict__, f)
+
+    def delete(self, dir='data/contract'):
+        cid = self.cid
+        p = Path(dir)
+        if cid.startswith('0000'):
+            p = p / 'template'
+        else:
+            p = p / 'contract'
+        p = p / f'{str(cid)}.data'
+        assert p.exists(), f"No existing file: {p}"
+        logging.info(f"Delete contract: {p.resolve()}")
+        p.unlink()
 
     @staticmethod
     def load(cid, dir='data/contract'):
@@ -201,65 +211,6 @@ class Contract:
         c._new = False
         return c
 
-    @staticmethod
-    def get_contract_list(dir='data/contract'):
-        p = Path(dir) / 'contract'
-        if not p.exists():
-            return []
-        result = []
-        for f in p.iterdir():
-            if f.suffix == '.data' and isLegalCid(f.stem):
-                result.append(f.stem)
-        return [(i, 'contract') for i in result]
-
-    @staticmethod
-    def get_template_list(dir='data/contract'):
-        p = Path(dir) / 'template'
-        if not p.exists():
-            return []
-        result = []
-        for f in p.iterdir():
-            if f.suffix == '.data':
-                result.append(f.stem)
-        return [(i, 'template') for i in result]
-
-    @staticmethod
-    def delete(cid, dir='data/contract'):
-        cid = str(cid)
-        p = Path(dir)
-        if cid.startswith('0000'):
-            p = p / 'template'
-        else:
-            p = p / 'contract'
-        p = p / f'{str(cid)}.data'
-        assert p.exists(), f"No existing file: {p}"
-        logging.info(f"Delete contract: {p.resolve()}")
-        p.unlink()
-
-    @staticmethod
-    def generate_contract_num(date, dir='data/contract'):
-        """date: (year, month, date)"""
-        p = Path(dir) / 'contract'
-        pre_six = '{}{:0>2d}{:0>2d}'.format(str(date[0])[-2:], int(date[1]), int(date[2]))
-        if not p.exists():
-            return pre_six + '01'
-        check_occupy = [True] * 99
-        for i in p.iterdir():
-            if i.stem.startswith(pre_six[:4]):
-                check_occupy[int(i.stem[6:8]) - 1] = False
-        last_two = None
-        for i, not_occupy in enumerate(check_occupy):
-            if not_occupy:
-                last_two = i + 1
-                break
-        if not last_two:
-            raise FileExceed(f'Contract for {pre_six} exceed 100.')
-        return '{}{:0>2d}'.format(pre_six, last_two)
-
-    @staticmethod
-    def get_today():
-        today = datetime.date.today()
-        return str(today.year), str(today.month), str(today.day)
 
 
 def numToBig(num):
@@ -313,20 +264,6 @@ def numToBig(num):
     if (ifint == True):
         money = money + '整'
     return money
-
-
-def isLegalCid(cid):
-    if type(cid) != str:
-        return False
-    if len(cid) < 8:
-        return False
-    if not cid[:8].isnumeric():
-        return False
-    try:
-        datetime.datetime(2000 + int(cid[:2]), int(cid[2:4]), int(cid[4:6]))
-    except ValueError:
-        return False
-    return True
 
 
 if __name__ == '__main__':
