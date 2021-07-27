@@ -23,6 +23,7 @@ class Contract:
         except ValueError:
             raise IllegalDate
         self.delivery_date = delivery_date
+        self.delivery_location = delivery_location
         self.payment_method = payment_method
         self.comments = comments
         assert type(others) == list
