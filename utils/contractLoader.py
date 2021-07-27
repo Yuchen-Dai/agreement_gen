@@ -50,7 +50,7 @@ class ContractLoader:
     def override_contract(self, contract_cid, supplier, buyer, brand, sign_date, delivery_date, delivery_location,
                           location, payment_method, comments, others, supplier_location, supplier_bank,
                           supplier_account, supplier_tax_num, supplier_tel, buyer_location, buyer_bank, buyer_account,
-                          buyer_tax_num, buyer_tel, name, contract_number):
+                          buyer_tax_num, buyer_tel):
         """
         :param contract_cid: str
         :param supplier: str
@@ -74,7 +74,6 @@ class ContractLoader:
         :param buyer_tax_num: str
         :param buyer_tel: str
         :param name: str
-        :param contract_number: str
         """
         if contract_cid in self.contracts:
             c = self.contracts[contract_cid]
@@ -98,8 +97,6 @@ class ContractLoader:
             c.buyer_account = buyer_account
             c.buyer_tax_num = buyer_tax_num
             c.buyer_tel = buyer_tel
-            c.name = name
-            c.cid = contract_number
             c.save()
         elif contract_cid in self.templates:
             c = self.templates[contract_cid]
@@ -122,18 +119,15 @@ class ContractLoader:
             c.buyer_account = buyer_account
             c.buyer_tax_num = buyer_tax_num
             c.buyer_tel = buyer_tel
-            c.name = name
-            c.cid = contract_number
             c.save()
         else:
             raise ValueError(f'{contract_cid} not exist.')
 
-    def create_contract(self, contract_cid, supplier, buyer, brand, sign_date, delivery_date, delivery_location,
+    def create_contract(self, supplier, buyer, brand, sign_date, delivery_date, delivery_location,
                         location, payment_method, comments, others, supplier_location, supplier_bank,
                         supplier_account, supplier_tax_num, supplier_tel, buyer_location, buyer_bank, buyer_account,
                         buyer_tax_num, buyer_tel, name, contract_number):
         """
-        :param contract_cid: str
         :param supplier: str
         :param buyer: str
         :param brand: str
@@ -160,7 +154,6 @@ class ContractLoader:
         if not isLegalCid(contract_number):
             raise IllegalContractNumber("Not a legal contract number.")
         c = Contract()
-        c.contract_cid = contract_cid
         c.supplier = supplier
         c.buyer = buyer
         c.brand = brand

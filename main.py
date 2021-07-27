@@ -1,6 +1,8 @@
 from main_window import MainWindow
 from dataLoader import DataLoader
+from contractLoader import ContractLoader
 
 
 dl = DataLoader.load()
-main_window = MainWindow(dl)
+cl = ContractLoader()
+main_window = MainWindow(dl, cl)

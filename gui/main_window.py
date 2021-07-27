@@ -3,9 +3,12 @@ import math
 import tkinter.font
 import tkinter.ttk
 from setting_window import SettingWindow
+from new_built_window import NewBuiltWindow
+from warning_window import WarningWindow
+from rename_window import RenameWindow
+from contractLoader import ContractLoader
 from dataLoader import DataLoader
 from excel import Excel
-from contract import Contract
 from product import Product
 
 
@@ -26,7 +29,7 @@ class Window:
 
 
 class MainWindow(Window):
-    def __init__(self, data_loader):
+    def __init__(self, data_loader, contract_loader):
         self.menu_canvas = None
         self.tem_canvas = None
         self.info_frame = None
@@ -35,18 +38,21 @@ class MainWindow(Window):
         self.chosen_file_id = None
         self.setting_button = None
         self.warning_label = None
+        self.item_menu = None
+        self.chosen_contract = None
         self.file_list = list()
         self.menu_list = list()
         self.info_list = dict()
         self.now_size = [1260, 900]
         self.detail_data = dict()
         self.data_loader = data_loader
+        self.contract_loader = contract_loader
 
         super().__init__()
 
     def gui_init(self, window):
         warning_label = tkinter.Label(window, bg="#323232", font="黑体 22", text="无可用选项", fg="#646464")
-        info_canvas = tkinter.Canvas(window, bg="#323232", scrollregion=(0, 0, 0, 1800))
+        info_canvas = tkinter.Canvas(window, bg="#323232", scrollregion=(0, 0, 0, 1850))
         info_canvas.place(relx=1, x=-500, y=67, width=500, height=-64, relheight=1)
         info_frame = tkinter.Frame(info_canvas, bg="#323232", bd=20, highlightbackground="#323232")
         info_frame.place(x=0, y=0, relwidth=1)
@@ -82,7 +88,7 @@ class MainWindow(Window):
                                          bg="#323232", fg="#E4E4E4", compound="center", cursor="hand2")
         info_menu_save = tkinter.Label(info_menu, image=save_disabled_img, bg="#323232", cursor="arrow")
         info_menu_back = tkinter.Label(info_menu, image=back_disabled_img, bg="#323232", cursor="arrow")
-        info_menu_create.pack(side="right", padx=15)
+        info_menu_create.pack(side="right", padx=20)
         info_menu_save.pack(side="left", padx=10)
         info_menu_back.pack(side="left", padx=0)
         self.info_menu = info_menu
@@ -155,8 +161,8 @@ class MainWindow(Window):
         agm_number_entry.grid(column=1, row=0, pady=5, sticky=tkinter.W)
         agm_time_label.grid(column=0, row=1, pady=5, sticky=tkinter.W)
         agm_time_frame.grid(column=1, row=1, pady=5, sticky=tkinter.W)
-        agm_fnumber_label.grid(column=0, row=2, pady=5, sticky=tkinter.W)
-        agm_fnumber_entry.grid(column=1, row=2, pady=5, sticky=tkinter.W)
+        # agm_fnumber_label.grid(column=0, row=2, pady=5, sticky=tkinter.W)
+        # agm_fnumber_entry.grid(column=1, row=2, pady=5, sticky=tkinter.W)
         agm_supplier_label.grid(column=0, row=3, pady=5, sticky=tkinter.W)
         agm_supplier_entry.grid(column=1, row=3, pady=5, sticky=tkinter.W)
         agm_demander_label.grid(column=0, row=4, pady=5, sticky=tkinter.W)
@@ -321,11 +327,6 @@ class MainWindow(Window):
         self.info_list["demander_detail_button"] = demander_detail_button
         self.info_list["demander_detail_line"] = demander_detail_line
         self.info_list["demander_detail_text"] = demander_detail_text
-        for i in range(15):
-            self.add_agm("合同1", agm_type="template")
-        self.add_agm("添加", number="", agm_type="add_button", img="img/file_add.png")
-        self.chosen_file_id = self.file_list[0]["id_number"]
-        self.choose_file(self.file_list[0]["id_number"])
 
         menu_name = ["合同模板", "最近打开", "全部", "收藏"]
         menu_icon = ["tem_icon.png", "recent_icon.png", "all_icon.png", "collect_icon.png"]
@@ -340,11 +341,11 @@ class MainWindow(Window):
             text = self.menu_canvas.create_text(length + 60, 35, text=menu_name[i], fill="#A0A0A0", font="黑体 14",
                                                 anchor="w")
             menu_dict = {"icon_file": icon_file, "icon": icon, "frame": frame, "text": text, "select_sign": select_sign,
-                         "id": i}
+                         "id": i, "value": menu_name[i]}
             length += now_length
 
             for i2 in menu_dict:
-                if i2 != "id":
+                if i2 != "id" and i2 != "value":
                     self.menu_canvas.tag_bind(menu_dict[i2], "<Enter>", self.get_menu_enter(i))
                     self.menu_canvas.tag_bind(menu_dict[i2], "<Leave>", self.get_menu_leave(i))
                     self.menu_canvas.tag_bind(menu_dict[i2], "<Button-1>", self.get_menu_click(i))
@@ -356,9 +357,22 @@ class MainWindow(Window):
         self.setting_button.place(relx=1, x=-50, y=15)
         self.info_list["setting_img"] = setting_img
 
+        item_menu = tkinter.Menu(tem_canvas, tearoff=False, font="新宋体 13", bg="#262626", fg="#A0A0A0")
+        item_menu.add_command(label="以此模板新建合同")
+        item_menu.add_command(label="重命名")
+        item_menu.add_command(label="删除")
+        item_menu.add_command(label="复制此模板")
+        item_menu.add_command(label="移至顶部")
+        item_menu.place()
+        self.item_menu = item_menu
+
         self.get_menu_click(0)(None)
         self.info_frame.update()
 
+        def create_click(evt):
+            self.new_built()
+
+        info_menu_create.bind("<Button-1>", create_click)
         self.setting_button.bind("<Button-1>", self.open_setting_menu)
         self.window.bind("<Configure>", self.size_change)
         self.tem_canvas.bind("<MouseWheel>", self.canvas_wheel)
@@ -372,37 +386,279 @@ class MainWindow(Window):
                 self.info_list[i].bind("<KeyPress>", self.info_change)
                 self.info_list[i].bind("<Return>", enter_disabled)
 
+    def create_tem(self, file_id):
+        print("create: %s" % file_id)
+
+    def delete_tem(self, file_id):
+        print("delete: %s" % file_id)
+
+    def copy_tem(self, file_id):
+        print("copy: %s" % file_id)
+
+    def lift_tem(self, file_id):
+        print("lift: %s" % file_id)
+
+    def rename_tem(self, file_id):
+        cid = self.file_list[file_id]["agm_code"]
+        rename_window = RenameWindow(master=self.window, cid=cid, command=self.rename_recall, width=530, height=100,
+                                     minsize_y=100)
+
+    def rename_recall(self, cid, new_name):
+        new_name = new_name.strip()
+        if not new_name:
+            warning_window = WarningWindow(text="名字不能为空。", master=self.window)
+            return
+        if len(new_name) > 20:
+            warning_window = WarningWindow(text="名字长度至多为20个字符。", master=self.window)
+            return
+        self.contract_loader.rename(cid, new_name)
+        self.refresh_agm()
+
+    def menu_show(self, pos, file_id):
+        file_type = self.file_list[file_id]["type"]
+        if file_type == "template":
+            def create():
+                self.create_tem(file_id)
+
+            def delete():
+                self.delete_tem(file_id)
+
+            def copy():
+                self.copy_tem(file_id)
+
+            def lift():
+                self.lift_tem(file_id)
+
+            def rename():
+                self.rename_tem(file_id)
+
+            self.item_menu.delete(0, 10)
+            self.item_menu.add_command(label="以此模板新建合同", command=create)
+            self.item_menu.add_command(label="重命名", command=rename)
+            self.item_menu.add_command(label="删除", command=delete)
+            self.item_menu.add_command(label="复制此模板", command=copy)
+            self.item_menu.add_command(label="移至顶部", command=lift)
+            self.item_menu.post(pos[0], pos[1])
+        elif file_type == "add_button":
+            self.item_menu.delete(0, 10)
+            self.item_menu.add_command(label="创建新模板")
+            self.item_menu.post(pos[0], pos[1])
+
     def clear_info(self):
         for i in self.info_list:
             if type(self.info_list[i]) is tkinter.Entry or type(self.info_list[i]) is tkinter.Text:
                 self.info_list[i].delete("1.0", "end")
 
     def open_setting_menu(self, evt):
-        setting_menu = SettingWindow(master=self.window, width=1280, height=800, resizable=True, data_loader=self.data_loader)
+        setting_menu = SettingWindow(master=self.window, width=1280, height=800, resizable=True, title="设置",
+                                     data_loader=self.data_loader)
 
-    def choose_file(self, file_id):
+    def open_contract(self, contract):
+        pass
+
+    def hide_window(self):
+        self.window.withdraw()
+
+    def show_window(self):
+        self.window.deiconify()
+
+    def fill_info(self, cid):
+        # supplier_name = contract.get_supplier()
+        # buyer_name = contract.get_buyer()
+        # sign_date = contract.get_sign_date()
+        # location = contract.get_location()
+        # brand = contract.get_brand()
+        # delivery_date = contract.delivery_date
+        # delivery_place = contract.get_location()
+        # payment_method = contract.payment_method
+        # comments = contract.comments
+        # others = contract.get_qita()
+        # supplier_info = contract.get_supplier_info()
+        # buyer_info = contract.get_buyer_info()
+        contract = self.contract_loader.get_contract(cid)
+
+        supplier_name = contract[0]
+        buyer_name = contract[1]
+        sign_date = contract[3]
+        location = contract[6]
+        brand = contract[2]
+        delivery_date = contract[4]
+        delivery_place = contract[5]
+        payment_method = contract[7]
+        comments = contract[8]
+        others = contract[9]
+        supplier_location = contract[10]
+        supplier_bank = contract[11]
+        supplier_account = contract[12]
+        supplier_tax_num = contract[13]
+        supplier_tel = contract[14]
+        buyer_location = contract[15]
+        buyer_bank = contract[16]
+        buyer_account = contract[17]
+        buyer_tax_num = contract[18]
+        buyer_tel = contract[19]
+
+        self.info_list["agm_time_year"].insert("1.0", sign_date[0])
+        self.info_list["agm_time_month"].insert("1.0", sign_date[1])
+        self.info_list["agm_time_day"].insert("1.0", sign_date[2])
+        self.info_list["agm_supplier_entry"].insert("1.0", str(supplier_name))
+        self.info_list["agm_demander_entry"].insert("1.0", str(buyer_name))
+        self.info_list["info_detail_require0"].insert("1.0", str(location))
+        self.info_list["info_detail_require1"].insert("1.0", str(brand))
+        self.info_list["info_detail_require2"].insert("1.0", str(delivery_date))
+        self.info_list["info_detail_require3"].insert("1.0", str(delivery_place))
+        self.info_list["info_detail_require4"].insert("1.0", str(payment_method))
+        self.info_list["info_detail_require5"].insert("1.0", str(comments))
+        for i in range(len(others)):
+            self.info_list["info_detail_require%s" % (6 + i)].insert("1.0", others[i])
+        self.info_list["supplier_detail_require0"].insert("1.0", str(supplier_location))
+        self.info_list["supplier_detail_require1"].insert("1.0", str(supplier_bank))
+        self.info_list["supplier_detail_require2"].insert("1.0", str(supplier_account))
+        self.info_list["supplier_detail_require3"].insert("1.0", str(supplier_tax_num))
+        self.info_list["supplier_detail_require4"].insert("1.0", str(supplier_tel))
+
+        self.info_list["demander_detail_require0"].insert("1.0", str(buyer_location))
+        self.info_list["demander_detail_require1"].insert("1.0", str(buyer_bank))
+        self.info_list["demander_detail_require2"].insert("1.0", str(buyer_account))
+        self.info_list["demander_detail_require3"].insert("1.0", str(buyer_tax_num))
+        self.info_list["demander_detail_require4"].insert("1.0", str(buyer_tel))
+
+    def disabled_fo_button(self):
         self.info_list["info_menu_save"].config(image=self.info_list["save_disabled_img"], cursor="arrow")
         self.info_list["info_menu_back"].config(image=self.info_list["back_disabled_img"], cursor="arrow")
+        self.info_list["info_menu_save"].unbind("<Button-1>")
+        self.info_list["info_menu_back"].unbind("<Button-1>")
+
+    def choose_file(self, file_id):
+        self.disabled_fo_button()
         for i in self.file_list:
             if i["id_number"] == file_id:
                 self.clear_info()
+                self.chosen_file_id = file_id
                 self.tem_canvas.itemconfigure(i["frame"], width=3, outline="#649AFA")
                 self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989")
                 if i["type"] != "file" and i["type"] != "template":
                     self.warning_label.place(relx=1, x=-320, rely=0.5, y=-100)
                     self.info_menu.place_forget()
                     self.info_canvas.place_forget()
+                    self.chosen_contract = None
                 else:
+                    self.chosen_contract = i["agm_code"]
                     self.warning_label.place_forget()
                     self.info_menu.place(relx=1, x=-498, rely=1, y=-70, width=510, height=75)
                     self.info_canvas.place(relx=1, x=-500, y=67, width=500, height=-64, relheight=1)
+                    if i["type"] == "file":
+                        self.info_list["agm_time_year"].config(state="normal", highlightbackground="#A0A0A0",
+                                                               highlightcolor="#A0A0A0")
+                        self.info_list["agm_time_month"].config(state="normal", highlightbackground="#A0A0A0",
+                                                                highlightcolor="#A0A0A0")
+                        self.info_list["agm_time_day"].config(state="normal", highlightbackground="#A0A0A0",
+                                                              highlightcolor="#A0A0A0")
+                        self.info_list["agm_time_year"].delete("1.0", "end-1c")
+                        self.info_list["agm_time_month"].delete("1.0", "end-1c")
+                        self.info_list["agm_time_day"].delete("1.0", "end-1c")
+                        self.info_list["agm_number_entry"].delete("1.0", "end-1c")
+                        contract_number = self.contract_loader.get_contract(self.chosen_contract)[-1]
+                        self.info_list["agm_number_entry"].insert("1.0", contract_number)
+                        self.info_list["agm_number_entry"].config(state="disabled")
+                    else:
+                        self.info_list["agm_time_year"].config(state="normal", highlightbackground="#323232",
+                                                               highlightcolor="#323232")
+                        self.info_list["agm_time_month"].config(state="normal", highlightbackground="#323232",
+                                                                highlightcolor="#323232")
+                        self.info_list["agm_time_day"].config(state="normal", highlightbackground="#323232",
+                                                              highlightcolor="#323232")
+                        self.info_list["agm_time_year"].delete("1.0", "end-1c")
+                        self.info_list["agm_time_month"].delete("1.0", "end-1c")
+                        self.info_list["agm_time_day"].delete("1.0", "end-1c")
+                        self.info_list["agm_time_year"].insert("1.0", "<自动>")
+                        self.info_list["agm_time_month"].insert("1.0", "<自动>")
+                        self.info_list["agm_time_day"].insert("1.0", "<自动>")
+                        self.info_list["agm_time_year"].config(state="disabled")
+                        self.info_list["agm_time_month"].config(state="disabled")
+                        self.info_list["agm_time_day"].config(state="disabled")
+
+                        self.info_list["agm_number_entry"].config(state="normal")
+                        self.info_list["agm_number_entry"].delete("1.0", "end-1c")
+                        self.info_list["agm_number_entry"].insert("1.0", "<自动>")
+                        self.info_list["agm_number_entry"].config(state="disabled")
+                    self.fill_info(self.chosen_contract)
             else:
                 self.tem_canvas.itemconfigure(i["frame"], width=2, outline="#454545")
                 self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989")
 
+    def new_built(self):
+        for i in self.file_list:
+            if i["id_number"] == self.chosen_file_id and not (i["type"] == "file" or i["type"] == "template"):
+                return
+            else:
+                break
+        template = None
+        new_built_window = NewBuiltWindow(self.window, template)
+
     def info_change(self, evt):
         self.info_list["info_menu_save"].config(image=self.info_list["save_enabled_img"], cursor="hand2")
         self.info_list["info_menu_back"].config(image=self.info_list["back_enabled_img"], cursor="hand2")
+        self.info_list["info_menu_back"].bind("<Button-1>", self.info_back)
+        self.info_list["info_menu_save"].bind("<Button-1>", self.info_save)
+
+    def info_save(self, evt):
+        year = self.info_list["agm_time_year"].get("1.0", "end-1c")
+        month = self.info_list["agm_time_month"].get("1.0", "end-1c")
+        day = self.info_list["agm_time_day"].get("1.0", "end-1c")
+        supplier_name = self.info_list["agm_supplier_entry"].get("1.0", "end-1c")
+        buyer_name = self.info_list["agm_demander_entry"].get("1.0", "end-1c")
+        location = self.info_list["info_detail_require0"].get("1.0", "end-1c")
+        brand = self.info_list["info_detail_require1"].get("1.0", "end-1c")
+        delivery_date = self.info_list["info_detail_require2"].get("1.0", "end-1c")
+        delivery_place = self.info_list["info_detail_require3"].get("1.0", "end-1c")
+        payment_method = self.info_list["info_detail_require4"].get("1.0", "end-1c")
+        comments = self.info_list["info_detail_require5"].get("1.0", "end-1c")
+        others = list()
+        others.append(self.info_list["info_detail_require6"].get("1.0", "end-1c"))
+        others.append(self.info_list["info_detail_require7"].get("1.0", "end-1c"))
+        others.append(self.info_list["info_detail_require8"].get("1.0", "end-1c"))
+        others.append(self.info_list["info_detail_require9"].get("1.0", "end-1c"))
+        others.append(self.info_list["info_detail_require10"].get("1.0", "end-1c"))
+        others.append(self.info_list["info_detail_require11"].get("1.0", "end-1c"))
+        for i in others:
+            if i == "":
+                others.remove(i)
+
+        supplier_location = self.info_list["supplier_detail_require0"].get("1.0", "end-1c")
+        supplier_bank = self.info_list["supplier_detail_require1"].get("1.0", "end-1c")
+        supplier_account = self.info_list["supplier_detail_require2"].get("1.0", "end-1c")
+        supplier_tax_num = self.info_list["supplier_detail_require3"].get("1.0", "end-1c")
+        supplier_tel = self.info_list["supplier_detail_require4"].get("1.0", "end-1c")
+
+        buyer_location = self.info_list["demander_detail_require0"].get("1.0", "end-1c")
+        buyer_bank = self.info_list["demander_detail_require1"].get("1.0", "end-1c")
+        buyer_account = self.info_list["demander_detail_require2"].get("1.0", "end-1c")
+        buyer_tax_num = self.info_list["demander_detail_require3"].get("1.0", "end-1c")
+        buyer_tel = self.info_list["demander_detail_require4"].get("1.0", "end-1c")
+
+        self.contract_loader.override_contract(self.chosen_contract, supplier_name, buyer_name, brand,
+                                               (year, month, day), delivery_date, delivery_place, location,
+                                               payment_method, comments, others, supplier_location, supplier_bank,
+                                               supplier_account, supplier_tax_num, supplier_tel, buyer_location,
+                                               buyer_bank, buyer_account, buyer_tax_num, buyer_tel)
+
+        # if (not year.isnumeric() or "." in year or len(year) != 4) and year != "<自动>":
+        #     warning_window = WarningWindow(text="日期年份格式错误", master=self.window)
+        #     return
+        # if (not month.isnumeric() or "." in month or int(month) > 12 or int(month) < 1) and month != "<自动>":
+        #     warning_window = WarningWindow(text="日期月份格式错误", master=self.window)
+        #     return
+        # if (not day.isnumeric() or "." in day or int(day) > 31 or int(day) < 1) and day != "<自动>":
+        #     warning_window = WarningWindow(text="日期格式错误", master=self.window)
+        #     return
+
+        self.disabled_fo_button()
+
+    def info_back(self, evt):
+        self.clear_info()
+        self.fill_info(self.chosen_contract)
+        self.disabled_fo_button()
 
     def get_menu_enter(self, menu_id=0):
         def func(evt):
@@ -436,12 +692,22 @@ class MainWindow(Window):
                 break
 
     def menu_click(self, menu_id):
+        value = None
         for i in self.menu_list:
             self.menu_canvas.itemconfigure(i["select_sign"], fill="")
         for i in self.menu_list:
             if i["id"] == menu_id:
+                value = i["value"]
                 self.menu_canvas.itemconfigure(i["select_sign"], fill="#649AFA")
                 break
+
+        if value == "合同模板":
+            self.clear_agm()
+            tem_list = self.contract_loader.get_template_list()
+            for i in tem_list:
+                self.add_agm(name=i[1], number="合同模板", agm_type="template", agm_code=i[0])
+            self.add_agm(name="添加", img="img/file_add.png", agm_type="add_button", number="")
+            self.choose_file(0)
 
     def size_change(self, evt):
         if self.window.winfo_width() != self.now_size[0] or self.window.winfo_height() != self.now_size[1]:
@@ -490,8 +756,18 @@ class MainWindow(Window):
                 break
 
     def file_click(self, id_number):
-        self.chosen_file_id = id_number
+        # self.chosen_file_id = id_number
         self.choose_file(id_number)
+
+    def clear_agm(self):
+        self.file_list = list()
+        self.tem_canvas.delete("all")
+
+    def refresh_agm(self):
+        for i in self.menu_list:
+            if self.menu_canvas.itemcget(i["select_sign"], "fill") == "#649AFA":
+                self.menu_click(i["id"])
+                break
 
     def add_agm(self, name, number="无编号", img="img/agreement_file.png", width=100, height=100, agm_type="file",
                 agm_code=None):
@@ -526,11 +802,15 @@ class MainWindow(Window):
         def file_click_id(event):
             self.file_click(id_number)
 
+        def file_menu(event):
+            self.menu_show((event.x_root, event.y_root), id_number)
+
         for i in agm_dict:
             if i != "id_number" and i != "type" and i!="agm_code":
                 self.tem_canvas.tag_bind(agm_dict[i], "<Enter>", file_enter_id)
                 self.tem_canvas.tag_bind(agm_dict[i], "<Leave>", file_leave_id)
                 self.tem_canvas.tag_bind(agm_dict[i], "<Button-1>", file_click_id)
+                self.tem_canvas.tag_bind(agm_dict[i], "<Button-3>", file_menu)
         self.file_list.append(agm_dict)
 
     def frame_wheel(self, evt):
@@ -549,4 +829,5 @@ class MainWindow(Window):
 
 if __name__ == "__main__":
     dl = DataLoader.load()
-    main_window = MainWindow(dl)
+    cl = ContractLoader()
+    main_window = MainWindow(dl, cl)

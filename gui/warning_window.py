@@ -3,9 +3,9 @@ from child_window import ChildWindow
 
 
 class WarningWindow(ChildWindow):
-    def __init__(self, master, text, width=350, height=150, minsize_x=300, minsize_y=150, resizable=False):
+    def __init__(self, master, text, width=350, height=150, minsize_x=300, minsize_y=150, title="警告", resizable=False):
         self.text = text
-        super().__init__(master, width, height, minsize_x, minsize_y, resizable)
+        super().__init__(master, width, height, minsize_x, minsize_y, resizable, title)
 
     def gui_init(self, window):
         sure_img = tkinter.PhotoImage(file="img/button_enabled.png", width=110, height=50)
