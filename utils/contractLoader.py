@@ -75,83 +75,57 @@ class ContractLoader:
         :param name: str
         :param contract_number: str
         """
-        c = self.contracts[contract_cid]
-        c.supplier = supplier
-        c.buyer = buyer
-        c.brand = brand
-        c.sign_date = sign_date
-        c.delivery_date = delivery_date
-        c.delivery_location = delivery_location
-        c.location = location
-        c.payment_method = payment_method
-        c.comments = comments
-        c.others = others
-        c.supplier_location = supplier_location
-        c.supplier_bank = supplier_bank
-        c.supplier_account = supplier_account
-        c.supplier_tax_num = supplier_tax_num
-        c.supplier_tel = supplier_tel
-        c.buyer_location = buyer_location
-        c.buyer_bank = buyer_bank
-        c.buyer_account = buyer_account
-        c.buyer_tax_num = buyer_tax_num
-        c.buyer_tel = buyer_tel
-        c.name = name
-        c.contract_number = contract_number
-        c.save()
-
-    def override_template(self, template_cid, supplier, buyer, brand, delivery_date, delivery_location,
-                          location, payment_method, comments, others, supplier_location, supplier_bank,
-                          supplier_account, supplier_tax_num, supplier_tel, buyer_location, buyer_bank, buyer_account,
-                          buyer_tax_num, buyer_tel, name, contract_number):
-        """
-
-        :param template_cid: str
-        :param supplier: str
-        :param buyer: str
-        :param brand: str
-        :param delivery_date: str
-        :param delivery_location: str
-        :param location: str
-        :param payment_method: str
-        :param comments: str
-        :param others: [str]
-        :param supplier_location: str
-        :param supplier_bank: str
-        :param supplier_account: str
-        :param supplier_tax_num: str
-        :param supplier_tel: str
-        :param buyer_location: str
-        :param buyer_bank: str
-        :param buyer_account: str
-        :param buyer_tax_num: str
-        :param buyer_tel: str
-        :param name: str
-        :param contract_number: str
-        """
-        c = self.templates[template_cid]
-        c.supplier = supplier
-        c.buyer = buyer
-        c.brand = brand
-        c.delivery_date = delivery_date
-        c.delivery_location = delivery_location
-        c.location = location
-        c.payment_method = payment_method
-        c.comments = comments
-        c.others = others
-        c.supplier_location = supplier_location
-        c.supplier_bank = supplier_bank
-        c.supplier_account = supplier_account
-        c.supplier_tax_num = supplier_tax_num
-        c.supplier_tel = supplier_tel
-        c.buyer_location = buyer_location
-        c.buyer_bank = buyer_bank
-        c.buyer_account = buyer_account
-        c.buyer_tax_num = buyer_tax_num
-        c.buyer_tel = buyer_tel
-        c.name = name
-        c.contract_number = contract_number
-        c.save()
+        if contract_cid in self.contracts:
+            c = self.contracts[contract_cid]
+            c.supplier = supplier
+            c.buyer = buyer
+            c.brand = brand
+            c.sign_date = sign_date
+            c.delivery_date = delivery_date
+            c.delivery_location = delivery_location
+            c.location = location
+            c.payment_method = payment_method
+            c.comments = comments
+            c.others = others
+            c.supplier_location = supplier_location
+            c.supplier_bank = supplier_bank
+            c.supplier_account = supplier_account
+            c.supplier_tax_num = supplier_tax_num
+            c.supplier_tel = supplier_tel
+            c.buyer_location = buyer_location
+            c.buyer_bank = buyer_bank
+            c.buyer_account = buyer_account
+            c.buyer_tax_num = buyer_tax_num
+            c.buyer_tel = buyer_tel
+            c.name = name
+            c.contract_number = contract_number
+            c.save()
+        elif contract_cid in self.templates:
+            c = self.templates[contract_cid]
+            c.supplier = supplier
+            c.buyer = buyer
+            c.brand = brand
+            c.delivery_date = delivery_date
+            c.delivery_location = delivery_location
+            c.location = location
+            c.payment_method = payment_method
+            c.comments = comments
+            c.others = others
+            c.supplier_location = supplier_location
+            c.supplier_bank = supplier_bank
+            c.supplier_account = supplier_account
+            c.supplier_tax_num = supplier_tax_num
+            c.supplier_tel = supplier_tel
+            c.buyer_location = buyer_location
+            c.buyer_bank = buyer_bank
+            c.buyer_account = buyer_account
+            c.buyer_tax_num = buyer_tax_num
+            c.buyer_tel = buyer_tel
+            c.name = name
+            c.contract_number = contract_number
+            c.save()
+        else:
+            raise ValueError(f'{contract_cid} not exist.')
 
     def create_contract(self, contract_cid, supplier, buyer, brand, sign_date, delivery_date, delivery_location,
                         location, payment_method, comments, others, supplier_location, supplier_bank,
