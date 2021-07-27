@@ -8,7 +8,7 @@ def _return_information(c):
     return c.supplier, c.buyer, c.brand, c.sign_date, c.delivery_date, c.delivery_location, c.location, \
            c.payment_method, c.comments, c.others, c.supplier_location, c.supplier_bank, c.supplier_account, \
            c.supplier_tax_num, c.supplier_tel, c.buyer_location, c.buyer_bank, c.buyer_account, c.buyer_tax_num, \
-           c.buyer_tel, c.name, c.contract_number
+           c.buyer_tel, c.name, c.cid
 
 
 class ContractLoader:
@@ -98,7 +98,7 @@ class ContractLoader:
             c.buyer_tax_num = buyer_tax_num
             c.buyer_tel = buyer_tel
             c.name = name
-            c.contract_number = contract_number
+            c.cid = contract_number
             c.save()
         elif contract_cid in self.templates:
             c = self.templates[contract_cid]
@@ -122,7 +122,7 @@ class ContractLoader:
             c.buyer_tax_num = buyer_tax_num
             c.buyer_tel = buyer_tel
             c.name = name
-            c.contract_number = contract_number
+            c.cid = contract_number
             c.save()
         else:
             raise ValueError(f'{contract_cid} not exist.')
@@ -181,7 +181,7 @@ class ContractLoader:
         c.buyer_tax_num = buyer_tax_num
         c.buyer_tel = buyer_tel
         c.name = name
-        c.contract_number = contract_number
+        c.cid = contract_number
         c.save()
         self.contracts[c.cid] = c
 
@@ -289,3 +289,4 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
                         level=logging.WARNING)
     cl = ContractLoader()
+
