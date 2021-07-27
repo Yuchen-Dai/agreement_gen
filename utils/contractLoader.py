@@ -185,6 +185,7 @@ class ContractLoader:
         :return the cid of new_template.
         """
         c = Contract()
+        c.name = "新建模板"
         c.save(self.dir)
         self.templates[c.cid] = c
         return c.cid
@@ -211,8 +212,10 @@ class ContractLoader:
         """
         if cid in self.contracts:
             self.contracts[cid].name = name
+            self.contracts[cid].save(self.dir)
         elif cid in self.templates:
             self.templates[cid].name = name
+            self.templates[cid].save(self.dir)
         else:
             raise ValueError('Cid is not exists.')
 
