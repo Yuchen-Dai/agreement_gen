@@ -45,6 +45,15 @@ class Contract:
 
         self.table = []  # [(product_id, quantity, discount)]
 
+    def update_sign_date(self, sign_date):
+        assert type(sign_date) == tuple
+        assert len(sign_date) == 3
+        assert all([type(i) == str for i in sign_date])
+        try:
+            self.sign_date = datetime.datetime(int(sign_date[0]), int(sign_date[1]), int(sign_date[2]))
+        except ValueError:
+            raise IllegalDate
+
     def get_name(self):
         return self.name if self.name else self.get_contract_num()
 

@@ -5,7 +5,8 @@ from exception import FileExceed, IllegalContractNumber
 
 
 def _return_information(c):
-    return c.supplier, c.buyer, c.brand, c.sign_date, c.delivery_date, c.delivery_location, c.location, \
+    return c.supplier, c.buyer, c.brand, (str(c.sign_date.year),str(c.sign_date.month), str(c.sign_date.day)), \
+           c.delivery_date, c.delivery_location, c.location, \
            c.payment_method, c.comments, c.others, c.supplier_location, c.supplier_bank, c.supplier_account, \
            c.supplier_tax_num, c.supplier_tel, c.buyer_location, c.buyer_bank, c.buyer_account, c.buyer_tax_num, \
            c.buyer_tel, c.name, c.cid
@@ -80,7 +81,7 @@ class ContractLoader:
             c.supplier = supplier
             c.buyer = buyer
             c.brand = brand
-            c.sign_date = sign_date
+            c.update_sign_date(sign_date)
             c.delivery_date = delivery_date
             c.delivery_location = delivery_location
             c.location = location
@@ -163,7 +164,7 @@ class ContractLoader:
         c.supplier = supplier
         c.buyer = buyer
         c.brand = brand
-        c.sign_date = sign_date
+        c.update_sign_date(sign_date)
         c.delivery_date = delivery_date
         c.delivery_location = delivery_location
         c.location = location
