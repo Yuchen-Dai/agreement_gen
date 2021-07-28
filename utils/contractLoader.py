@@ -35,11 +35,20 @@ class ContractLoader:
                 if f.suffix == '.data' and isLegalCid(cid):
                     self.templates[cid] = Contract.load(cid, dir)
 
-    def get_contract_list(self):
+    def get_contract_list(self, date):
         """
+        :param date: (year, month ,None)
         :return: [(cid, contract's name)]
         """
-        return [(i, v.get_name()) for i, v in self.contracts.items()]
+        year = date[0]
+        month = date[1]
+        if not year:
+            return list({('00000000', f'20{i[:2]}') for i in self.contracts})
+        elif not month:
+            return list({('00000000', f'20{i[:2]}/{i[2:4]}') for i in self.contracts if i[:2] == year[-2:]})
+        else:
+            return [(i, v.get_name()) for i, v in self.contracts.items()
+                    if i[:2] == year[-2:] and i[2:4] == '{:0>2d}'.format(int(month))]
 
     def get_template_list(self):
         """
@@ -221,6 +230,13 @@ class ContractLoader:
         else:
             raise ValueError('Cid is not exists.')
 
+    def copy_contract(self, cid):
+        """
+        :param cid: contract be copied
+        :return: cid of new contract
+        """
+        pass  # todo 复制合同
+
     def delete(self, cid):
         """
         :param cid: The contract to be deleted
@@ -257,7 +273,7 @@ class ContractLoader:
                 raise FileExceed(f'Contracts for this month {pre_six} exceed 100.')
             last_two = '{:0>2d}'.format(biggest)
         else:
-            if not last_two.isnumeric():
+            if not all([s in '0123456789' for s in last_two]):
                 raise IllegalContractNumber
             last_two = '{:0>2d}'.format(int(last_two))
             if len(last_two) != 2 or last_two == '00':
@@ -296,11 +312,9 @@ if __name__ == '__main__':
     os.chdir('../')
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
                         level=logging.WARNING)
-    # for i in range(1,100):
+    # for i in range(1,15):
     #     c = Contract(contract_number='210728{:0>2d}'.format(i))
     #     c.set_template(False)
     #     c.save()
     cl = ContractLoader()
-    today = cl.get_today()
-    print(today)
-    print(cl.generate_contract_num(today))
+    print(cl.get_contract_list(('2021',None,None)))
