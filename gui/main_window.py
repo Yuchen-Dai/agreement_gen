@@ -453,7 +453,7 @@ class MainWindow(Window):
             self.item_menu.post(pos[0], pos[1])
         elif file_type == "contract":
             def open_con():
-                pass
+                self.open_contract(self.file_list[file_id]["agm_code"])
 
             def create_con():
                 self.create(file_id)
@@ -502,6 +502,7 @@ class MainWindow(Window):
                                      data_loader=self.data_loader)
 
     def open_contract(self, cid):
+        print("open:%s" % cid)
         contract_window = ContractWindow(master=self.window, data_loader=self.data_loader)
 
     def hide_window(self):
