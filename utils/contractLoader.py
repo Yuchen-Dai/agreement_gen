@@ -1,11 +1,11 @@
 from contract import Contract
 from pathlib import Path
 import datetime
-from exception import FileExceed, IllegalContractNumber
+from exception import FileExceed, IllegalContractNumber, ContractNumberAlreadyExist, IllegalDate
 
 
 def _return_information(c):
-    return c.supplier, c.buyer, c.brand, (str(c.sign_date.year),str(c.sign_date.month), str(c.sign_date.day)), \
+    return c.supplier, c.buyer, c.brand, (str(c.sign_date.year), str(c.sign_date.month), str(c.sign_date.day)), \
            c.delivery_date, c.delivery_location, c.location, \
            c.payment_method, c.comments, c.others, c.supplier_location, c.supplier_bank, c.supplier_account, \
            c.supplier_tax_num, c.supplier_tel, c.buyer_location, c.buyer_bank, c.buyer_account, c.buyer_tax_num, \
@@ -176,8 +176,10 @@ class ContractLoader:
         c.buyer_tel = buyer_tel
         c.name = name
         c.cid = contract_number
+        c.set_template(False)
         c.save()
         self.contracts[c.cid] = c
+        return c.cid
 
     def create_template(self):
         """
@@ -233,27 +235,36 @@ class ContractLoader:
         else:
             raise ValueError('Cid is not exists.')
 
-    @staticmethod
-    def generate_contract_num(date, dir='data/contract'):
-        """ in: date: (year, month, day)
-            out: eight digits string
+    def generate_contract_num(self, date, last_two=None):
         """
-        p = Path(dir) / 'contract'
+        :param date: (year, month, day)
+        :param last_two: last two digits in string format
+        :return: Generating number
+        """
+        try:
+            _ = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
+        except ValueError:
+            raise IllegalDate
         pre_six = '{}{:0>2d}{:0>2d}'.format(str(date[0])[-2:], int(date[1]), int(date[2]))
-        if not p.exists():
-            return pre_six + '01'
-        check_occupy = [True] * 99
-        for i in p.iterdir():
-            if i.stem.startswith(pre_six[:4]):
-                check_occupy[int(i.stem[6:8]) - 1] = False
-        last_two = None
-        for i, not_occupy in enumerate(check_occupy):
-            if not_occupy:
-                last_two = i + 1
-                break
         if not last_two:
-            raise FileExceed(f'Contract for {pre_six} exceed 100.')
-        return '{}{:0>2d}'.format(pre_six, last_two)
+            biggest = 1
+            for cid in self.contracts:
+                if cid.startswith(pre_six[:4]):
+                    this_last_two = int(cid[-2:])
+                    if this_last_two >= biggest:
+                        biggest = this_last_two + 1
+            if biggest > 99:
+                raise FileExceed(f'Contracts for this month {pre_six} exceed 100.')
+            last_two = '{:0>2d}'.format(biggest)
+        else:
+            if not last_two.isnumeric():
+                raise IllegalContractNumber
+            last_two = '{:0>2d}'.format(int(last_two))
+            if len(last_two) != 2 or last_two == '00':
+                raise IllegalContractNumber
+            if pre_six + last_two in self.contracts:
+                raise ContractNumberAlreadyExist
+        return pre_six + last_two
 
     @staticmethod
     def get_today():
@@ -285,5 +296,11 @@ if __name__ == '__main__':
     os.chdir('../')
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
                         level=logging.WARNING)
+    # for i in range(1,100):
+    #     c = Contract(contract_number='210728{:0>2d}'.format(i))
+    #     c.set_template(False)
+    #     c.save()
     cl = ContractLoader()
-
+    today = cl.get_today()
+    print(today)
+    print(cl.generate_contract_num(today))
