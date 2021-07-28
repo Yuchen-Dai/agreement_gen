@@ -1,3 +1,83 @@
+# from child_window import ChildWindow
+#
+#
+#
+# class ContractWindow(ChildWindow):
+#     pass
+    # contract_window_count = 0
+    #
+    # def __init__(self, master, cid):
+    #     self.cid = cid
+    #     self.master = master
+    #     super().__init__(master, 1400, 900, 1000, 700, True)
+    #
+    # def close(self):
+    #     __class__.contract_window_count -= 1
+    #     self.master.deiconify()
+    #     super().close()
+    #
+    # @staticmethod
+    # def check():
+    #     return __class__.contract_window_count < 1
+    #
+    # def gui_init(self, window):
+    #     __class__.contract_window_count += 1
+    #     self.master.withdraw()
+    #
+    #     try:
+    #         combostyle = tkinter.ttk.Style()
+    #         combostyle.theme_create('combostyle', parent='clam',
+    #                                 settings={'TCombobox':
+    #                                               {'configure':
+    #                                                    {'selectbackground': '#646464',
+    #                                                     'fieldbackground': '#646464',
+    #                                                     'background': '#646464',
+    #                                                     'foreground': "#A0A0A0",
+    #                                                     'arrowsize': 15,
+    #                                                     'lightcolor': "#646464",
+    #                                                     'arrowcolor': "#A0A0A0",
+    #                                                     'selectforeground': "#929292",
+    #                                                     'padding': 6
+    #                                                     }}}
+    #                                 )
+    #         combostyle.theme_use('combostyle')
+    #
+    #         style = tkinter.ttk.Style()
+    #         style.element_create("Custom.Treeheading.border", "from", "default")
+    #         style.layout("Custom.Treeview.Heading", [
+    #             ("Custom.Treeheading.cell", {'sticky': 'nswe'}),
+    #             ("Custom.Treeheading.border", {'sticky': 'nswe', 'children': [
+    #                 ("Custom.Treeheading.padding", {'sticky': 'nswe', 'children': [
+    #                     ("Custom.Treeheading.image", {'side': 'right', 'sticky': ''}),
+    #                     ("Custom.Treeheading.text", {'sticky': 'we'})
+    #                 ]})
+    #             ]}),
+    #         ])
+    #         head_font = ('黑体', '12')
+    #         content_font = ('宋体', '12')
+    #         style.configure("Custom.Treeview.Heading",
+    #                         background="#646464", foreground="#E4E4E4", relief="flat", font=head_font)
+    #         style.configure("Custom.Treeview", background="#323232", foreground="#A0A0A0", fieldbackground="#323232",
+    #                         highlightthickness=0, font=content_font)
+    #         style.map("Custom.Treeview.Heading",
+    #                   relief=[('active', 'groove'), ('pressed', 'sunken')])
+    #     except BaseException:
+    #         print("主题已添加")
+    #
+    #     library_frame = tkinter.Frame(self.window, bg="#262626")
+    #     tkinter.Frame(library_frame, bg="#464646", width=3).pack(side="right", fill="y")
+    #     tkinter.Frame(library_frame, bg="#262626", width=15).pack(side="left", fill="y")
+    #     tkinter.Frame(library_frame, bg="#262626", width=15).pack(side="right", fill="y")
+    #     tkinter.Frame(library_frame, bg="#262626", height=15).pack(side="top", fill="x")
+    #     tkinter.Frame(library_frame, bg="#262626", height=15).pack(side="bottom", fill="x")
+    #     library_frame.place(relwidth=0.35, relheight=1)
+    #
+    #     contract_frame = tkinter.Frame(self.window, bg="#323232", padx=15, pady=15)
+    #     contract_frame.place(relwidth=7, relheight=1, relx=0.35)
+    #
+    #     library_chosen_frame = tkinter.Frame(library_frame, bg="#323232", padx=10, pady=10, height=400)
+    #     library_chosen_frame.pack(side="top", fill="x")
+
 import tkinter
 import tkinter.ttk
 import re
@@ -21,7 +101,7 @@ product_type = {'框架断路器': ['RMW1', 'RMW2', 'ME', 'RMW3'],
                 '特种电器': ['RMU1', 'RMG1', 'RMMG1', 'RMU3', 'RMKB1']}
 
 
-class SettingWindow(ChildWindow):
+class ContractWindow(ChildWindow):
     setting_count = 0
 
     @staticmethod
@@ -570,3 +650,5 @@ class SettingWindow(ChildWindow):
         for i in self.data["panel_list"]:
             self.data["panel_list"][i].place_forget()
         self.data["panel_list"][panel].place(x=160, relwidth=1, width=-160, relheight=1)
+
+

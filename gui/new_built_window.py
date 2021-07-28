@@ -1,14 +1,19 @@
 import tkinter
 from child_window import ChildWindow
+from warning_window import WarningWindow
+from assembly import CustomText
+from exception import *
 from tkinter import font
 
 
 class NewBuiltWindow(ChildWindow):
     new_built_count = 0
 
-    def __init__(self, master, template, width=500, height=800, minsize_x=400, minsize_y=400, title="新建合同",
+    def __init__(self, master, cid, cl, command, width=500, height=800, minsize_x=400, minsize_y=400, title="新建合同",
                  resizable=False):
-        self.template = template
+        self.template_cid = cid
+        self.contract_loader = cl
+        self.command = command
         self.info_list = dict()
         self.detail_data = dict()
         self.info_frame = None
@@ -82,22 +87,22 @@ class NewBuiltWindow(ChildWindow):
                                         highlightcolor="#323232", bd=0, highlightthickness=1,
                                         insertbackground="#323232",
                                         height=1, width=20, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
-        agm_number_entry.insert("0.0", "<日期、尾号填写有误>")
+        agm_number_entry.insert("0.0", "<待生成>")
         agm_number_entry.config(state="disabled")
 
         agm_time_label = tkinter.Label(info_frame, bg="#323232", fg="#A0A0A0", text="签订时间:")
         agm_time_frame = tkinter.Frame(info_frame, bg="#323232")
-        agm_time_year = tkinter.Text(agm_time_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+        agm_time_year = CustomText(agm_time_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
                                      highlightcolor="#649AFA", bd=0, highlightthickness=1, insertbackground="#A0A0A0",
                                      height=1, width=6, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
         # agm_time_year.insert("0.0", "<自动>")
         # agm_time_year.config(state="disabled", highlightbackground="#323232", highlightcolor="#323232")
-        agm_time_month = tkinter.Text(agm_time_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+        agm_time_month = CustomText(agm_time_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
                                       highlightcolor="#649AFA", bd=0, highlightthickness=1, insertbackground="#A0A0A0",
                                       height=1, width=6, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
         # agm_time_month.insert("0.0", "<自动>")
         # agm_time_month.config(state="disabled", highlightbackground="#323232", highlightcolor="#323232")
-        agm_time_day = tkinter.Text(agm_time_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+        agm_time_day = CustomText(agm_time_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
                                     highlightcolor="#649AFA", bd=0, highlightthickness=1, insertbackground="#A0A0A0",
                                     height=1, width=6, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
         # agm_time_day.insert("0.0", "<自动>")
@@ -117,7 +122,7 @@ class NewBuiltWindow(ChildWindow):
         self.info_list["agm_time_day"] = agm_time_day
 
         agm_fnumber_label = tkinter.Label(info_frame, bg="#323232", fg="#A0A0A0", text="编号尾号:")
-        agm_fnumber_entry = tkinter.Text(info_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+        agm_fnumber_entry = CustomText(info_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
                                          highlightcolor="#649AFA", bd=0, highlightthickness=1,
                                          insertbackground="#A0A0A0",
                                          height=1, width=8, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
@@ -135,14 +140,14 @@ class NewBuiltWindow(ChildWindow):
                                           insertbackground="#A0A0A0",
                                           height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
         # tkinter.Frame(info_frame, height=25, bg="#323232").grid(column=0, row=0)
-        agm_number_label.grid(column=0, row=0, pady=5, sticky=tkinter.W)
-        agm_number_entry.grid(column=1, row=0, pady=5, sticky=tkinter.W)
-        agm_name_label.grid(column=0, row=1, pady=5, sticky=tkinter.W)
-        agm_name_entry.grid(column=1, row=1, pady=5, sticky=tkinter.W)
-        agm_time_label.grid(column=0, row=2, pady=5, sticky=tkinter.W)
-        agm_time_frame.grid(column=1, row=2, pady=5, sticky=tkinter.W)
-        agm_fnumber_label.grid(column=0, row=3, pady=5, sticky=tkinter.W)
-        agm_fnumber_entry.grid(column=1, row=3, pady=5, sticky=tkinter.W)
+        agm_number_label.grid(column=0, row=1, pady=5, sticky=tkinter.W)
+        agm_number_entry.grid(column=1, row=1, pady=5, sticky=tkinter.W)
+        agm_name_label.grid(column=0, row=0, pady=5, sticky=tkinter.W)
+        agm_name_entry.grid(column=1, row=0, pady=5, sticky=tkinter.W)
+        agm_time_label.grid(column=0, row=3, pady=5, sticky=tkinter.W)
+        agm_time_frame.grid(column=1, row=3, pady=5, sticky=tkinter.W)
+        agm_fnumber_label.grid(column=0, row=2, pady=5, sticky=tkinter.W)
+        agm_fnumber_entry.grid(column=1, row=2, pady=5, sticky=tkinter.W)
         agm_supplier_label.grid(column=0, row=4, pady=5, sticky=tkinter.W)
         agm_supplier_entry.grid(column=1, row=4, pady=5, sticky=tkinter.W)
         agm_demander_label.grid(column=0, row=5, pady=5, sticky=tkinter.W)
@@ -306,6 +311,45 @@ class NewBuiltWindow(ChildWindow):
             require_entry.grid(row=i, column=1, sticky=tkinter.W, pady=5)
             self.info_list["demander_detail_require%s" % i] = require_entry
 
+        def confirm(evt):
+            supplier_name_c = agm_supplier_entry.get("1.0", "end-1c")
+            buyer_name_c = agm_demander_entry.get("1.0", "end-1c")
+            year = agm_time_year.get("1.0", "end-1c")
+            month = agm_time_month.get("1.0", "end-1c")
+            day = agm_time_day.get("1.0", "end-1c")
+            location_c = self.info_list["info_detail_require0"].get("1.0", "end-1c")
+            brand_c = self.info_list["info_detail_require1"].get("1.0", "end-1c")
+            delivery_date_c = self.info_list["info_detail_require2"].get("1.0", "end-1c")
+            delivery_place_c = self.info_list["info_detail_require3"].get("1.0", "end-1c")
+            payment_method_c = self.info_list["info_detail_require4"].get("1.0", "end-1c")
+            comments_c = self.info_list["info_detail_require5"].get("1.0", "end-1c")
+            others_c = list()
+            for i2 in range(6):
+                content = self.info_list["info_detail_require%s" % (6 + i2)].get("1.0", "end-1c")
+                if content != "":
+                    others_c.append(content)
+            supplier_info = list()
+            for i2 in range(5):
+                supplier_info.append(self.info_list["supplier_detail_require%s" % i2].get("1.0", "end-1c"))
+            demander_info = list()
+            for i2 in range(5):
+                demander_info.append(self.info_list["demander_detail_require%s" % i2].get("1.0", "end-1c"))
+
+            name = agm_name_entry.get("1.0", "end-1c")
+            number = agm_number_entry.get("1.0", "end-1c")
+            if not number.isnumeric():
+                warning_window = WarningWindow(master=self.window, text="生成合同失败，\n具体原因见合同编号栏。")
+                return
+
+            data = (supplier_name_c, buyer_name_c, brand_c, (
+                year, month, day), delivery_date_c, delivery_place_c, location_c,
+                    payment_method_c, comments_c, others_c, supplier_info[0], supplier_info[1], supplier_info[2],
+                    supplier_info[3], supplier_info[4], demander_info[0], demander_info[1], demander_info[2],
+                    demander_info[3], demander_info[4], name, number)
+
+            self.close()
+            self.command(data)
+
         def entry_focus(evt):
             evt.widget.config(highlightbackground="#A0A0A0", bg="#464646")
             evt.widget.unbind("<FocusIn>")
@@ -315,14 +359,99 @@ class NewBuiltWindow(ChildWindow):
                     if self.info_list[item].cget("highlightbackground") == "#D96C6C":
                         return
             sure_button.configure(cursor="hand2", image=button_enabled_img)
+            sure_button.bind("<Button-1>", confirm)
             sure_button.unbind("<Enter>")
             sure_button.unbind("<Leave>")
 
+        sure_button.bind("<Button-1>", confirm)
+
         for i in self.info_list:
-            if (type(self.info_list[i]) is tkinter.Text or type(self.info_list[i]) is tkinter.Entry)\
+            if (type(self.info_list[i]) is tkinter.Text or type(self.info_list[i]) is CustomText)\
                     and i != "agm_number_entry":
                 self.info_list[i].config(highlightbackground="#D96C6C", bg="#3A3A3A")
                 self.info_list[i].bind("<FocusIn>", entry_focus)
+
+        def contract_number_refresh(evt):
+            year = agm_time_year.get("1.0", "end-1c")
+            month = agm_time_month.get("1.0", "end-1c")
+            day = agm_time_day.get("1.0", "end-1c")
+            fnumber = agm_fnumber_entry.get("1.0", "end-1c")
+
+            try:
+                number = self.contract_loader.generate_contract_num((year, month, day), fnumber)
+            except FileExceed:
+                number = "<合同数超过100>"
+            except IllegalContractNumber:
+                number = "<尾号填写错误>"
+            except ContractNumberAlreadyExist:
+                number = "<合同编号重复>"
+            except IllegalDate:
+                number = "<日期填写错误>"
+
+            agm_number_entry.configure(state="normal")
+            agm_number_entry.delete("1.0", "end")
+            agm_number_entry.insert("1.0", number)
+            agm_number_entry.configure(state="disabled")
+
+        # 填充内容
+        if self.template_cid is not None:
+            contract = self.contract_loader.get_contract(self.template_cid)
+
+            supplier_name = contract[0]
+            buyer_name = contract[1]
+            location = contract[6]
+            brand = contract[2]
+            delivery_date = contract[4]
+            delivery_place = contract[5]
+            payment_method = contract[7]
+            comments = contract[8]
+            others = contract[9]
+            supplier_location = contract[10]
+            supplier_bank = contract[11]
+            supplier_account = contract[12]
+            supplier_tax_num = contract[13]
+            supplier_tel = contract[14]
+            buyer_location = contract[15]
+            buyer_bank = contract[16]
+            buyer_account = contract[17]
+            buyer_tax_num = contract[18]
+            buyer_tel = contract[19]
+
+            agm_supplier_entry.insert("1.0", supplier_name)
+            agm_demander_entry.insert("1.0", buyer_name)
+            self.info_list["info_detail_require0"].insert("1.0", str(location))
+            self.info_list["info_detail_require1"].insert("1.0", str(brand))
+            self.info_list["info_detail_require2"].insert("1.0", str(delivery_date))
+            self.info_list["info_detail_require3"].insert("1.0", str(delivery_place))
+            self.info_list["info_detail_require4"].insert("1.0", str(payment_method))
+            self.info_list["info_detail_require5"].insert("1.0", str(comments))
+            for i in range(len(others)):
+                self.info_list["info_detail_require%s" % (6 + i)].insert("1.0", others[i])
+            self.info_list["supplier_detail_require0"].insert("1.0", str(supplier_location))
+            self.info_list["supplier_detail_require1"].insert("1.0", str(supplier_bank))
+            self.info_list["supplier_detail_require2"].insert("1.0", str(supplier_account))
+            self.info_list["supplier_detail_require3"].insert("1.0", str(supplier_tax_num))
+            self.info_list["supplier_detail_require4"].insert("1.0", str(supplier_tel))
+
+            self.info_list["demander_detail_require0"].insert("1.0", str(buyer_location))
+            self.info_list["demander_detail_require1"].insert("1.0", str(buyer_bank))
+            self.info_list["demander_detail_require2"].insert("1.0", str(buyer_account))
+            self.info_list["demander_detail_require3"].insert("1.0", str(buyer_tax_num))
+            self.info_list["demander_detail_require4"].insert("1.0", str(buyer_tel))
+
+        agm_name_entry.insert("1.0", "新键合同")
+        today = self.contract_loader.get_today()
+        last_number = self.contract_loader.generate_contract_num(today)[-2:]
+        agm_fnumber_entry.insert("1.0", last_number)
+        agm_time_year.insert("1.0", today[0])
+        agm_time_month.insert("1.0", today[1])
+        agm_time_day.insert("1.0", today[2])
+
+        agm_fnumber_entry.bind("<<TextModified>>", contract_number_refresh)
+        agm_time_year.bind("<<TextModified>>", contract_number_refresh)
+        agm_time_month.bind("<<TextModified>>", contract_number_refresh)
+        agm_time_day.bind("<<TextModified>>", contract_number_refresh)
+        contract_number_refresh(None)
 
     @staticmethod
     def check():

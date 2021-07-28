@@ -3,8 +3,10 @@ from child_window import ChildWindow
 
 
 class WarningWindow(ChildWindow):
-    def __init__(self, master, text, width=350, height=150, minsize_x=300, minsize_y=150, title="警告", resizable=False):
+    def __init__(self, master, text, width=350, height=150, minsize_x=300, minsize_y=150, title="警告", resizable=False,
+                 command=None):
         self.text = text
+        self.command = command
         super().__init__(master, width, height, minsize_x, minsize_y, resizable, title)
 
     def gui_init(self, window):
@@ -13,9 +15,12 @@ class WarningWindow(ChildWindow):
                                     bg="#323232", fg="#E4E4E4", compound="center", cursor="hand2")
         self.data["sure_img"] = sure_img
 
-        def cancel(evt):
+        def confirm(evt):
+            if self.command is not None:
+                self.command()
             self.close()
-        sure_button.bind("<Button-1>", cancel)
+
+        sure_button.bind("<Button-1>", confirm)
         tkinter.Frame(window, bg="#323232", height=15).pack(side="bottom")
         sure_button.pack(side="bottom", fill="x")
         label = tkinter.Label(window, text=self.text, bg="#323232", fg="#A0A0A0", font="宋体 12")

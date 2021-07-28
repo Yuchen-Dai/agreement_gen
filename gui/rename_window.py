@@ -1,4 +1,5 @@
 from child_window import ChildWindow
+from warning_window import WarningWindow
 import tkinter
 
 
@@ -35,6 +36,13 @@ class RenameWindow(ChildWindow):
 
     def confirm(self, evt):
         new_name = self.data["new_name"].get("1.0", "end-1c")
+        new_name = new_name.strip()
+        if not new_name:
+            warning_window = WarningWindow(text="名字不能为空。", master=self.window)
+            return
+        if len(new_name) > 20:
+            warning_window = WarningWindow(text="名字长度至多为20个字符。", master=self.window)
+            return
         self.data["command"](self.data["cid"], new_name)
         self.close()
 

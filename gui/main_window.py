@@ -6,6 +6,7 @@ from setting_window import SettingWindow
 from new_built_window import NewBuiltWindow
 from warning_window import WarningWindow
 from rename_window import RenameWindow
+from contract_window import ContractWindow
 from contractLoader import ContractLoader
 from dataLoader import DataLoader
 from excel import Excel
@@ -40,6 +41,7 @@ class MainWindow(Window):
         self.warning_label = None
         self.item_menu = None
         self.chosen_contract = None
+        self.now_path = list()
         self.file_list = list()
         self.menu_list = list()
         self.info_list = dict()
@@ -328,8 +330,10 @@ class MainWindow(Window):
         self.info_list["demander_detail_line"] = demander_detail_line
         self.info_list["demander_detail_text"] = demander_detail_text
 
-        menu_name = ["合同模板", "最近打开", "全部", "收藏"]
-        menu_icon = ["tem_icon.png", "recent_icon.png", "all_icon.png", "collect_icon.png"]
+        # menu_name = ["合同模板", "最近打开", "全部", "收藏"]
+        # menu_icon = ["tem_icon.png", "recent_icon.png", "all_icon.png", "collect_icon.png"]
+        menu_name = ["合同模板", "合同"]
+        menu_icon = ["tem_icon.png",  "all_icon.png"]
         length = 0
         for i in range(len(menu_name)):
             now_length = len(menu_name[i]) * 15 + 90
@@ -386,31 +390,31 @@ class MainWindow(Window):
                 self.info_list[i].bind("<KeyPress>", self.info_change)
                 self.info_list[i].bind("<Return>", enter_disabled)
 
-    def create_tem(self, file_id):
-        print("create: %s" % file_id)
+    def create(self, file_id):
+        cid = self.file_list[file_id]["agm_code"]
+        self.new_built(cid)
 
-    def delete_tem(self, file_id):
-        print("delete: %s" % file_id)
+    def delete(self, file_id):
+        cid = self.file_list[file_id]["agm_code"]
+
+        def delete_sure():
+            self.contract_loader.delete(cid)
+            self.refresh_agm()
+
+        warning_window = WarningWindow(master=self.window, text="确定要删除该文件吗？", command=delete_sure)
 
     def copy_tem(self, file_id):
         print("copy: %s" % file_id)
 
     def lift_tem(self, file_id):
-        print("lift: %s" % file_id)
+        warning_window = WarningWindow(master=self.window, text="此功能未上线。")
 
-    def rename_tem(self, file_id):
+    def rename(self, file_id):
         cid = self.file_list[file_id]["agm_code"]
         rename_window = RenameWindow(master=self.window, cid=cid, command=self.rename_recall, width=530, height=100,
                                      minsize_y=100)
 
     def rename_recall(self, cid, new_name):
-        new_name = new_name.strip()
-        if not new_name:
-            warning_window = WarningWindow(text="名字不能为空。", master=self.window)
-            return
-        if len(new_name) > 20:
-            warning_window = WarningWindow(text="名字长度至多为20个字符。", master=self.window)
-            return
         self.contract_loader.rename(cid, new_name)
         self.refresh_agm()
 
@@ -418,10 +422,10 @@ class MainWindow(Window):
         file_type = self.file_list[file_id]["type"]
         if file_type == "template":
             def create():
-                self.create_tem(file_id)
+                self.create(file_id)
 
             def delete():
-                self.delete_tem(file_id)
+                self.delete(file_id)
 
             def copy():
                 self.copy_tem(file_id)
@@ -430,7 +434,7 @@ class MainWindow(Window):
                 self.lift_tem(file_id)
 
             def rename():
-                self.rename_tem(file_id)
+                self.rename(file_id)
 
             self.item_menu.delete(0, 10)
             self.item_menu.add_command(label="以此模板新建合同", command=create)
@@ -439,9 +443,53 @@ class MainWindow(Window):
             self.item_menu.add_command(label="复制此模板", command=copy)
             self.item_menu.add_command(label="移至顶部", command=lift)
             self.item_menu.post(pos[0], pos[1])
-        elif file_type == "add_button":
+        elif file_type == "add_template":
+            def create_new_template():
+                self.contract_loader.create_template()
+                self.refresh_agm()
+
             self.item_menu.delete(0, 10)
-            self.item_menu.add_command(label="创建新模板")
+            self.item_menu.add_command(label="创建新模板", command=create_new_template)
+            self.item_menu.post(pos[0], pos[1])
+        elif file_type == "contract":
+            def open_con():
+                pass
+
+            def create_con():
+                self.create(file_id)
+
+            def delete_con():
+                self.delete(file_id)
+
+            def rename_con():
+                self.rename(file_id)
+
+            self.item_menu.delete(0, 10)
+            self.item_menu.add_command(label="打开合同", command=open_con)
+            self.item_menu.add_command(label="以此为模板新建合同", command=create_con)
+            self.item_menu.add_command(label="重命名", command=rename_con)
+            self.item_menu.add_command(label="删除", command=delete_con)
+            self.item_menu.post(pos[0], pos[1])
+        elif file_type == "folder":
+            def open_folder():
+                folder = self.file_list[file_id]["agm_code"]
+                self.open_folder(folder)
+
+            self.item_menu.delete(0, 10)
+            self.item_menu.add_command(label="打开文件夹", command=open_folder)
+            self.item_menu.post(pos[0], pos[1])
+        elif file_type == "add_contract":
+            def add_con():
+                self.new_built()
+                self.item_menu.delete(0, 10)
+            self.item_menu.delete(0, 10)
+            self.item_menu.add_command(label="创建合同", command=add_con)
+            self.item_menu.post(pos[0], pos[1])
+        elif file_type == "folder_back":
+            def folder_back():
+                self.back_folder()
+            self.item_menu.delete(0, 10)
+            self.item_menu.add_command(label="返回上一级目录", command=folder_back)
             self.item_menu.post(pos[0], pos[1])
 
     def clear_info(self):
@@ -453,8 +501,8 @@ class MainWindow(Window):
         setting_menu = SettingWindow(master=self.window, width=1280, height=800, resizable=True, title="设置",
                                      data_loader=self.data_loader)
 
-    def open_contract(self, contract):
-        pass
+    def open_contract(self, cid):
+        contract_window = ContractWindow(master=self.window, data_loader=self.data_loader)
 
     def hide_window(self):
         self.window.withdraw()
@@ -537,7 +585,7 @@ class MainWindow(Window):
                 self.chosen_file_id = file_id
                 self.tem_canvas.itemconfigure(i["frame"], width=3, outline="#649AFA")
                 self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989")
-                if i["type"] != "file" and i["type"] != "template":
+                if i["type"] != "contract" and i["type"] != "template":
                     self.warning_label.place(relx=1, x=-320, rely=0.5, y=-100)
                     self.info_menu.place_forget()
                     self.info_canvas.place_forget()
@@ -547,7 +595,13 @@ class MainWindow(Window):
                     self.warning_label.place_forget()
                     self.info_menu.place(relx=1, x=-498, rely=1, y=-70, width=510, height=75)
                     self.info_canvas.place(relx=1, x=-500, y=67, width=500, height=-64, relheight=1)
-                    if i["type"] == "file":
+                    if i["type"] == "contract":
+                        def create_contract(evt):
+                            self.open_contract(i["agm_code"])
+
+                        self.info_list["info_menu_create"].unbind("<Button-1>")
+                        self.info_list["info_menu_create"].bind("<Button-1>", create_contract)
+                        self.info_list["info_menu_create"].config(text="打开")
                         self.info_list["agm_time_year"].config(state="normal", highlightbackground="#A0A0A0",
                                                                highlightcolor="#A0A0A0")
                         self.info_list["agm_time_month"].config(state="normal", highlightbackground="#A0A0A0",
@@ -557,11 +611,18 @@ class MainWindow(Window):
                         self.info_list["agm_time_year"].delete("1.0", "end-1c")
                         self.info_list["agm_time_month"].delete("1.0", "end-1c")
                         self.info_list["agm_time_day"].delete("1.0", "end-1c")
+                        self.info_list["agm_number_entry"].config(state="normal")
                         self.info_list["agm_number_entry"].delete("1.0", "end-1c")
                         contract_number = self.contract_loader.get_contract(self.chosen_contract)[-1]
                         self.info_list["agm_number_entry"].insert("1.0", contract_number)
                         self.info_list["agm_number_entry"].config(state="disabled")
                     else:
+                        def create_contract(evt):
+                            self.new_built()
+
+                        self.info_list["info_menu_create"].unbind("<Button-1>")
+                        self.info_list["info_menu_create"].bind("<Button-1>", create_contract)
+                        self.info_list["info_menu_create"].config(text="新建")
                         self.info_list["agm_time_year"].config(state="normal", highlightbackground="#323232",
                                                                highlightcolor="#323232")
                         self.info_list["agm_time_month"].config(state="normal", highlightbackground="#323232",
@@ -587,14 +648,21 @@ class MainWindow(Window):
                 self.tem_canvas.itemconfigure(i["frame"], width=2, outline="#454545")
                 self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989")
 
-    def new_built(self):
-        for i in self.file_list:
-            if i["id_number"] == self.chosen_file_id and not (i["type"] == "file" or i["type"] == "template"):
-                return
-            else:
-                break
-        template = None
-        new_built_window = NewBuiltWindow(self.window, template)
+    def new_built(self, cid=None):
+        if cid is None:
+            cid = self.file_list[self.chosen_file_id]["agm_code"]
+
+        def recall(data):
+            new_file_cid = self.create_contract(data)
+            self.open_contract(new_file_cid)
+
+        new_built_window = NewBuiltWindow(self.window, cid, self.contract_loader, command=recall)
+
+    def create_contract(self, data):
+        return self.contract_loader.create_contract(data[0], data[1], data[2], data[3], data[4], data[5], data[6],
+                                                    data[7], data[8], data[9], data[10], data[11], data[12], data[13],
+                                                    data[14], data[15], data[16], data[17], data[18], data[19], data[20],
+                                                    data[21])
 
     def info_change(self, evt):
         self.info_list["info_menu_save"].config(image=self.info_list["save_enabled_img"], cursor="hand2")
@@ -706,8 +774,40 @@ class MainWindow(Window):
             tem_list = self.contract_loader.get_template_list()
             for i in tem_list:
                 self.add_agm(name=i[1], number="合同模板", agm_type="template", agm_code=i[0])
-            self.add_agm(name="添加", img="img/file_add.png", agm_type="add_button", number="")
+            self.add_agm(name="添加", img="img/file_add.png", agm_type="add_template", number="")
             self.choose_file(0)
+        elif value == "合同":
+            # self.now_path = list()
+            self.contract_refresh(self.now_path)
+
+    def open_folder(self, folder):
+        self.now_path.append(folder)
+        self.contract_refresh(self.now_path)
+
+    def back_folder(self):
+        if len(self.now_path) > 0:
+            self.now_path.pop()
+        self.contract_refresh(self.now_path)
+
+    def contract_refresh(self, folder):
+        self.clear_agm()
+        input_folder = folder.copy()
+        while len(input_folder) < 3:
+            input_folder.append(None)
+        contract_list = self.contract_loader.get_contract_list(tuple(input_folder))
+        if input_folder[0] is not None:
+            self.add_agm(name="返回", img="img/back_file.png", agm_type="folder_back", number="")
+        for i in contract_list:
+            contract_type = "folder" if i[0] == "00000000" else "contract"
+            contract_code = i[1] if i[0] == "00000000" else i[0]
+            contract_number = "" if i[0] == "00000000" else i[0]
+            contract_img = "img/folder_file.png" if i[0] == "00000000" else "img/agreement_file.png"
+            contract_name = i[1]
+            self.add_agm(name=contract_name, agm_code=contract_code, agm_type=contract_type, number=contract_number,
+                         img=contract_img)
+        if input_folder[0] is None:
+            self.add_agm(name="创建合同", img="img/file_add.png", agm_type="add_contract", number="")
+        self.choose_file(0)
 
     def size_change(self, evt):
         if self.window.winfo_width() != self.now_size[0] or self.window.winfo_height() != self.now_size[1]:
@@ -754,6 +854,22 @@ class MainWindow(Window):
                 self.tem_canvas.configure(cursor="arrow")
                 self.tem_canvas.itemconfigure(i["frame"], width=3)
                 break
+
+    def file_double_click(self, id_number):
+        file_type = self.file_list[id_number]["type"]
+        if file_type == "add_template":
+            self.contract_loader.create_template()
+            self.refresh_agm()
+        elif file_type == "template":
+            self.create(id_number)
+        elif file_type == "add_contract":
+            self.new_built()
+        elif file_type == "folder":
+            self.open_folder(self.file_list[id_number]["agm_code"])
+        elif file_type == "folder_back":
+            self.back_folder()
+        elif file_type == "contract":
+            self.open_contract(self.file_list[id_number]["agm_code"])
 
     def file_click(self, id_number):
         # self.chosen_file_id = id_number
@@ -802,15 +918,19 @@ class MainWindow(Window):
         def file_click_id(event):
             self.file_click(id_number)
 
+        def file_double_click(event):
+            self.file_double_click(id_number)
+
         def file_menu(event):
             self.menu_show((event.x_root, event.y_root), id_number)
 
         for i in agm_dict:
-            if i != "id_number" and i != "type" and i!="agm_code":
+            if i != "id_number" and i != "type" and i != "agm_code":
                 self.tem_canvas.tag_bind(agm_dict[i], "<Enter>", file_enter_id)
                 self.tem_canvas.tag_bind(agm_dict[i], "<Leave>", file_leave_id)
                 self.tem_canvas.tag_bind(agm_dict[i], "<Button-1>", file_click_id)
                 self.tem_canvas.tag_bind(agm_dict[i], "<Button-3>", file_menu)
+                self.tem_canvas.tag_bind(agm_dict[i], "<Double-Button-1>", file_double_click)
         self.file_list.append(agm_dict)
 
     def frame_wheel(self, evt):
