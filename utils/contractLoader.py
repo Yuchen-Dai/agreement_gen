@@ -75,15 +75,17 @@ class ContractLoader:
         if not discount:
             discount = 1
         self.contracts[cid].add_item(product, int(quantity), float(discount), comments)
+        self.contracts[cid].save(self.dir)
         return 0
 
-    def delete_product(self, cid, line_number):
+    def remove_product(self, cid, line_number):
         """
         :param cid: Contract to be used
         :param line_number: Line number start from 0
         :return: None
         """
         self.contracts[cid].del_item(line_number)
+        self.contracts[cid].save(self.dir)
 
     def get_table_info(self, cid):
         """
@@ -276,14 +278,14 @@ class ContractLoader:
         self._save_template_order()
         return c.cid
 
-    def move_template_to_front(self, cid):
+    def move_template_to_front(self, template_cid):
         """
-        :param cid: Template to be moved
+        :param template_cid: Template to be moved
         :return
         """
-        if cid in self.template_order:
-            self.template_order.remove(cid)
-            self.template_order.insert(0, cid)
+        if template_cid in self.template_order:
+            self.template_order.remove(template_cid)
+            self.template_order.insert(0, template_cid)
             self._save_template_order()
 
     def get_contract(self, cid):
@@ -315,13 +317,13 @@ class ContractLoader:
         else:
             raise ValueError('Cid is not exists.')
 
-    def copy_template(self, cid):
+    def copy_template(self, template_cid):
         """
-        :param cid: contract be copied
+        :param template_cid: contract be copied
         :return: cid of new contract
         """
-        c = Contract.copy(self.templates[cid])
-        c.name = self.templates[cid].name + '_复制'
+        c = Contract.copy(self.templates[template_cid])
+        c.name = self.templates[template_cid].name + '_复制'
         c.save(self.dir)
         self.templates[c.cid] = c
         self.template_order.append(c.cid)

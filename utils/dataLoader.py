@@ -57,7 +57,7 @@ class DataLoader:
             product_list = sorted(product_list, key=lambda x: x[1].model)
             product_list = sorted(product_list, key=lambda x: x[1].name)
         elif key == 'model':
-            product_list = sorted(product_list, key=lambda x: x[1].model)
+            product_list = sorted(product_list, key=lambda x: x[1].get_model())
         return product_list
 
     @staticmethod

@@ -532,8 +532,7 @@ class SettingWindow(ChildWindow):
         name = self.data["widget_list"]["product_adjunctName_entry"].get("1.0", 'end-1c')
         name = name.replace("\n", "")
         price = self.data["widget_list"]["product_adjunctPrice_entry"].get("1.0", 'end-1c')
-        pattern = r'[0-9]+(.[0-9]+)?'
-        if not re.match(pattern, price) and price != "":
+        if not re.match(r'^([0-9]+(.[0-9]+)?)?$', price):
             warning_window = WarningWindow(self.window, "价格必须为数字或空")
             return
         price = float(price) if price != "" else 0.0

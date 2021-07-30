@@ -63,7 +63,9 @@ class Contract:
         return self.name if self.name else self.get_contract_num()
 
     def add_item(self, product, quantity, discount, comments):
+        logging.info(f"Add line: {product}")
         self.table.append((product, quantity, discount, comments))
+        self.table.sort(key=lambda x: x[0])
 
     def del_item(self, line_number):
         logging.info(f"Del line: {line_number}")

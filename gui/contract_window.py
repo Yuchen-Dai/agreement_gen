@@ -466,7 +466,7 @@ class ContractWindow(ChildWindow):
         contract_product = self.data["widget_list"]["contract_product"]
         selection = contract_product.selection()
         for i in selection:
-            self.contract_loader.delete_product(int(i))
+            self.contract_loader.remove_product(self.cid, int(i))
         self.contract_product_refresh()
 
     def lock_change(self, evt):

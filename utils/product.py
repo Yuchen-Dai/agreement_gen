@@ -50,11 +50,19 @@ class Product:
         new_adjunct = [(i[0], i[1]) for i in self.adjunct]
         return Product(self.name, self.model, self.current, self.unit, self.raw_price, new_adjunct)
 
-    def __gt__(self, other):
-        pass  # todo 为了顺序插入contract table
+    def __lt__(self, other):
+        print(1)
+        if self.model < other.model:
+            return True
+        if self.model == other.model and self.current < other.current:
+            return True
+        if self.model == other.model and self.current == other.current and \
+                len(self.get_adjunct()) < len(other.get_adjunct()):
+            return True
+        return False
 
     def __eq__(self, other):
-        if self.model != other.model or self.current != self.current:
+        if self.model != other.model or self.current != other.current:
             return False
         if len(self.adjunct) != len(other.adjunct):
             return False
