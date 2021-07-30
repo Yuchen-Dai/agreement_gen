@@ -50,8 +50,19 @@ class Product:
         new_adjunct = [(i[0], i[1]) for i in self.adjunct]
         return Product(self.name, self.model, self.current, self.unit, self.raw_price, new_adjunct)
 
+    def __gt__(self, other):
+        pass  # todo 为了顺序插入contract table
+
     def __eq__(self, other):
-        return self.model == other.model and self.current == self.current  # todo 还需要比较adjunct
+        if self.model != other.model or self.current != self.current:
+            return False
+        if len(self.adjunct) != len(other.adjunct):
+            return False
+        name_list = [i[0] for i in other.adjunct]
+        for i in self.adjunct:
+            if i[0] not in name_list:
+                return False
+        return True
 
     def __repr__(self):
         return f'Product(name = {self.name}, model = {self.model}, current = {self.current}, unit = {self.unit}, ' \

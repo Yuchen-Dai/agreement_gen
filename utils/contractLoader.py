@@ -63,12 +63,17 @@ class ContractLoader:
         :param comments: Comments of product
         :return: 0: Success
                  1: Quantity should be a positive integer.
-                 2：Discount should left blank or like 0.xxx (the last digit should not be 0)
+                 2：Discount should left blank or in format of 0.xxx
+                 3: Product already in table
         """
-        if not all(i in ['0123456789'] for i in quantity):
+        if not all([i in '0123456789' for i in quantity]):
             return 1
-        if re.match(r"^(0?\.[0-9]+)?$", discount):
+        if not re.match(r"^((0?\.[0-9]+)|1)?$", discount):
             return 2
+        if product in [i[0] for i in self.contracts[cid].get_table()]:
+            return 3
+        if not discount:
+            discount = 1
         self.contracts[cid].add_item(product, int(quantity), float(discount), comments)
         return 0
 

@@ -62,8 +62,7 @@ class Contract:
     def get_name(self):
         return self.name if self.name else self.get_contract_num()
 
-    def add_item(self, product, quantity, comments, discount=1.0):
-        assert type(product) == Product
+    def add_item(self, product, quantity, discount, comments):
         self.table.append((product, quantity, discount, comments))
 
     def del_item(self, line_number):
@@ -107,7 +106,7 @@ class Contract:
 
     def get_total_quantity(self):
         total = 0
-        for line in self.tale:
+        for line in self.table:
             total += line[1]
         return total
 
@@ -123,9 +122,6 @@ class Contract:
 
     def get_brand(self):
         return [(self.brand if self.brand else ' ', self.get_total())]
-
-    def get_table(self):
-        return self.table
 
     def get_zhiliang(self):  # 二、质量要求技术标准
         return '按国家有关质量标准及需方技术要求。 '
