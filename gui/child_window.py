@@ -1,7 +1,7 @@
 import tkinter
 
 
-class ChildWindow:
+class ChildWindow():
     # count = 0
 
     @staticmethod
@@ -13,6 +13,7 @@ class ChildWindow:
                  , **data):
         if self.check():
             # __class__.count += 1
+            super().__init__()
             self.window = tkinter.Toplevel(master=master)
             self.window.option_add("*Font", "黑体 15")
             self.window.title(title)
@@ -25,7 +26,7 @@ class ChildWindow:
             self.data = data
             self.window.grab_set()
             self.gui_init(self.window)
-            self.window.mainloop()
+            # self.window.mainloop()
 
     def close(self):
         # __class__.count -= 1

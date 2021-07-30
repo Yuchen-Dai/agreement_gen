@@ -2,6 +2,7 @@ import tkinter
 import math
 import tkinter.font
 import tkinter.ttk
+import time
 from setting_window import SettingWindow
 from new_built_window import NewBuiltWindow
 from warning_window import WarningWindow
@@ -36,11 +37,13 @@ class MainWindow(Window):
         self.info_frame = None
         self.info_canvas = None
         self.info_menu = None
+        self.tem_info = None
         self.chosen_file_id = None
         self.setting_button = None
         self.warning_label = None
         self.item_menu = None
         self.chosen_contract = None
+        self.tem_canvas_space = 0
         self.now_path = list()
         self.file_list = list()
         self.menu_list = list()
@@ -63,11 +66,18 @@ class MainWindow(Window):
         menu_canvas.place(x=-3, y=0, relwidth=1, width=6, height=70)
         tem_canvas = tkinter.Canvas(window, bg="#262626", bd=0, highlightbackground="#262626")
         tem_canvas.place(x=0, y=70, width=-500, relwidth=1, height=-70, relheight=1)
+        tem_info = tkinter.Frame(window, bg="#464646", padx=30)
+        tem_info.place(y=70, relwidth=1, width=-516, height=40)
+        self.tem_info = tem_info
         self.warning_label = warning_label
         self.menu_canvas = menu_canvas
         self.tem_canvas = tem_canvas
         self.info_canvas = info_canvas
         self.info_frame = info_frame
+
+        tem_path = tkinter.Label(tem_info, bg="#464646", fg="#A0A0A0", text="当前路径: /")
+        tem_path.pack(side="left")
+        self.info_list["tem_path"] = tem_path
 
         tem_scr = tkinter.Scrollbar(self.tem_canvas, command=tem_canvas.yview)
         tem_scr.place(x=-16, relx=1, y=0, relheight=1)
@@ -404,10 +414,12 @@ class MainWindow(Window):
         warning_window = WarningWindow(master=self.window, text="确定要删除该文件吗？", command=delete_sure)
 
     def copy_tem(self, file_id):
-        print("copy: %s" % file_id)
+        self.contract_loader.copy_template(self.file_list[file_id]["agm_code"])
+        self.refresh_agm()
 
     def lift_tem(self, file_id):
-        warning_window = WarningWindow(master=self.window, text="此功能未上线。")
+        self.contract_loader.move_template_to_front(self.file_list[file_id]["agm_code"])
+        self.refresh_agm()
 
     def rename(self, file_id):
         cid = self.file_list[file_id]["agm_code"]
@@ -502,8 +514,7 @@ class MainWindow(Window):
                                      data_loader=self.data_loader)
 
     def open_contract(self, cid):
-        print("open:%s" % cid)
-        contract_window = ContractWindow(master=self.window, data_loader=self.data_loader)
+        contract_window = ContractWindow(master=self.window, cid=cid, data_loader=self.data_loader)
 
     def hide_window(self):
         self.window.withdraw()
@@ -772,12 +783,15 @@ class MainWindow(Window):
 
         if value == "合同模板":
             self.clear_agm()
+            self.tem_info.place_forget()
+            self.tem_canvas_space = 0
             tem_list = self.contract_loader.get_template_list()
             for i in tem_list:
                 self.add_agm(name=i[1], number="合同模板", agm_type="template", agm_code=i[0])
             self.add_agm(name="添加", img="img/file_add.png", agm_type="add_template", number="")
             self.choose_file(0)
         elif value == "合同":
+            self.tem_info.place(y=70, relwidth=1, width=-516, height=40)
             # self.now_path = list()
             self.contract_refresh(self.now_path)
 
@@ -792,6 +806,12 @@ class MainWindow(Window):
 
     def contract_refresh(self, folder):
         self.clear_agm()
+        self.tem_canvas_space = 40
+        path_text = "当前路径: "
+        for i in folder:
+            path_text += "/%s" % i
+        path_text = "当前路径: /" if path_text == "当前路径: " else path_text
+        self.info_list["tem_path"].config(text=path_text)
         input_folder = folder.copy()
         while len(input_folder) < 3:
             input_folder.append(None)
@@ -893,12 +913,12 @@ class MainWindow(Window):
         line = now_length // line_contain
         column = now_length % line_contain
         x = column * 180 + 20
-        y = line * 180 + 20
+        y = line * 180 + 20 + self.tem_canvas_space
         # name = path.split("/")[-1].split(".")[0]
-        if y + 300 < self.window.winfo_height() - 74:
+        if y + 300 + self.tem_canvas_space < self.window.winfo_height() - 74:
             self.tem_canvas.configure(scrollregion=(0, 0, 0, self.window.winfo_height() - 74))
         else:
-            self.tem_canvas.configure(scrollregion=(0, 0, 0, y + 300))
+            self.tem_canvas.configure(scrollregion=(0, 0, 0, y + 300 + self.tem_canvas_space))
 
         frame = self.tem_canvas.create_rectangle(x, y, x + 160, y + 160, fill="#323232", outline="#454545", width=2)
         img_file = tkinter.PhotoImage(file=img, width=width, height=height)
@@ -917,7 +937,8 @@ class MainWindow(Window):
             self.file_leave(id_number)
 
         def file_click_id(event):
-            self.file_click(id_number)
+            if id_number != self.chosen_file_id:
+                self.file_click(id_number)
 
         def file_double_click(event):
             self.file_double_click(id_number)
