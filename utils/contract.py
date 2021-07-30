@@ -45,6 +45,7 @@ class Contract:
 
         self.table = []  # [(product_id, quantity, discount)]
 
+
     def update_sign_date(self, sign_date):
         assert type(sign_date) == tuple
         assert len(sign_date) == 3
@@ -59,6 +60,8 @@ class Contract:
 
     def add_item(self, product, quantity, discount=1.0):
         assert type(product) == Product
+        assert type(quantity) == int
+        assert type(discount) == float
         self.table.append((product, quantity, discount))
 
     def del_item(self, line_number):
@@ -221,6 +224,32 @@ class Contract:
         c._new = False
         return c
 
+    @staticmethod
+    def copy(other):
+        c = Contract()
+        if type(other) == Contract:
+            c.location = other.location
+            c.supplier = other.supplier
+            c.brand = other.brand
+            c.buyer = other.buyer
+            c.sign_date = datetime.datetime(other.sign_date.year,other.sign_date.month, other.sign_date.date)
+            c.delivery_date = other.delivery_date
+            c.delivery_location = other.delivery_location
+            c.payment_method = other.payment_method
+            c.comments = other.comments
+            c.others = [i for i in other.others]
+            c.supplier_location = other.supplier_location
+            c.supplier_bank = other.supplier_bank
+            c.supplier_account = other.supplier_account
+            c.supplier_tax_num = other.supplier_tax_num
+            c.supplier_tel = other.supplier_tel
+            c.buyer_location = other.buyer_location
+            c.buyer_bank = other.buyer_bank
+            c.buyer_account = other.buyer_account
+            c.buyer_tax_num = other.buyer_tax_num
+            c.buyer_tel = other.buyer_tel
+            c.name = other.name
+        return c
 
 
 def numToBig(num):

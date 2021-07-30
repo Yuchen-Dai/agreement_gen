@@ -2,7 +2,7 @@ from contract import Contract
 from pathlib import Path
 import datetime
 from exception import FileExceed, IllegalContractNumber, ContractNumberAlreadyExist, IllegalDate
-
+import pickle
 
 def _return_information(c):
     return c.supplier, c.buyer, c.brand, (str(c.sign_date.year), str(c.sign_date.month), str(c.sign_date.day)), \
@@ -17,6 +17,7 @@ class ContractLoader:
     def __init__(self, dir='data/contract'):
         self.contracts = {}
         self.templates = {}
+        self.template_order = []
         self.dir = dir
 
         # load contracts
@@ -35,6 +36,40 @@ class ContractLoader:
                 if f.suffix == '.data' and isLegalCid(cid):
                     self.templates[cid] = Contract.load(cid, dir)
 
+        # load templates' order
+        order_path = Path(dir) / 'templates.data'
+        if order_path.exists():
+            with order_path.open('rb') as f:
+                self.template_order = pickle.load(f)
+        to_be_deleted = []
+        for i in range(len(self.template_order)):
+            if self.template_order[i] not in self.templates:
+                to_be_deleted.append(i)
+        to_be_deleted.reverse()
+        for i in to_be_deleted:
+            del self.template_order[i]
+        for cid in self.templates:
+            if cid not in self.template_order:
+                self.template_order.append(cid)
+
+    def add_product(self, cid, product, quantity: int, discount: float):
+        """
+        :param cid: Contract to be used
+        :param product: Product to be added
+        :param quantity: Quantity of product
+        :param discount: Discount of product
+        :return: None
+        """
+        self.contracts[cid].add_item(product, quantity, discount)
+
+    def delete_product(self, cid, line_number):
+        """
+        :param cid: Contract to be used
+        :param line_number: Line number start from 0
+        :return: None
+        """
+        self.contracts[cid].del_item(line_number)
+
     def get_contract_list(self, date):
         """
         :param date: (year, month ,None)
@@ -45,7 +80,7 @@ class ContractLoader:
         if not year:
             return list({('00000000', f'20{i[:2]}') for i in self.contracts})
         elif not month:
-            return list({('00000000', f'20{i[:2]}/{i[2:4]}') for i in self.contracts if i[:2] == year[-2:]})
+            return list({('00000000', f'{i[2:4]}') for i in self.contracts if i[:2] == year[-2:]})
         else:
             return [(i, v.get_name()) for i, v in self.contracts.items()
                     if i[:2] == year[-2:] and i[2:4] == '{:0>2d}'.format(int(month))]
@@ -54,7 +89,7 @@ class ContractLoader:
         """
         :return: [(cid, contract's name)]
         """
-        return [(i, v.get_name()) for i, v in self.templates.items()]
+        return [(cid, self.templates[cid].get_name()) for cid in self.template_order]
 
     def override_contract(self, contract_cid, supplier, buyer, brand, sign_date, delivery_date, delivery_location,
                           location, payment_method, comments, others, supplier_location, supplier_bank,
@@ -106,7 +141,7 @@ class ContractLoader:
             c.buyer_account = buyer_account
             c.buyer_tax_num = buyer_tax_num
             c.buyer_tel = buyer_tel
-            c.save()
+            c.save(self.dir)
         elif contract_cid in self.templates:
             c = self.templates[contract_cid]
             c.supplier = supplier
@@ -128,7 +163,7 @@ class ContractLoader:
             c.buyer_account = buyer_account
             c.buyer_tax_num = buyer_tax_num
             c.buyer_tel = buyer_tel
-            c.save()
+            c.save(self.dir)
         else:
             raise ValueError(f'{contract_cid} not exist.')
 
@@ -186,7 +221,7 @@ class ContractLoader:
         c.name = name
         c.cid = contract_number
         c.set_template(False)
-        c.save()
+        c.save(self.dir)
         self.contracts[c.cid] = c
         return c.cid
 
@@ -199,7 +234,19 @@ class ContractLoader:
         c.name = "新建模板"
         c.save(self.dir)
         self.templates[c.cid] = c
+        self.template_order.append(c.cid)
+        self._save_template_order()
         return c.cid
+
+    def move_template_to_front(self, cid):
+        """
+        :param cid: Template to be moved
+        :return:
+        """
+        if cid in self.template_order:
+            self.template_order.remove(cid)
+            self.template_order.insert(0, cid)
+            self._save_template_order()
 
     def get_contract(self, cid):
         """
@@ -230,12 +277,17 @@ class ContractLoader:
         else:
             raise ValueError('Cid is not exists.')
 
-    def copy_contract(self, cid):
+    def copy_template(self, cid):
         """
         :param cid: contract be copied
         :return: cid of new contract
         """
-        pass  # todo 复制合同
+        c = Contract.copy(self.templates[cid])
+        c.save(self.dir)
+        self.templates[c.cid] = c
+        self.template_order.append(c.cid)
+        self._save_template_order()
+        return c.cid
 
     def delete(self, cid):
         """
@@ -248,6 +300,8 @@ class ContractLoader:
         elif cid in self.templates:
             self.templates[cid].delete(self.dir)
             del self.templates[cid]
+            self.template_order.remove(cid)
+            self._save_template_order()
         else:
             raise ValueError('Cid is not exists.')
 
@@ -281,6 +335,11 @@ class ContractLoader:
             if pre_six + last_two in self.contracts:
                 raise ContractNumberAlreadyExist
         return pre_six + last_two
+
+    def _save_template_order(self):
+        order_path = Path(self.dir) / 'templates.data'
+        with order_path.open('wb') as f:
+            pickle.dump(self.template_order, f)
 
     @staticmethod
     def get_today():
@@ -317,4 +376,6 @@ if __name__ == '__main__':
     #     c.set_template(False)
     #     c.save()
     cl = ContractLoader()
-    print(cl.get_contract_list(('2021',None,None)))
+    # print(cl.get_template_list())
+    # cl.move_template_to_front('00000011')
+    # print(cl.get_template_list())
