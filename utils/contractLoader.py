@@ -1,6 +1,8 @@
 from contract import Contract
 from pathlib import Path
 import datetime
+
+from excel import Excel
 from exception import FileExceed, IllegalContractNumber, ContractNumberAlreadyExist, IllegalDate
 import pickle
 import re
@@ -53,6 +55,18 @@ class ContractLoader:
         for cid in self.templates:
             if cid not in self.template_order:
                 self.template_order.append(cid)
+
+    def export_excel(self, contract_cid, file_type, filename, file_dir):
+        """
+        :param contract_cid: Contract
+        :param file_type: 1: 合同, 2:报价单
+        :param filename: The output file
+        :param file_dir: The output folder
+        :return: 1: Fail 0: Success
+        """
+        Excel(self.contracts[contract_cid])
+        Excel.run()
+
 
     def add_product(self, cid, product, quantity: str, discount: str, comments: str):
         """

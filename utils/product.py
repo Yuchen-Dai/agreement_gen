@@ -51,7 +51,6 @@ class Product:
         return Product(self.name, self.model, self.current, self.unit, self.raw_price, new_adjunct)
 
     def __lt__(self, other):
-        print(1)
         if self.model < other.model:
             return True
         if self.model == other.model and self.current < other.current:
