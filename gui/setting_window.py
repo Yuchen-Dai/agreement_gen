@@ -30,6 +30,8 @@ class SettingWindow(ChildWindow):
 
     def close(self):
         __class__.setting_count -= 1
+        if self.data.get("command") is not None:
+            self.data["command"]()
         super().close()
 
     def gui_init(self, window):

@@ -1,6 +1,7 @@
 from child_window import ChildWindow
 from dataLoader import DataLoader
 from warning_window import WarningWindow
+from setting_window import SettingWindow
 import tkinter
 import tkinter.ttk
 
@@ -305,6 +306,15 @@ class ContractWindow(ChildWindow):
         self.data["setting_img"] = setting_img
         info_setting_button = tkinter.Label(top_info_frame, image=setting_img, bg="#323232", cursor="hand2")
 
+        def setting_recall():
+            self.search()
+
+        def open_setting(evt):
+            setting_menu = SettingWindow(master=self.window, width=1280, height=800, resizable=True, title="设置",
+                                         data_loader=self.data_loader, command=setting_recall)
+
+        info_setting_button.bind("<Button-1>", open_setting)
+
         info_number_label.pack(side="left")
         tkinter.Frame(top_info_frame, bg="#323232", width=15).pack(side="left")
         info_name_label.pack(side="left")
@@ -325,6 +335,7 @@ class ContractWindow(ChildWindow):
         product_delete_lock = tkinter.Label(info_bottom_line, bg="#323232", image=lock_image, cursor="hand2")
 
         total_label = tkinter.Label(info_bottom_line, bg="#323232", fg="#9A9A9A", text="合计数量:-  合计金额:-")
+        widget_list["total_label"] = total_label
 
         contract_export.pack(side="right")
         tkinter.Frame(info_bottom_line, bg="#323232", width=10).pack(side="right")
@@ -356,16 +367,16 @@ class ContractWindow(ChildWindow):
         contract_product.heading("totalPrice", text="金额")
         contract_product.heading("comments", text="备注")
 
-        contract_product.column("number", width=30, anchor="w")
+        contract_product.column("number", width=30, anchor="center")
         contract_product.column("name", width=130, anchor="w")
         contract_product.column("model", width=330, anchor="w")
-        contract_product.column("unit", width=40, anchor="w")
-        contract_product.column("amount", width=40, anchor="w")
-        contract_product.column("price", width=80, anchor="w")
-        contract_product.column("discount", width=60, anchor="w")
-        contract_product.column("adjunctPrice", width=60, anchor="w")
-        contract_product.column("singlePrice", width=80, anchor="w")
-        contract_product.column("totalPrice", width=80, anchor="w")
+        contract_product.column("unit", width=40, anchor="center")
+        contract_product.column("amount", width=40, anchor="center")
+        contract_product.column("price", width=80, anchor="center")
+        contract_product.column("discount", width=60, anchor="center")
+        contract_product.column("adjunctPrice", width=60, anchor="center")
+        contract_product.column("singlePrice", width=80, anchor="center")
+        contract_product.column("totalPrice", width=80, anchor="center")
         contract_product.column("comments", width=80, anchor="w")
 
         contract_library_scroll = tkinter.Scrollbar(contract_frame, command=contract_product.yview)
@@ -375,9 +386,32 @@ class ContractWindow(ChildWindow):
         contract_product.pack(side="left", fill="both", expand=1)
 
         widget_list["contract_product"] = contract_product
+
+        def contract_product_select(evt):
+            self.select(contract_product)
+
+        contract_product.bind('<<TreeviewSelect>>', contract_product_select)
         self.contract_product_refresh()
 
         product_add_button.bind("<Button-1>", self.add_product)
+
+        def export_as_contract():
+            pass
+
+        def export_as_quotation():
+            pass
+
+        def menu_show(evt):
+            x = evt.x_root
+            y = evt.y_root
+            item_menu.post(x, y)
+
+        item_menu = tkinter.Menu(window, tearoff=False, font="新宋体 13", bg="#262626", fg="#A0A0A0")
+        item_menu.add_command(label="导出为合同", command=export_as_contract)
+        item_menu.add_command(label="导出为报价单", command=export_as_quotation)
+        item_menu.place()
+
+        contract_export.bind("<Button-1>", menu_show)
 
     @staticmethod
     def button_enter(evt):
@@ -425,8 +459,15 @@ class ContractWindow(ChildWindow):
         for i in range(len(product_list)):
             contract_product.insert('', i, values=product_list[i], tags=(i, "all"), iid=i)
 
+        total = self.contract_loader.get_table_total(self.cid)
+        self.data["widget_list"]["total_label"].config(text="合计数量:%s  合计金额:%s" % (total[0], total[1]))
+
     def delete_product(self, evt):
-        pass
+        contract_product = self.data["widget_list"]["contract_product"]
+        selection = contract_product.selection()
+        for i in selection:
+            self.contract_loader.delete_product(int(i))
+        self.contract_product_refresh()
 
     def lock_change(self, evt):
         if self.data["delete_lock"]:
