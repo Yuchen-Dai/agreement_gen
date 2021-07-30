@@ -5,8 +5,10 @@ import pickle
 from pathlib import Path
 from exception import ContractNumberAlreadyExist, IllegalDate, FileExceed
 
+
 class Contract:
-    def __init__(self, supplier='', buyer='', brand='', sign_date=('1970', '01', '01',), delivery_date='', delivery_location = '',
+    def __init__(self, supplier='', buyer='', brand='', sign_date=('1970', '01', '01',), delivery_date='',
+                 delivery_location='',
                  location='', payment_method='', comments='', others=[], supplier_location='',
                  supplier_bank='', supplier_account='', supplier_tax_num='', supplier_tel='',
                  buyer_location='', buyer_bank='', buyer_account='', buyer_tax_num='', buyer_tel='',
@@ -45,6 +47,8 @@ class Contract:
 
         self.table = []  # [(product_id, quantity, discount)]
 
+    def get_table(self):
+        return self.table
 
     def update_sign_date(self, sign_date):
         assert type(sign_date) == tuple
@@ -58,11 +62,9 @@ class Contract:
     def get_name(self):
         return self.name if self.name else self.get_contract_num()
 
-    def add_item(self, product, quantity, discount=1.0):
+    def add_item(self, product, quantity, comments, discount=1.0):
         assert type(product) == Product
-        assert type(quantity) == int
-        assert type(discount) == float
-        self.table.append((product, quantity, discount))
+        self.table.append((product, quantity, discount, comments))
 
     def del_item(self, line_number):
         logging.info(f"Del line: {line_number}")
@@ -89,7 +91,7 @@ class Contract:
     def get_supplier_info(self) -> 'company_name, company_location, company_bank, account#, tax#, tel#':
         return self.get_supplier(), self.supplier_location if self.supplier_location else ' ', \
                self.supplier_bank if self.supplier_bank else ' ', \
-               self.supplier_account if self.supplier_account else ' ', self.supplier_tax_num if self.supplier_tax_num\
+               self.supplier_account if self.supplier_account else ' ', self.supplier_tax_num if self.supplier_tax_num \
                    else ' ', self.supplier_tel if self.supplier_tel else ' '
 
     def get_buyer_info(self) -> 'company_name, company_location, company_bank, account#, tax#, tel#':
@@ -102,6 +104,12 @@ class Contract:
 
     def get_supplier(self):
         return self.supplier if self.supplier else ' '
+
+    def get_total_quantity(self):
+        total = 0
+        for line in self.tale:
+            total += line[1]
+        return total
 
     def get_total(self):
         total = 0
@@ -232,7 +240,7 @@ class Contract:
             c.supplier = other.supplier
             c.brand = other.brand
             c.buyer = other.buyer
-            c.sign_date = datetime.datetime(other.sign_date.year,other.sign_date.month, other.sign_date.date)
+            c.sign_date = datetime.datetime(other.sign_date.year, other.sign_date.month, other.sign_date.day)
             c.delivery_date = other.delivery_date
             c.delivery_location = other.delivery_location
             c.payment_method = other.payment_method

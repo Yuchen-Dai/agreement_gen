@@ -3,6 +3,8 @@ from pathlib import Path
 import datetime
 from exception import FileExceed, IllegalContractNumber, ContractNumberAlreadyExist, IllegalDate
 import pickle
+import re
+
 
 def _return_information(c):
     return c.supplier, c.buyer, c.brand, (str(c.sign_date.year), str(c.sign_date.month), str(c.sign_date.day)), \
@@ -52,15 +54,23 @@ class ContractLoader:
             if cid not in self.template_order:
                 self.template_order.append(cid)
 
-    def add_product(self, cid, product, quantity: int, discount: float):
+    def add_product(self, cid, product, quantity: str, discount: str, comments: str):
         """
         :param cid: Contract to be used
         :param product: Product to be added
         :param quantity: Quantity of product
         :param discount: Discount of product
-        :return: None
+        :param comments: Comments of product
+        :return: 0: Success
+                 1: Quantity should be a positive integer.
+                 2：Discount should left blank or like 0.xxx (the last digit should not be 0)
         """
-        self.contracts[cid].add_item(product, quantity, discount)
+        if not all(i in ['0123456789'] for i in quantity):
+            return 1
+        if re.match(r"^(0?\.[0-9]+)?$", discount):
+            return 2
+        self.contracts[cid].add_item(product, int(quantity), float(discount), comments)
+        return 0
 
     def delete_product(self, cid, line_number):
         """
@@ -69,6 +79,29 @@ class ContractLoader:
         :return: None
         """
         self.contracts[cid].del_item(line_number)
+
+    def get_table_info(self, cid):
+        """
+        :param cid: Contract of table
+        :return: [(line_num, name, specs, unit, quantity, raw_price, discount, adjunct_price, single_price,
+                   total_price, comment)]
+        """
+        result = []
+        for i, (product, quantity, discount, comment) in enumerate(self.contracts[cid].get_table()):
+            single_price = product.get_raw_price()*discount+product.get_adjunct_price()
+            total_price = single_price*quantity
+            result.append((i+1, product.get_name(), product.get_specs(), product.get_unit(), str(quantity),
+                           product.get_raw_price(), str(discount), str(product.get_adjunct_price()),
+                           str(single_price), str(total_price), comment))
+        return result
+
+    def get_table_total(self, cid):
+        """
+        :param cid: Contract be used
+        :return: total_quantity, total_price
+        """
+        c = self.contracts[cid]
+        return c.get_total_quantity(), c.get_total()
 
     def get_contract_list(self, date):
         """
@@ -228,7 +261,7 @@ class ContractLoader:
     def create_template(self):
         """
         Create a template file
-        :return the cid of new_template.
+        :return: the cid of new_template.
         """
         c = Contract()
         c.name = "新建模板"
@@ -241,7 +274,7 @@ class ContractLoader:
     def move_template_to_front(self, cid):
         """
         :param cid: Template to be moved
-        :return:
+        :return
         """
         if cid in self.template_order:
             self.template_order.remove(cid)
@@ -250,7 +283,7 @@ class ContractLoader:
 
     def get_contract(self, cid):
         """
-        :return  All of contract in tuple: supplier, buyer, brand, sign_date, delivery_date, delivery_location,
+        :return: All of contract in tuple: supplier, buyer, brand, sign_date, delivery_date, delivery_location,
                           location, payment_method, comments, others, supplier_location, supplier_bank,
                           supplier_account, supplier_tax_num, supplier_tel, buyer_location, buyer_bank, buyer_account,
                           buyer_tax_num, buyer_tel, name, contract_number
@@ -283,6 +316,7 @@ class ContractLoader:
         :return: cid of new contract
         """
         c = Contract.copy(self.templates[cid])
+        c.name = self.templates[cid].name + '_复制'
         c.save(self.dir)
         self.templates[c.cid] = c
         self.template_order.append(c.cid)
@@ -292,7 +326,7 @@ class ContractLoader:
     def delete(self, cid):
         """
         :param cid: The contract to be deleted
-        :return:
+        :return
         """
         if cid in self.contracts:
             self.contracts[cid].delete(self.dir)
