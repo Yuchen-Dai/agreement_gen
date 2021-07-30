@@ -4,6 +4,7 @@ from warning_window import WarningWindow
 from setting_window import SettingWindow
 import tkinter
 import tkinter.ttk
+import tkinter.filedialog
 
 product_type = {'框架断路器': ['RMW1', 'RMW2', 'ME', 'RMW3'],
                 '塑壳断路器': ['RMM1', 'RMM2', 'RMM3', 'RMM1L', 'RMM2L', 'RMM3L', 'RMM3D'],
@@ -353,8 +354,7 @@ class ContractWindow(ChildWindow):
 
         columns = ("number", "name", "model", "unit", "amount", "price", "discount", "adjunctPrice", "singlePrice",
                    "totalPrice", "comments")
-        contract_product = tkinter.ttk.Treeview(contract_frame, show="headings", select="browse",
-                                                columns=columns, style="Custom.Treeview")
+        contract_product = tkinter.ttk.Treeview(contract_frame, show="headings", columns=columns, style="Custom.Treeview")
         contract_product.heading("number", text="序号")
         contract_product.heading("name", text="产品名称")
         contract_product.heading("model", text="型号及规格")
@@ -396,10 +396,16 @@ class ContractWindow(ChildWindow):
         product_add_button.bind("<Button-1>", self.add_product)
 
         def export_as_contract():
-            pass
+            file_path = tkinter.filedialog.asksaveasfilename(title=u'保存合同', filetypes=[("excel表格", ".xlsx")],
+                                                             initialfile=contract_number + contract_name,
+                                                             parent=window)
+            self.contract_loader.export_excel(self.cid, 1, file_path)
 
         def export_as_quotation():
-            pass
+            file_path = tkinter.filedialog.asksaveasfilename(title=u'保存报价单', filetypes=[("excel表格", ".xlsx")],
+                                                             initialfile=contract_number + contract_name,
+                                                             parent=window)
+            self.contract_loader.export_excel(self.cid, 2, file_path)
 
         def menu_show(evt):
             x = evt.x_root
@@ -450,6 +456,9 @@ class ContractWindow(ChildWindow):
                 return
             elif result == 0:
                 self.contract_product_refresh()
+                self.data["widget_list"]["amount_entry"].delete("1.0", "end")
+                self.data["widget_list"]["discount_entry"].delete("1.0", "end")
+                self.data["widget_list"]["comments_entry"].delete("1.0", "end")
 
     def contract_product_refresh(self):
         product_list = self.contract_loader.get_table_info(self.cid)
@@ -460,14 +469,17 @@ class ContractWindow(ChildWindow):
             contract_product.insert('', i, values=product_list[i], tags=(i, "all"), iid=i)
 
         total = self.contract_loader.get_table_total(self.cid)
+        self.select(contract_product)
         self.data["widget_list"]["total_label"].config(text="合计数量:%s  合计金额:%s" % (total[0], total[1]))
 
     def delete_product(self, evt):
         contract_product = self.data["widget_list"]["contract_product"]
-        selection = contract_product.selection()
+        selection = list(contract_product.selection())
+        selection.reverse()
         for i in selection:
             self.contract_loader.remove_product(self.cid, int(i))
         self.contract_product_refresh()
+        self.lock_change(None)
 
     def lock_change(self, evt):
         if self.data["delete_lock"]:

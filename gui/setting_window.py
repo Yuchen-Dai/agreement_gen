@@ -431,6 +431,9 @@ class SettingWindow(ChildWindow):
         data_loader.save()
         self.products_read()
         self.category_return()
+        self.data["widget_list"]["product_type_entry"].delete("1.0", 'end')
+        self.data["widget_list"]["product_current_entry"].delete("1.0", 'end')
+        self.data["widget_list"]["product_price_entry"].delete("1.0", 'end')
 
     def product_load(self, product_list):
         for i in self.data["product_treeview"].get_children():

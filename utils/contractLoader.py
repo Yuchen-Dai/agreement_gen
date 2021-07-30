@@ -56,16 +56,15 @@ class ContractLoader:
             if cid not in self.template_order:
                 self.template_order.append(cid)
 
-    def export_excel(self, contract_cid, file_type, filename, file_dir):
+    def export_excel(self, contract_cid, file_type, file_dir):
         """
         :param contract_cid: Contract
         :param file_type: 1: 合同, 2:报价单
-        :param filename: The output file
-        :param file_dir: The output folder
+        :param file_dir: The output file
         :return: 1: Fail 0: Success
         """
-        Excel(self.contracts[contract_cid])
-        Excel.run()
+        e = Excel(self.contracts[contract_cid])
+        e.run()
 
 
     def add_product(self, cid, product, quantity: str, discount: str, comments: str):
