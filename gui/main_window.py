@@ -514,7 +514,8 @@ class MainWindow(Window):
                                      data_loader=self.data_loader)
 
     def open_contract(self, cid):
-        contract_window = ContractWindow(master=self.window, cid=cid, data_loader=self.data_loader)
+        contract_window = ContractWindow(master=self.window, cid=cid, data_loader=self.data_loader,
+                                         contract_loader=self.contract_loader)
 
     def hide_window(self):
         self.window.withdraw()

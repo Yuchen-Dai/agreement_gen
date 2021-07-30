@@ -1,5 +1,6 @@
 from child_window import ChildWindow
 from dataLoader import DataLoader
+from warning_window import WarningWindow
 import tkinter
 import tkinter.ttk
 
@@ -19,10 +20,12 @@ class ContractWindow(ChildWindow):
     pass
     contract_window_count = 0
 
-    def __init__(self, master, cid, data_loader):
+    def __init__(self, master, cid, data_loader, contract_loader):
         self.cid = cid
         self.master = master
         self.data_loader = data_loader
+        self.contract_loader = contract_loader
+        self.library_chosen_pid = None
         if self.check():
             self.master.withdraw()
         super().__init__(master, 1600, 900, 1600, 800, True)
@@ -77,6 +80,9 @@ class ContractWindow(ChildWindow):
                       relief=[('active', 'groove'), ('pressed', 'sunken')])
         except BaseException:
             print("主题已添加")
+
+        widget_list = dict()
+        self.data["widget_list"] = widget_list
 
         library_frame = tkinter.Frame(self.window, bg="#262626")
         tkinter.Frame(library_frame, bg="#464646", width=3).pack(side="right", fill="y")
@@ -170,6 +176,10 @@ class ContractWindow(ChildWindow):
         product_add_button.bind("<Enter>", self.button_enter)
         product_add_button.bind("<Leave>", self.button_leave)
 
+        widget_list["amount_entry"] = amount_entry
+        widget_list["discount_entry"] = discount_entry
+        widget_list["comments_entry"] = comments_entry
+
         # 以下是产品库布局
         combobox_font = ('黑体', '14')
         self.window.option_add("*TCombobox*Listbox.font", combobox_font)
@@ -247,6 +257,7 @@ class ContractWindow(ChildWindow):
                 chosen_adjunct_02.insert("1.0", adjunct)
                 chosen_adjunct_02.configure(state="disabled")
                 chosen_adjunctPrice_02.config(text="%s元" % adjunct_price)
+                self.library_chosen_pid = chosen_pid
             else:
                 chosen_name_02.config(text="<未选择>")
                 chosen_type_02.config(text="<未选择>")
@@ -256,6 +267,7 @@ class ContractWindow(ChildWindow):
                 chosen_adjunct_02.insert("1.0", "<未选择>")
                 chosen_adjunct_02.configure(state="disabled")
                 chosen_adjunctPrice_02.config(text="<未选择>")
+                self.library_chosen_pid = None
 
         def to_search(evt):
             self.search()
@@ -267,16 +279,18 @@ class ContractWindow(ChildWindow):
         screen_type_cb.bind("<<ComboboxSelected>>", to_search)
         product_search_entry.bind("<Return>", to_search)
 
-        widget_list = dict()
         widget_list["screen_name_cb"] = screen_name_cb
         widget_list["screen_type_cb"] = screen_type_cb
         widget_list["product_search_entry"] = product_search_entry
         widget_list["product_library"] = product_library
-        self.data["widget_list"] = widget_list
 
         self.products_read()
 
         # 以下为右侧布局
+        contract = self.contract_loader.get_contract(self.cid)
+        contract_name = contract[-2]
+        contract_number = contract[-1]
+
         top_info_frame = tkinter.Frame(contract_frame, bg="#323232")
         top_info_frame.pack(side="top", fill="x")
         tkinter.Frame(top_info_frame, bg="#464646", height=3).pack(side="bottom", fill="x")
@@ -284,8 +298,9 @@ class ContractWindow(ChildWindow):
         tkinter.Frame(top_info_frame, bg="#323232", height=10).pack(side="top", fill="x")
         tkinter.Frame(top_info_frame, bg="#323232", width=15).pack(side="left", fill="y")
         tkinter.Frame(top_info_frame, bg="#323232", width=10).pack(side="right", fill="y")
-        info_number_label = tkinter.Label(top_info_frame, bg="#464646", fg="#9A9A9A", padx=10, pady=5, text="00000000")
-        info_name_label = tkinter.Label(top_info_frame, bg="#323232", fg="#A0A0A0", text="合同文件")
+        info_number_label = tkinter.Label(top_info_frame, bg="#464646", fg="#9A9A9A", padx=10, pady=5,
+                                          text=contract_number)
+        info_name_label = tkinter.Label(top_info_frame, bg="#323232", fg="#A0A0A0", text=contract_name)
         setting_img = tkinter.PhotoImage(file="img/setting_icon.png", width=35, height=35)
         self.data["setting_img"] = setting_img
         info_setting_button = tkinter.Label(top_info_frame, image=setting_img, bg="#323232", cursor="hand2")
@@ -295,6 +310,35 @@ class ContractWindow(ChildWindow):
         info_name_label.pack(side="left")
         info_setting_button.pack(side="right")
         tkinter.Frame(top_info_frame, bg="#323232", width=15).pack(side="left")
+
+        info_bottom_line = tkinter.Frame(contract_frame, bg="#323232", padx=10, pady=5)
+        contract_export = tkinter.Label(info_bottom_line, bg="#649AFA", fg="#E4E4E4", text="导出为...",
+                                        cursor="hand2", padx=8, pady=4, font="黑体 14")
+        product_list_delete = tkinter.Label(info_bottom_line, bg="#646464", fg="#A0A0A0", text="移除选中产品",
+                                            cursor="arrow", padx=8, pady=4, font="黑体 14")
+
+        lock_image = tkinter.PhotoImage(file="img/lock_icon.png", width=35, height=35)
+        unlock_image = tkinter.PhotoImage(file="img/unlock_icon.png", width=35, height=35)
+        self.data["lock_image"] = lock_image
+        self.data["unlock_image"] = unlock_image
+        self.data["delete_lock"] = True
+        product_delete_lock = tkinter.Label(info_bottom_line, bg="#323232", image=lock_image, cursor="hand2")
+
+        total_label = tkinter.Label(info_bottom_line, bg="#323232", fg="#9A9A9A", text="合计数量:-  合计金额:-")
+
+        contract_export.pack(side="right")
+        tkinter.Frame(info_bottom_line, bg="#323232", width=10).pack(side="right")
+        product_list_delete.pack(side="right")
+        product_delete_lock.pack(side="right")
+        total_label.pack(side="left")
+        info_bottom_line.pack(side="bottom", fill="x")
+
+        widget_list["product_list_delete"] = product_list_delete
+        widget_list["product_delete_lock"] = product_delete_lock
+
+        product_delete_lock.bind("<Button-1>", self.lock_change)
+        contract_export.bind("<Enter>", self.button_enter)
+        contract_export.bind("<Leave>", self.button_leave)
 
         columns = ("number", "name", "model", "unit", "amount", "price", "discount", "adjunctPrice", "singlePrice",
                    "totalPrice", "comments")
@@ -330,6 +374,11 @@ class ContractWindow(ChildWindow):
         contract_library_scroll.pack(side="right", fill="y")
         contract_product.pack(side="left", fill="both", expand=1)
 
+        widget_list["contract_product"] = contract_product
+        self.contract_product_refresh()
+
+        product_add_button.bind("<Button-1>", self.add_product)
+
     @staticmethod
     def button_enter(evt):
         evt.widget.config(bg="#84AAFF")
@@ -348,6 +397,51 @@ class ContractWindow(ChildWindow):
             else:
                 tree_view.tag_configure(i, background="#323232", foreground="#A0A0A0")
         return selection
+
+    def add_product(self, evt):
+        if self.library_chosen_pid is not None:
+            amount = self.data["widget_list"]["amount_entry"].get("1.0", "end-1c")
+            discount = self.data["widget_list"]["discount_entry"].get("1.0", "end-1c")
+            comments = self.data["widget_list"]["comments_entry"].get("1.0", "end-1c")
+            product = self.data_loader.get_product(self.library_chosen_pid)
+            result = self.contract_loader.add_product(self.cid, product, amount, discount, comments)
+            if result == 1:
+                warning_window = WarningWindow(master=self.window, text="数量必须为正整数。")
+                return
+            elif result == 2:
+                warning_window = WarningWindow(master=self.window, text="折扣格式错误，输入范围为0~1。")
+                return
+            elif result == 3:
+                warning_window = WarningWindow(master=self.window, text="产品已添加，\n如需修改请先移除原有产品。")
+                return
+            elif result == 0:
+                self.contract_product_refresh()
+
+    def contract_product_refresh(self):
+        product_list = self.contract_loader.get_table_info(self.cid)
+        contract_product = self.data["widget_list"]["contract_product"]
+        for i in contract_product.get_children():
+            contract_product.delete(i)
+        for i in range(len(product_list)):
+            contract_product.insert('', i, values=product_list[i], tags=(i, "all"), iid=i)
+
+    def delete_product(self, evt):
+        pass
+
+    def lock_change(self, evt):
+        if self.data["delete_lock"]:
+            self.data["widget_list"]["product_delete_lock"].configure(image=self.data["unlock_image"])
+            self.data["widget_list"]["product_list_delete"].configure(bg="#649AFA", fg="#E4E4E4", cursor="hand2")
+            self.data["widget_list"]["product_list_delete"].bind("<Enter>", self.button_enter)
+            self.data["widget_list"]["product_list_delete"].bind("<Leave>", self.button_leave)
+            self.data["widget_list"]["product_list_delete"].bind("<Button-1>", self.delete_product)
+        else:
+            self.data["widget_list"]["product_delete_lock"].configure(image=self.data["lock_image"])
+            self.data["widget_list"]["product_list_delete"].configure(bg="#646464", fg="#A0A0A0", cursor="arrow")
+            self.data["widget_list"]["product_list_delete"].unbind("<Enter>")
+            self.data["widget_list"]["product_list_delete"].unbind("<Leave>")
+            self.data["widget_list"]["product_list_delete"].unbind("<Button-1>")
+        self.data["delete_lock"] = not self.data["delete_lock"]
 
     def product_library_set(self, name_list, type_list, price_list, pid_list):
         self.data["pid_list"] = pid_list
