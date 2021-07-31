@@ -196,6 +196,7 @@ class Contract:
         p = p / f'{self.cid}.data'
         if p.exists() and self._new:
             raise ContractNumberAlreadyExist
+        self._new = False
         logging.info(f"Save data: {p.resolve()}")
         with p.open('wb') as f:
             pickle.dump(self.__dict__, f)
@@ -227,7 +228,6 @@ class Contract:
             with p.open('rb') as pkl_file:
                 c.__dict__ = pickle.load(pkl_file)
             logging.info(f"Load contract from file: {p.resolve()}")
-        c._new = False
         return c
 
     @staticmethod

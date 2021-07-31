@@ -843,7 +843,7 @@ class MainWindow(Window):
                 line = now_length // line_contain
                 column = now_length % line_contain
                 x = column * 180 + 20
-                y = line * 180 + 20
+                y = line * 180 + 20 + self.tem_canvas_space
                 now_length += 1
                 if y + 300 < self.window.winfo_height() - 74:
                     self.tem_canvas.configure(scrollregion=(0, 0, 0, self.window.winfo_height() - 74))

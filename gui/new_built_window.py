@@ -439,7 +439,7 @@ class NewBuiltWindow(ChildWindow):
             self.info_list["demander_detail_require3"].insert("1.0", str(buyer_tax_num))
             self.info_list["demander_detail_require4"].insert("1.0", str(buyer_tel))
 
-        agm_name_entry.insert("1.0", "新键合同")
+        agm_name_entry.insert("1.0", "新建合同")
         today = self.contract_loader.get_today()
         last_number = self.contract_loader.generate_contract_num(today)[-2:]
         agm_fnumber_entry.insert("1.0", last_number)
