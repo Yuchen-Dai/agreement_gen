@@ -19,7 +19,9 @@ class Window:
         self.window = tkinter.Tk()
         self.window.option_add("*Font", "黑体 15")
         self.window.title("合同生成器")
-        self.window.geometry("%sx%s" % (width, height))
+        screen_width = self.window.winfo_screenwidth()
+        screen_height = self.window.winfo_screenheight() - 70
+        self.window.geometry("%sx%s+%d+%d" % (width, height, (screen_width - width) / 2, (screen_height - height) / 2))
         self.window.minsize(900, 500)
         self.window.configure(bg="#323232")
         self.window.update()

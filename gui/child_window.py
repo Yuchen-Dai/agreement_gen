@@ -18,7 +18,10 @@ class ChildWindow():
             self.window.option_add("*Font", "黑体 15")
             self.window.title(title)
             self.window.resizable(width=resizable, height=resizable)
-            self.window.geometry("%sx%s" % (width, height))
+            screen_width = self.window.winfo_screenwidth()
+            screen_height = self.window.winfo_screenheight() - 70
+            self.window.geometry(
+                "%sx%s+%d+%d" % (width, height, (screen_width - width) / 2, (screen_height - height) / 2))
             self.window.minsize(minsize_x, minsize_y)
             self.window.configure(bg="#323232")
             self.window.update()
