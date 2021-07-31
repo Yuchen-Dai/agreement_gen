@@ -87,7 +87,7 @@ class Contract:
 
     def get_location(self):
         """签订地点"""
-        return self.location
+        return self.location if self.location else ' '
 
     def get_supplier_info(self) -> 'company_name, company_location, company_bank, account#, tax#, tel#':
         return self.get_supplier(), self.supplier_location if self.supplier_location else ' ', \
@@ -149,7 +149,7 @@ class Contract:
         return f'空白。'
 
     def get_jiesuan(self):  # 九、结算方式及期限
-        return self.payment_method if self.payment_method else ' '
+        return self.payment_method if self.payment_method else '空白。'
 
     def get_ruxu(self):  # 十、如需提供担保，另立合同担保书，作为本合同附件
         return f'空白。'

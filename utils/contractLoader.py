@@ -56,10 +56,10 @@ class ContractLoader:
             if cid not in self.template_order:
                 self.template_order.append(cid)
 
-    def export_excel(self, contract_cid, file_type, file_dir):
+    def export_excel(self, contract_cid, output_type, file_dir):
         """
         :param contract_cid: Contract
-        :param file_type: 1: 合同, 2:报价单
+        :param output_type: 1: 合同, 2:报价单
         :param file_dir: The output file
         :return: 1: Fail 0: Success
         """
@@ -386,7 +386,7 @@ class ContractLoader:
             last_two = '{:0>2d}'.format(int(last_two))
             if len(last_two) != 2 or last_two == '00':
                 raise IllegalContractNumber
-            if pre_six + last_two in self.contracts:
+            if last_two in [i[-2:] for i in self.contracts]:
                 raise ContractNumberAlreadyExist
         return pre_six + last_two
 

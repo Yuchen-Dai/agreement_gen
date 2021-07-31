@@ -144,11 +144,11 @@ class Excel:
         sheet1.set_column(7, 7, 27)
 
         sheet1.merge_range(0, 0, 0, 7, '购销合同', merge_format0)
-        write_nonbold_bold(sheet1, 2, 0, 2, 5, merge_format4, merge_format4_bold, '供方：', c.get_supplier())
-        write_nonbold_bold(sheet1, 3, 0, 3, 5, merge_format4, merge_format4_bold, '需方：', c.get_buyer())
-        write_nonbold_bold(sheet1, 2, 6, 2, 7, merge_format4, merge_format4_bold, '合同编号：', c.get_contract_num())
-        write_nonbold_bold(sheet1, 3, 6, 3, 7, merge_format4, merge_format4_bold, '签订地点：', c.get_location())
-        write_nonbold_bold(sheet1, 4, 6, 4, 7, merge_format4, merge_format4_bold, '签订时间：', c.get_sign_date())
+        write_nonbold_bold(sheet1, 2, 0, 2, 5, merge_format4, merge_format4_bold, '供方：', self.c.get_supplier())
+        write_nonbold_bold(sheet1, 3, 0, 3, 5, merge_format4, merge_format4_bold, '需方：', self.c.get_buyer())
+        write_nonbold_bold(sheet1, 2, 6, 2, 7, merge_format4, merge_format4_bold, '合同编号：', self.c.get_contract_num())
+        write_nonbold_bold(sheet1, 3, 6, 3, 7, merge_format4, merge_format4_bold, '签订地点：', self.c.get_location())
+        write_nonbold_bold(sheet1, 4, 6, 4, 7, merge_format4, merge_format4_bold, '签订时间：', self.c.get_sign_date())
         sheet1.merge_range(4, 0, 4, 5, '一、产品名称、商标、型号、厂家、数量、金额、供货时间', merge_format5)
 
         for col in range(8):
@@ -255,7 +255,7 @@ class Excel:
             sheet2.write(2, col, ['序号', '产品名称', '型号及规格', '单位', '数量', '面价', '折扣',
                                   '附件', '单价', '金额', '备注'][col], format1_bold)
         row, col = 3, 0
-        for product, number, discount in self.c.get_table():
+        for product, number, discount, comment in self.c.get_table():
             sheet2.write(row, col, row - 2, format1)  # 序号
             sheet2.write(row, col + 1, product.get_name(), format1)  # 产品名称
             sheet2.write(row, col + 2, product.get_specs(), format1)  # 型号及规格
@@ -275,9 +275,9 @@ class Excel:
         sheet2.write_formula(row, col + 9, f'=SUM(J4:J{row})', number_format2_bold)
         sheet2.merge_range(row + 1, 0, row + 1, 10, f'合计人民币金额（大写）：{self.c.get_total_daxie()}', merge_format3)
         write_nonbold_bold(sheet2, row + 3, 0, row + 3, 3, merge_format4, merge_format4_bold, '单位名称（章）：',
-                           c.get_supplier())
+                           self.c.get_supplier())
         write_nonbold_bold(sheet2, row + 3, 4, row + 3, 10, merge_format4, merge_format4_bold, '单位名称（章）：',
-                           c.get_buyer())
+                           self.c.get_buyer())
         sheet2.merge_range(row + 5, 0, row + 5, 3, '日期：', merge_format4)
         sheet2.merge_range(row + 5, 4, row + 5, 10, '日期：', merge_format4)
         sheet2.insert_image(row, 1, 'img\\stamp1.png')
