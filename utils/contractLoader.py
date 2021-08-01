@@ -56,6 +56,9 @@ class ContractLoader:
             if cid not in self.template_order:
                 self.template_order.append(cid)
 
+    def refresh(self):
+        pass  # todo 刷新合同和模板
+
     def export_excel(self, contract_cid, output_type, file_dir):
         """
         :param contract_cid: Contract
@@ -64,10 +67,12 @@ class ContractLoader:
         :return: 1: Fail 0: Success
         """
         e = Excel(self.contracts[contract_cid])
-        e.run()
+        e.run(output_type=output_type, file_dir=file_dir)
 
+    def save_contract(self, cid):
+        pass  # todo 保存合同
 
-    def add_product(self, cid, product, quantity: str, discount: str, comments: str):
+    def add_product(self, cid, product, quantity: str, discount: str, comments: str):  # todo 保存要脱离出来
         """
         :param cid: Contract to be used
         :param product: Product to be added
@@ -91,7 +96,7 @@ class ContractLoader:
         self.contracts[cid].save(self.dir)
         return 0
 
-    def remove_product(self, cid, line_number):
+    def remove_product(self, cid, line_number):  # todo 保存要脱离出来
         """
         :param cid: Contract to be used
         :param line_number: Line number start from 0
@@ -108,9 +113,9 @@ class ContractLoader:
         """
         result = []
         for i, (product, quantity, discount, comment) in enumerate(self.contracts[cid].get_table()):
-            single_price = product.get_raw_price()*discount+product.get_adjunct_price()
-            total_price = single_price*quantity
-            result.append((i+1, product.get_name(), product.get_specs(), product.get_unit(), str(quantity),
+            single_price = product.get_raw_price() * discount + product.get_adjunct_price()
+            total_price = single_price * quantity
+            result.append((i + 1, product.get_name(), product.get_specs(), product.get_unit(), str(quantity),
                            product.get_raw_price(), str(discount), str(product.get_adjunct_price()),
                            str(single_price), str(total_price), comment))
         return result
@@ -122,6 +127,21 @@ class ContractLoader:
         """
         c = self.contracts[cid]
         return c.get_total_quantity(), c.get_total()
+
+    def get_statistics(self, date):
+        """
+        :param date: (year, month ,None)
+        :return: total of specific date
+        """
+        year = date[0]
+        month = date[1]
+        if not year:
+            return sum([i.get_total() for i in self.contracts.values()])
+        elif not month:
+            return sum([i.get_total() for i in self.contracts.values() if i.cid[:2] == year[-2:]])
+        else:
+            return sum([i.get_total() for i in self.contracts.values() if i.cid[:2] == year[-2:]
+                        and i.cid[2:4] == '{:0>2d}'.format(int(month))])
 
     def get_contract_list(self, date):
         """

@@ -11,6 +11,9 @@ class DataLoader:
     def __init__(self):
         self.data = {'products': {}, 'id_count': 0}
 
+    def refresh(self):
+        pass
+
     def get_product(self, pid):
         if pid not in self.data['products']:
             logging.info(f"Product id not exist: {pid}")
@@ -39,7 +42,7 @@ class DataLoader:
             logging.info(f"Delete product id: {pid}, {self.data['products'][pid]}")
             del self.data['products'][pid]
 
-    def save(self, data_dir='data'):
+    def save(self, data_dir='data'):  # todo 1. 没有更新内容就不写入 2. 当冲突的时候对本地数据集以及当前数据集做并集操作
         p = Path(data_dir)
         if not p.exists():
             logging.info(f"Create data directory: {p.resolve}")
