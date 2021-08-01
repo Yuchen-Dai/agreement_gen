@@ -316,6 +316,17 @@ class SettingWindow(ChildWindow):
         self.data["unlock_image"] = unlock_image
         self.data["delete_lock"] = True
         product_delete_lock = tkinter.Label(product_detail_line02, bg="#464646", image=lock_image, cursor="hand2")
+
+        refresh_img = tkinter.PhotoImage(file="img/refresh_icon.png", width=35, height=35)
+        refresh_button = tkinter.Label(product_detail_line02, image=refresh_img, bg="#464646", cursor="hand2")
+        self.data["refresh_img"] = refresh_img
+
+        def refresh_products(evt):
+            self.data["data_loader"].refresh()
+            self.search()
+
+        refresh_button.bind("<Button-1>", refresh_products)
+
         # product_list_delete.bind("<Enter>", self.button_enter)
         # product_list_delete.bind("<Leave>", self.button_leave)
         product_search_button.pack(side="right")
@@ -329,6 +340,7 @@ class SettingWindow(ChildWindow):
         product_detail_line01.pack(side="top", fill="x")
         product_list_delete.pack(side="right")
         product_delete_lock.pack(side="right")
+        refresh_button.pack(side="left")
         product_detail_line02.pack(side="bottom", fill="x")
         tkinter.Frame(product_detail_frame, bg="#464646", height=20).pack(side="top")
         product_listbox_scroll.pack(side="right", fill="y")

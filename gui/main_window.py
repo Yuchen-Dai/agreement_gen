@@ -614,10 +614,19 @@ class MainWindow(Window):
                 self.tem_canvas.itemconfigure(i["frame"], width=3, outline="#649AFA")
                 self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989")
                 if i["type"] != "contract" and i["type"] != "template":
-                    self.warning_label.place(relx=1, x=-320, rely=0.5, y=-100)
                     self.info_menu.place_forget()
                     self.info_canvas.place_forget()
                     self.chosen_contract = None
+                    if i["type"] == "folder":
+                        input_folder = self.now_path.copy()
+                        while len(input_folder) < 3:
+                            input_folder.append(None)
+                        total_sells = self.contract_loader.get_statistics(input_folder)
+                        self.warning_label.place(relx=1, x=-470, y=100, rely=0)
+                        self.warning_label.config(text=f"总销售额:{total_sells}")
+                    else:
+                        self.warning_label.place(relx=1, x=-320, rely=0.5, y=-100)
+                        self.warning_label.config(text="无可用选项")
                 else:
                     self.chosen_contract = i["agm_code"]
                     self.warning_label.place_forget()
