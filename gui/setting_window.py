@@ -7,6 +7,7 @@ from assembly import StandardBar
 from dataLoader import DataLoader
 from excel import Excel
 from contract import Contract
+from exception import *
 from product import Product
 
 product_type = {'框架断路器': ['RMW1', 'RMW2', 'ME', 'RMW3'],
@@ -32,6 +33,7 @@ class SettingWindow(ChildWindow):
         __class__.setting_count -= 1
         if self.data.get("command") is not None:
             self.data["command"]()
+        self.data["data_loader"].save()
         super().close()
 
     def gui_init(self, window):
@@ -403,7 +405,6 @@ class SettingWindow(ChildWindow):
         data_loader = self.data["data_loader"]
         for i in selection:
             data_loader.del_data(int(i))
-        data_loader.save()
         self.products_read()
         self.lock_change(None)
         self.category_return()
@@ -427,8 +428,11 @@ class SettingWindow(ChildWindow):
         data_loader = self.data["data_loader"]
         new_product = Product(unit="台", raw_price=product_price, adjunct=product_adjunct_list, current=product_current,
                               model=product_type, name=product_name)
-        data_loader.add_data(new_product)
-        data_loader.save()
+        try:
+            data_loader.add_data(new_product)
+        except ProductAlreadyExist:
+            warning_window = WarningWindow(self.window, "产品已存在。")
+            return
         self.products_read()
         self.category_return()
         self.data["widget_list"]["product_type_entry"].delete("1.0", 'end')

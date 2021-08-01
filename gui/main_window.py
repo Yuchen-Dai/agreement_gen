@@ -373,6 +373,19 @@ class MainWindow(Window):
         self.setting_button.place(relx=1, x=-50, y=15)
         self.info_list["setting_img"] = setting_img
 
+        refresh_img = tkinter.PhotoImage(file="img/refresh_icon.png", width=35, height=35)
+        refresh_button = tkinter.Label(window, image=refresh_img, bg="#323232", cursor="hand2")
+        refresh_button.place(relx=1, x=-100, y=15)
+        self.info_list["refresh_img"] = refresh_img
+        self.info_list["refresh_button"] = refresh_button
+
+        def refresh_file(evt):
+            self.contract_loader.refresh()
+            self.data_loader.refresh()
+            self.refresh_agm()
+
+        refresh_button.bind("<Button-1>", refresh_file)
+
         item_menu = tkinter.Menu(tem_canvas, tearoff=False, font="新宋体 13", bg="#262626", fg="#A0A0A0")
         item_menu.add_command(label="以此模板新建合同")
         item_menu.add_command(label="重命名")

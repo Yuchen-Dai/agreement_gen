@@ -35,6 +35,7 @@ class ContractWindow(ChildWindow):
     def close(self):
         __class__.contract_window_count -= 1
         self.master.deiconify()
+        self.contract_loader.save_contract(self.cid)
         super().close()
 
     @staticmethod
