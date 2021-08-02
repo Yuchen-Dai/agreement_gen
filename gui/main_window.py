@@ -2,7 +2,7 @@ import tkinter
 import math
 import tkinter.font
 import tkinter.ttk
-import time
+import tkinter.messagebox
 from setting_window import SettingWindow
 from new_built_window import NewBuiltWindow
 from warning_window import WarningWindow
@@ -10,13 +10,12 @@ from rename_window import RenameWindow
 from contract_window import ContractWindow
 from contractLoader import ContractLoader
 from dataLoader import DataLoader
-from excel import Excel
-from product import Product
 
 
 class Window:
     def error_report(self, error):
-        pass
+        tkinter.messagebox.showerror(title='错误', message='程序出现错误，请联系公司总经理。')
+        self.window.destroy()
 
     def root_error_call_back(self, *error):
         self.error_report(error)
