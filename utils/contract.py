@@ -44,6 +44,7 @@ class Contract:
         self.cid = contract_number
         self._is_template = True
         self._new = True
+        self._modify = True
 
         self.table = []  # [(product_id, quantity, discount)]
 
@@ -66,10 +67,12 @@ class Contract:
         logging.info(f"Add line: {product}")
         self.table.append((product, quantity, discount, comments))
         self.table.sort(key=lambda x: x[0])
+        self._modify = True
 
     def del_item(self, line_number):
         logging.info(f"Del line: {line_number}")
         del self.table[line_number]
+        self._modify = True
 
     def get_sign_date(self):
         if not self.sign_date:
@@ -197,9 +200,13 @@ class Contract:
         if p.exists() and self._new:
             raise ContractNumberAlreadyExist
         self._new = False
-        logging.info(f"Save data: {p.resolve()}")
-        with p.open('wb') as f:
-            pickle.dump(self.__dict__, f)
+        if self._modify:
+            self._modify = False
+            logging.info(f"Save data: {p.resolve()}")
+            with p.open('wb') as f:
+                pickle.dump(self.__dict__, f)
+        else:
+            logging.info(f"No modify, did not save: {p.resolve()}")
 
     def delete(self, dir='data/contract'):
         cid = self.cid
@@ -228,6 +235,7 @@ class Contract:
             with p.open('rb') as pkl_file:
                 c.__dict__ = pickle.load(pkl_file)
             logging.info(f"Load contract from file: {p.resolve()}")
+        c._modify = False
         return c
 
     @staticmethod

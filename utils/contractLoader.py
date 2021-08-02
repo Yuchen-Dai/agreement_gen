@@ -18,30 +18,30 @@ def _return_information(c):
 
 class ContractLoader:
 
-    def __init__(self, dir='data/contract'):
+    def __init__(self, data_dir='data/contract'):
         self.contracts = {}
         self.templates = {}
         self.template_order = []
-        self.dir = dir
+        self.data_dir = data_dir
 
         # load contracts
-        contracts_path = Path(dir) / 'contract'
+        contracts_path = Path(data_dir) / 'contract'
         if contracts_path.exists():
             for f in contracts_path.iterdir():
                 cid = f.stem
                 if f.suffix == '.data' and isLegalCid(cid):
-                    self.contracts[cid] = Contract.load(cid, dir)
+                    self.contracts[cid] = Contract.load(cid, data_dir)
 
         # load templates
-        template_path = Path(dir) / 'template'
+        template_path = Path(data_dir) / 'template'
         if template_path.exists():
             for f in template_path.iterdir():
                 cid = f.stem
                 if f.suffix == '.data' and isLegalCid(cid):
-                    self.templates[cid] = Contract.load(cid, dir)
+                    self.templates[cid] = Contract.load(cid, data_dir)
 
         # load templates' order
-        order_path = Path(dir) / 'templates.data'
+        order_path = Path(data_dir) / 'templates.data'
         if order_path.exists():
             with order_path.open('rb') as f:
                 self.template_order = pickle.load(f)
@@ -57,7 +57,45 @@ class ContractLoader:
                 self.template_order.append(cid)
 
     def refresh(self):
-        pass  # todo 刷新合同和模板
+        """
+        Refresh from file.
+        :return:
+        """
+        self.contracts = {}
+        self.templates = {}
+        self.template_order = []
+
+        # load contracts
+        contracts_path = Path(self.data_dir) / 'contract'
+        if contracts_path.exists():
+            for f in contracts_path.iterdir():
+                cid = f.stem
+                if f.suffix == '.data' and isLegalCid(cid):
+                    self.contracts[cid] = Contract.load(cid, self.data_dir)
+
+        # load templates
+        template_path = Path(self.data_dir) / 'template'
+        if template_path.exists():
+            for f in template_path.iterdir():
+                cid = f.stem
+                if f.suffix == '.data' and isLegalCid(cid):
+                    self.templates[cid] = Contract.load(cid, self.data_dir)
+
+        # load templates' order
+        order_path = Path(self.data_dir) / 'templates.data'
+        if order_path.exists():
+            with order_path.open('rb') as f:
+                self.template_order = pickle.load(f)
+        to_be_deleted = []
+        for i in range(len(self.template_order)):
+            if self.template_order[i] not in self.templates:
+                to_be_deleted.append(i)
+        to_be_deleted.reverse()
+        for i in to_be_deleted:
+            del self.template_order[i]
+        for cid in self.templates:
+            if cid not in self.template_order:
+                self.template_order.append(cid)
 
     def export_excel(self, contract_cid, output_type, file_dir):
         """
@@ -70,9 +108,14 @@ class ContractLoader:
         e.run(output_type=output_type, file_dir=file_dir)
 
     def save_contract(self, cid):
-        pass  # todo 保存合同
+        """
+        保存指定合同（在基础信息不变，修改了table时,调用此方法）
+        :param cid: Contract to be saved
+        :return: None
+        """
+        self.contracts[cid].save()
 
-    def add_product(self, cid, product, quantity: str, discount: str, comments: str):  # todo 保存要脱离出来
+    def add_product(self, cid, product, quantity: str, discount: str, comments: str):
         """
         :param cid: Contract to be used
         :param product: Product to be added
@@ -93,17 +136,15 @@ class ContractLoader:
         if not discount:
             discount = 1
         self.contracts[cid].add_item(product, int(quantity), float(discount), comments)
-        self.contracts[cid].save(self.dir)
         return 0
 
-    def remove_product(self, cid, line_number):  # todo 保存要脱离出来
+    def remove_product(self, cid, line_number):
         """
         :param cid: Contract to be used
         :param line_number: Line number start from 0
         :return: None
         """
         self.contracts[cid].del_item(line_number)
-        self.contracts[cid].save(self.dir)
 
     def get_table_info(self, cid):
         """
@@ -190,7 +231,6 @@ class ContractLoader:
         :param buyer_account: str
         :param buyer_tax_num: str
         :param buyer_tel: str
-        :param name: str
         """
         if contract_cid in self.contracts:
             c = self.contracts[contract_cid]
@@ -214,7 +254,7 @@ class ContractLoader:
             c.buyer_account = buyer_account
             c.buyer_tax_num = buyer_tax_num
             c.buyer_tel = buyer_tel
-            c.save(self.dir)
+            c.save(self.data_dir)
         elif contract_cid in self.templates:
             c = self.templates[contract_cid]
             c.supplier = supplier
@@ -236,7 +276,7 @@ class ContractLoader:
             c.buyer_account = buyer_account
             c.buyer_tax_num = buyer_tax_num
             c.buyer_tel = buyer_tel
-            c.save(self.dir)
+            c.save(self.data_dir)
         else:
             raise ValueError(f'{contract_cid} not exist.')
 
@@ -294,7 +334,7 @@ class ContractLoader:
         c.name = name
         c.cid = contract_number
         c.set_template(False)
-        c.save(self.dir)
+        c.save(self.data_dir)
         self.contracts[c.cid] = c
         return c.cid
 
@@ -305,7 +345,7 @@ class ContractLoader:
         """
         c = Contract()
         c.name = "新建模板"
-        c.save(self.dir)
+        c.save(self.data_dir)
         self.templates[c.cid] = c
         self.template_order.append(c.cid)
         self._save_template_order()
@@ -343,10 +383,10 @@ class ContractLoader:
         """
         if cid in self.contracts:
             self.contracts[cid].name = name
-            self.contracts[cid].save(self.dir)
+            self.contracts[cid].save(self.data_dir)
         elif cid in self.templates:
             self.templates[cid].name = name
-            self.templates[cid].save(self.dir)
+            self.templates[cid].save(self.data_dir)
         else:
             raise ValueError('Cid is not exists.')
 
@@ -357,7 +397,7 @@ class ContractLoader:
         """
         c = Contract.copy(self.templates[template_cid])
         c.name = self.templates[template_cid].name + '_复制'
-        c.save(self.dir)
+        c.save(self.data_dir)
         self.templates[c.cid] = c
         self.template_order.append(c.cid)
         self._save_template_order()
@@ -369,10 +409,10 @@ class ContractLoader:
         :return
         """
         if cid in self.contracts:
-            self.contracts[cid].delete(self.dir)
+            self.contracts[cid].delete(self.data_dir)
             del self.contracts[cid]
         elif cid in self.templates:
-            self.templates[cid].delete(self.dir)
+            self.templates[cid].delete(self.data_dir)
             del self.templates[cid]
             self.template_order.remove(cid)
             self._save_template_order()
@@ -411,7 +451,7 @@ class ContractLoader:
         return pre_six + last_two
 
     def _save_template_order(self):
-        order_path = Path(self.dir) / 'templates.data'
+        order_path = Path(self.data_dir) / 'templates.data'
         with order_path.open('wb') as f:
             pickle.dump(self.template_order, f)
 

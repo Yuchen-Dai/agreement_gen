@@ -13,11 +13,11 @@ class Excel:
 
     def run(self, file_dir, output_type):  # todo 类型2报价单需要添加
         border = 1
-        p = Path(file_dir)
-        if not p.exists():
-            logging.info(f'No existing output directory, create: {p.resolve()}')
-            return 1
-            # p.mkdir(parents=True)
+        p = Path(file_dir+".xlsx")
+        # if not p.exists():
+        #     logging.info(f'No existing output directory, create: {p.resolve()}')
+        #     return 1
+        #     p.mkdir(parents=True)
         workbook = xlsxwriter.Workbook(file_dir)
 
         right_bottom = workbook.add_format({'right': border, 'bottom': border, 'align': 'left', 'valign': 'vcenter'})

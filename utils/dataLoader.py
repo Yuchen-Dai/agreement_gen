@@ -10,9 +10,10 @@ class DataLoader:
 
     def __init__(self):
         self.data = {'products': {}, 'id_count': 0}
+        self._modify = True
 
-    def refresh(self):
-        pass
+    def refresh(self, data_dir = 'data'):
+        self.save(data_dir)
 
     def get_product(self, pid):
         if pid not in self.data['products']:
@@ -33,6 +34,7 @@ class DataLoader:
         logging.info(f'Add product pid {self.data["id_count"]}: {new_product}')
         self.data['products'][self.data['id_count']] = new_product
         self.data['id_count'] += 1
+        self._modify = True
 
     def del_data(self, pid):
         if pid not in self.data['products']:
@@ -41,16 +43,30 @@ class DataLoader:
         else:
             logging.info(f"Delete product id: {pid}, {self.data['products'][pid]}")
             del self.data['products'][pid]
+            self._modify = True
 
-    def save(self, data_dir='data'):  # todo 1. 没有更新内容就不写入 2. 当冲突的时候对本地数据集以及当前数据集做并集操作
+    def save(self, data_dir='data'):
         p = Path(data_dir)
         if not p.exists():
             logging.info(f"Create data directory: {p.resolve}")
             p.mkdir(parents=True)
         p = p / 'products.data'
-        logging.info(f"Save data: {p.resolve()}")
-        with p.open('wb') as f:
-            pickle.dump(self.data, f)
+        if p.exists():
+            with p.open('rb') as f:
+                cloud_data = pickle.load(f)
+                for product in cloud_data['products'].values():
+                    if product not in self.data['products'].values():
+                        logging.info(f"Update product from cloud:{product}")
+                        self.data['products'][self.data['id_count']] = product
+                        self.data['id_count'] += 1
+                        self._modify = True
+        if self._modify:
+            self._modify = False
+            logging.info(f"Save data: {p.resolve()}")
+            with p.open('wb') as f:
+                pickle.dump(self.data, f)
+        else:
+            logging.info(f"No modify, data did not save: {p.resolve()}")
 
     @staticmethod
     def sorted(product_list, key):
@@ -85,6 +101,7 @@ class DataLoader:
             return dl
         else:
             logging.info(f'No existing dir: use empty dataloader')
+        dl._modify = False
         return dl
 
     def __str__(self):
