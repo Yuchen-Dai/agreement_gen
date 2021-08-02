@@ -235,6 +235,7 @@ class Contract:
             with p.open('rb') as pkl_file:
                 c.__dict__ = pickle.load(pkl_file)
             logging.info(f"Load contract from file: {p.resolve()}")
+        c._new = False
         c._modify = False
         return c
 
