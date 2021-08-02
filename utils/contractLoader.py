@@ -382,10 +382,10 @@ class ContractLoader:
         :return:
         """
         if cid in self.contracts:
-            self.contracts[cid].name = name
+            self.contracts[cid].rename(name)
             self.contracts[cid].save(self.data_dir)
         elif cid in self.templates:
-            self.templates[cid].name = name
+            self.templates[cid].rename(name)
             self.templates[cid].save(self.data_dir)
         else:
             raise ValueError('Cid is not exists.')

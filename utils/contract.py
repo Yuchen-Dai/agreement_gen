@@ -208,6 +208,10 @@ class Contract:
         else:
             logging.info(f"No modify, did not save: {p.resolve()}")
 
+    def rename(self, name):
+        self.name = name
+        self._modify = True
+
     def delete(self, dir='data/contract'):
         cid = self.cid
         p = Path(dir)
