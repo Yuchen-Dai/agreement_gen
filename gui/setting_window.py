@@ -38,6 +38,7 @@ class SettingWindow(ChildWindow):
 
     def gui_init(self, window):
         __class__.setting_count += 1
+        self.data["data_loader"].refresh()
         menu_frame = tkinter.Frame(self.window, bg="#262626", bd=0)
         menu_frame.place(width=160, relheight=1)
 
@@ -445,11 +446,11 @@ class SettingWindow(ChildWindow):
         except ProductAlreadyExist:
             warning_window = WarningWindow(self.window, "产品已存在。")
             return
-        self.products_read()
-        self.category_return()
+        self.search()
         self.data["widget_list"]["product_type_entry"].delete("1.0", 'end')
         self.data["widget_list"]["product_current_entry"].delete("1.0", 'end')
         self.data["widget_list"]["product_price_entry"].delete("1.0", 'end')
+        self.data["widget_list"]["product_standard_canvas"].delete_all()
 
     def product_load(self, product_list):
         for i in self.data["product_treeview"].get_children():
