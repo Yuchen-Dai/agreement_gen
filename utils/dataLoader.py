@@ -36,7 +36,6 @@ class DataLoader:
         self._modify = True
 
     def del_data(self, pid):
-        x = [1] + 1
         if pid not in self.data['products']:
             logging.info(f"Product id not exist: {pid}")
             raise ProductNotExist(f"Product id not exist: {pid}")
