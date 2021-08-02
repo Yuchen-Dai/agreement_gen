@@ -623,7 +623,7 @@ class MainWindow(Window):
                             input_folder.append(None)
                         total_sells = self.contract_loader.get_statistics(input_folder)
                         self.warning_label.place(relx=1, x=-470, y=100, rely=0)
-                        self.warning_label.config(text=f"总销售额:{total_sells}")
+                        self.warning_label.config(text="总销售额:{:.2f}".format(total_sells))
                     else:
                         self.warning_label.place(relx=1, x=-320, rely=0.5, y=-100)
                         self.warning_label.config(text="无可用选项")
