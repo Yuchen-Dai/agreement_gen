@@ -1,4 +1,3 @@
-from product import Product
 from exception import ProductNotExist, ProductAlreadyExist
 from pathlib import Path
 import pickle
@@ -14,6 +13,7 @@ class DataLoader:
 
     def refresh(self, data_dir = 'data'):
         self.save(data_dir)
+        logging.info("Refresh contractloader.")
 
     def get_product(self, pid):
         if pid not in self.data['products']:
@@ -26,7 +26,6 @@ class DataLoader:
         return product_list
 
     def add_data(self, new_product):
-        assert isinstance(new_product, Product)
         for i in self.data['products'].values():
             if i == new_product:
                 logging.info(f'Product already exists: {i}')
@@ -37,6 +36,7 @@ class DataLoader:
         self._modify = True
 
     def del_data(self, pid):
+        x = [1] + 1
         if pid not in self.data['products']:
             logging.info(f"Product id not exist: {pid}")
             raise ProductNotExist(f"Product id not exist: {pid}")
@@ -98,7 +98,6 @@ class DataLoader:
             with p.open('rb') as pkl_file:
                 dl.data = pickle.load(pkl_file)
             logging.info(f"Load data from file: {p.resolve()}")
-            return dl
         else:
             logging.info(f'No existing dir: use empty dataloader')
         dl._modify = False
@@ -120,14 +119,14 @@ if __name__ == '__main__':
                         level=logging.DEBUG)
     dl = DataLoader.load()
 
-    a = Product('塑壳断路器', 'RMM1-630S/3310', '500A', '台', 1220.00, [("抽屉式", 180), ("VC3", 30.1)])
-    b = Product('交流塑壳断路', 'RMM1-100S/3300', '160A', '只', 174, [("带电剩余保护模块", 88)])
-    c = Product('微型断路器', 'RMC3-63', "", "只", 94.2, [("带剩余电流保护模块AC型 30mA", 16)])
-    dl.add_data(a)
-    dl.add_data(b)
-    dl.add_data(c)
-    pl = dl.get_products_list()
-    pl = DataLoader.sorted(pl, key='model')
-    pl = DataLoader.search(pl, keyword='')
-    print(pl)
+    # a = Product('塑壳断路器', 'RMM1-630S/3310', '500A', '台', 1220.00, [("抽屉式", 180), ("VC3", 30.1)])
+    # b = Product('交流塑壳断路', 'RMM1-100S/3300', '160A', '只', 174, [("带电剩余保护模块", 88)])
+    # c = Product('微型断路器', 'RMC3-63', "", "只", 94.2, [("带剩余电流保护模块AC型 30mA", 16)])
+    # dl.add_data(a)
+    # dl.add_data(b)
+    # dl.add_data(c)
+    # pl = dl.get_products_list()
+    # pl = DataLoader.sorted(pl, key='model')
+    # pl = DataLoader.search(pl, keyword='')
+    # print(pl)
     # dl.save()

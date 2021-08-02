@@ -1,5 +1,6 @@
 import tkinter
 import math
+import traceback
 import tkinter.font
 import tkinter.ttk
 import tkinter.messagebox
@@ -10,11 +11,12 @@ from rename_window import RenameWindow
 from contract_window import ContractWindow
 from contractLoader import ContractLoader
 from dataLoader import DataLoader
-
+import logging
 
 class Window:
     def error_report(self, error):
-        tkinter.messagebox.showerror(title='错误', message='程序出现错误，请联系公司总经理。')
+        tkinter.messagebox.showerror(title='错误', message='程序运行出现异常，请联系公司总经理。')
+        logging.critical(''.join(traceback.format_exception(error[0], error[1], error[2])))
         self.window.destroy()
 
     def root_error_call_back(self, *error):

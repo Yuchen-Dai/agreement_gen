@@ -3,19 +3,19 @@
 class Product:
     def __init__(self, name: str , model: str, current: str, unit: str, raw_price: float, adjunct: list):
         assert type(name) == str
-        self.name = name.strip()
+        self.name = name.strip("\n\t ")
         assert type(model) == str
-        self.model = model.strip()
+        self.model = model.strip("\n\t ")
         assert type(current) == str
-        self.current = current.strip()
+        self.current = current.strip("\n\t ")
         assert type(unit) == str
-        self.unit = unit.strip()
+        self.unit = unit.strip("\n\t ")
         assert type(raw_price) in [int, float], f'price should be int or float, but recieve a {type(raw_price)}'
         self.raw_price = raw_price
         assert type(adjunct) == list, f'adjunct should be a list of tuple: [(adjunct_name, price)], but receive {type(adjunct)}'
         assert all(type(i) == tuple and len(i) == 2 for i in adjunct)
         assert all([type(i[0]) == str and (type(i[1]) == float or type(i[1]) == int) for i in adjunct])
-        self.adjunct = adjunct  # [(adjunct_name, price)]
+        self.adjunct = [(i[0].strip("\n\t "), i[1]) for i in adjunct]  # [(adjunct_name, price)]
 
     def get_specs(self):
         result = self.model
@@ -44,7 +44,7 @@ class Product:
         return self.raw_price
 
     def get_adjunct_price(self):
-        return sum([i[1] for i in self.adjunct])
+        return float(sum([i[1] for i in self.adjunct]))
 
     def copy(self):
         new_adjunct = [(i[0], i[1]) for i in self.adjunct]

@@ -4,7 +4,7 @@ from contract import Contract
 from pathlib import Path
 from product import Product
 
-import xlsxwriter, os, logging, exception
+import xlsxwriter, os, logging
 
 
 class Excel:

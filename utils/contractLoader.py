@@ -96,6 +96,7 @@ class ContractLoader:
         for cid in self.templates:
             if cid not in self.template_order:
                 self.template_order.append(cid)
+        logging.info("Refresh contractloader.")
 
     def export_excel(self, contract_cid, output_type, file_dir):
         """
@@ -336,6 +337,7 @@ class ContractLoader:
         c.set_template(False)
         c.save(self.data_dir)
         self.contracts[c.cid] = c
+        logging.info(f"Create contract: {c.cid}")
         return c.cid
 
     def create_template(self):
@@ -349,6 +351,7 @@ class ContractLoader:
         self.templates[c.cid] = c
         self.template_order.append(c.cid)
         self._save_template_order()
+        logging.info(f"Create template: {c.cid}")
         return c.cid
 
     def move_template_to_front(self, template_cid):

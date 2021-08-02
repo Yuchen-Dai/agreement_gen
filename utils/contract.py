@@ -64,13 +64,13 @@ class Contract:
         return self.name if self.name else self.get_contract_num()
 
     def add_item(self, product, quantity, discount, comments):
-        logging.info(f"Add line: {product}")
+        logging.debug(f"Add line: {product}")
         self.table.append((product, quantity, discount, comments))
         self.table.sort(key=lambda x: x[0])
         self._modify = True
 
     def del_item(self, line_number):
-        logging.info(f"Del line: {line_number}")
+        logging.debug(f"Del line: {line_number}")
         del self.table[line_number]
         self._modify = True
 
@@ -194,7 +194,7 @@ class Contract:
             p = p / 'contract'
 
         if not p.exists():
-            logging.info(f"Create saving directory: {p.resolve()}")
+            logging.debug(f"Create saving directory: {p.resolve()}")
             p.mkdir(parents=True)
         p = p / f'{self.cid}.data'
         if p.exists() and self._new:
@@ -202,11 +202,11 @@ class Contract:
         self._new = False
         if self._modify:
             self._modify = False
-            logging.info(f"Save data: {p.resolve()}")
+            logging.debug(f"Save data: {p.resolve()}")
             with p.open('wb') as f:
                 pickle.dump(self.__dict__, f)
         else:
-            logging.info(f"No modify, did not save: {p.resolve()}")
+            logging.debug(f"No modify, did not save: {p.resolve()}")
 
     def rename(self, name):
         self.name = name
@@ -221,7 +221,7 @@ class Contract:
             p = p / 'contract'
         p = p / f'{str(cid)}.data'
         assert p.exists(), f"No existing file: {p}"
-        logging.info(f"Delete contract: {p.resolve()}")
+        logging.debug(f"Delete contract: {p.resolve()}")
         p.unlink()
 
     @staticmethod
@@ -232,13 +232,13 @@ class Contract:
             assert p.exists(), f"No existing file: {p}"
             with p.open('rb') as pkl_file:
                 c.__dict__ = pickle.load(pkl_file)
-            logging.info(f"Load template from file: {p.resolve()}")
+            logging.debug(f"Load template from file: {p.resolve()}")
         else:
             p = Path(dir) / 'contract' / f'{str(cid)}.data'
             assert p.exists(), f"No existing file: {p}"
             with p.open('rb') as pkl_file:
                 c.__dict__ = pickle.load(pkl_file)
-            logging.info(f"Load contract from file: {p.resolve()}")
+            logging.debug(f"Load contract from file: {p.resolve()}")
         c._new = False
         c._modify = False
         return c
