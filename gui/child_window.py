@@ -9,11 +9,15 @@ class ChildWindow():
         return True
         # return __class__.count == 0
 
+    def error_report(self, *error):
+        self.master.error_report(error)
+
     def __init__(self, master, width=1260, height=900, minsize_x=400, minsize_y=400, resizable=False, title="合同生成器"
                  , **data):
         if self.check():
             # __class__.count += 1
             super().__init__()
+            self.master = master
             self.window = tkinter.Toplevel(master=master)
             self.window.option_add("*Font", "黑体 15")
             self.window.title(title)
@@ -28,12 +32,14 @@ class ChildWindow():
             self.window.protocol("WM_DELETE_WINDOW", self.close)
             self.data = data
             self.window.grab_set()
+            self.window.report_callback_exception = self.error_report
             self.gui_init(self.window)
             # self.window.mainloop()
 
     def close(self):
         # __class__.count -= 1
         self.window.destroy()
+        self.master = None
 
     def gui_init(self, window):
         pass

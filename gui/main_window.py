@@ -15,6 +15,12 @@ from product import Product
 
 
 class Window:
+    def error_report(self, error):
+        pass
+
+    def root_error_call_back(self, *error):
+        self.error_report(error)
+
     def __init__(self, width=1260, height=900):
         self.window = tkinter.Tk()
         self.window.option_add("*Font", "黑体 15")
@@ -26,6 +32,7 @@ class Window:
         self.window.configure(bg="#323232")
         self.window.update()
         self.gui_init(self.window)
+        self.window.report_callback_exception = self.root_error_call_back
         self.window.mainloop()
 
     def gui_init(self, window):
