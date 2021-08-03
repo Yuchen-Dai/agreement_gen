@@ -13,6 +13,7 @@ from contractLoader import ContractLoader
 from dataLoader import DataLoader
 import logging
 
+
 class Window:
     def error_report(self, error):
         tkinter.messagebox.showerror(title='错误', message='程序运行出现异常，请联系公司总经理。')
@@ -127,7 +128,8 @@ class MainWindow(Window):
         # 右侧布局代码
         agm_number_label = tkinter.Label(info_frame, bg="#323232", fg="#A0A0A0", text="合同编号:")
         agm_number_entry = tkinter.Text(info_frame, bg="#323232", fg="#A0A0A0", highlightbackground="#323232",
-                                        highlightcolor="#323232", bd=0, highlightthickness=1, insertbackground="#323232",
+                                        highlightcolor="#323232", bd=0, highlightthickness=1,
+                                        insertbackground="#323232",
                                         height=1, width=15, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
         agm_number_entry.insert("0.0", "<自动>")
         agm_number_entry.config(state="disabled")
@@ -172,11 +174,13 @@ class MainWindow(Window):
 
         agm_supplier_label = tkinter.Label(info_frame, bg="#323232", fg="#A0A0A0", text="供方:")
         agm_supplier_entry = tkinter.Text(info_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
-                                          highlightcolor="#649AFA", bd=0, highlightthickness=1, insertbackground="#A0A0A0",
+                                          highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                          insertbackground="#A0A0A0",
                                           height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
         agm_demander_label = tkinter.Label(info_frame, bg="#323232", fg="#A0A0A0", text="需方:")
         agm_demander_entry = tkinter.Text(info_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
-                                          highlightcolor="#649AFA", bd=0, highlightthickness=1, insertbackground="#A0A0A0",
+                                          highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                          insertbackground="#A0A0A0",
                                           height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
         # tkinter.Frame(info_frame, height=25, bg="#323232").grid(column=0, row=0)
         agm_number_label.grid(column=0, row=0, pady=5, sticky=tkinter.W)
@@ -229,13 +233,15 @@ class MainWindow(Window):
 
         label_list = ["签订地点", "品牌", "交(提)货时间", "交(提)货地点", "结算方式\n及期限", "备注", "其他约定事情\n①",
                       "其他约定事情\n②", "其他约定事情\n③", "其他约定事情\n④", "其他约定事情\n⑤", "其他约定事情\n⑥"]
-        setting_list = [(1, 15), (1, 15), (1, 15), (1, 27), (3, 27), (1, 27), (5, 27), (5, 27), (5, 27), (5, 27), (5, 27), (5, 27)]
+        setting_list = [(1, 15), (1, 15), (1, 15), (1, 27), (3, 27), (1, 27), (5, 27), (5, 27), (5, 27), (5, 27),
+                        (5, 27), (5, 27)]
         for i in range(len(label_list)):
             require_label = tkinter.Label(info_inner_detail, bg="#323232", fg="#909090", text=label_list[i],
                                           font="黑体 13", justify="left")
             require_entry = tkinter.Text(info_inner_detail, bg="#464646", fg="#909090", highlightbackground="#A0A0A0",
                                          highlightcolor="#649AFA", bd=0, highlightthickness=1,
-                                         insertbackground="#A0A0A0", height=setting_list[i][0], width=setting_list[i][1],
+                                         insertbackground="#A0A0A0", height=setting_list[i][0],
+                                         width=setting_list[i][1],
                                          wrap="char", undo=True, maxundo=-1, padx=10, pady=5,
                                          font="宋体 13")
             require_label.grid(row=i, column=0, sticky=tkinter.W + tkinter.N, ipadx=10, pady=5)
@@ -285,7 +291,8 @@ class MainWindow(Window):
         for i in range(len(label_list)):
             require_label = tkinter.Label(supplier_inner_detail, bg="#323232", fg="#909090", text=label_list[i],
                                           font="黑体 13", justify="left")
-            require_entry = tkinter.Text(supplier_inner_detail, bg="#464646", fg="#909090", highlightbackground="#A0A0A0",
+            require_entry = tkinter.Text(supplier_inner_detail, bg="#464646", fg="#909090",
+                                         highlightbackground="#A0A0A0",
                                          highlightcolor="#649AFA", bd=0, highlightthickness=1,
                                          insertbackground="#A0A0A0", height=setting_list[i][0],
                                          width=setting_list[i][1],
@@ -353,7 +360,7 @@ class MainWindow(Window):
         # menu_name = ["合同模板", "最近打开", "全部", "收藏"]
         # menu_icon = ["tem_icon.png", "recent_icon.png", "all_icon.png", "collect_icon.png"]
         menu_name = ["合同模板", "合同"]
-        menu_icon = ["tem_icon.png",  "all_icon.png"]
+        menu_icon = ["tem_icon.png", "all_icon.png"]
         length = 0
         for i in range(len(menu_name)):
             now_length = len(menu_name[i]) * 15 + 90
@@ -517,12 +524,14 @@ class MainWindow(Window):
             def add_con():
                 self.new_built()
                 self.item_menu.delete(0, 10)
+
             self.item_menu.delete(0, 10)
             self.item_menu.add_command(label="创建合同", command=add_con)
             self.item_menu.post(pos[0], pos[1])
         elif file_type == "folder_back":
             def folder_back():
                 self.back_folder()
+
             self.item_menu.delete(0, 10)
             self.item_menu.add_command(label="返回上一级目录", command=folder_back)
             self.item_menu.post(pos[0], pos[1])
@@ -706,7 +715,8 @@ class MainWindow(Window):
     def create_contract(self, data):
         return self.contract_loader.create_contract(data[0], data[1], data[2], data[3], data[4], data[5], data[6],
                                                     data[7], data[8], data[9], data[10], data[11], data[12], data[13],
-                                                    data[14], data[15], data[16], data[17], data[18], data[19], data[20],
+                                                    data[14], data[15], data[16], data[17], data[18], data[19],
+                                                    data[20],
                                                     data[21])
 
     def info_change(self, evt):
@@ -776,16 +786,19 @@ class MainWindow(Window):
     def get_menu_enter(self, menu_id=0):
         def func(evt):
             self.menu_enter(menu_id)
+
         return func
 
     def get_menu_leave(self, menu_id=0):
         def func(evt):
             self.menu_leave(menu_id)
+
         return func
 
     def get_menu_click(self, menu_id=0):
         def func(evt):
             self.menu_click(menu_id)
+
         return func
 
     def menu_enter(self, menu_id):

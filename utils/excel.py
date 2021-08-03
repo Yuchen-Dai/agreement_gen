@@ -18,7 +18,7 @@ class Excel:
         #     logging.info(f'No existing output directory, create: {p.resolve()}')
         #     return 1
         #     p.mkdir(parents=True)
-        workbook = xlsxwriter.Workbook(file_dir)
+        workbook = xlsxwriter.Workbook(p)
 
         right_bottom = workbook.add_format({'right': border, 'bottom': border, 'align': 'left', 'valign': 'vcenter'})
         left_bottom = workbook.add_format({'left': border, 'bottom': border, 'align': 'left', 'valign': 'vcenter'})

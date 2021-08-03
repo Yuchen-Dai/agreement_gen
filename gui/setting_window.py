@@ -26,6 +26,7 @@ product_type = {'框架断路器': ['RMW1', 'RMW2', 'ME', 'RMW3'],
 class SettingWindow(ChildWindow):
     setting_count = 0
     settings = None
+    settings_modify = None
 
     @staticmethod
     def check():
@@ -34,10 +35,14 @@ class SettingWindow(ChildWindow):
     def close(self):
         __class__.setting_count -= 1
         logging_level = str(self.data["logging_level"].get())
-        __class__.settings["logging_level"] = logging_level
-        setting_path = Path('setting.yaml')
-        with setting_path.open('w') as f:
-            f.write('\n'.join([f'{i}:{v}'for i, v in __class__.settings.items()]))
+        if logging_level != __class__.settings["logging_level"]:
+            __class__.settings["logging_level"] = logging_level
+            __class__.settings_modify = True
+        if __class__.settings_modify:
+            __class__.settings_modify = False
+            setting_path = Path('setting.yaml')
+            with setting_path.open('w') as f:
+                f.write('\n'.join([f'{i}:{v}'for i, v in __class__.settings.items()]))
         if self.data.get("command") is not None:
             self.data["command"]()
         self.data["data_loader"].save()
@@ -46,6 +51,7 @@ class SettingWindow(ChildWindow):
     def gui_init(self, window):
         setting_path = Path('setting.yaml')
         if not __class__.settings:
+            __class__.settings_modify = False
             __class__.settings = {}
             if setting_path.exists():
                 with setting_path.open('r') as f:
@@ -58,6 +64,7 @@ class SettingWindow(ChildWindow):
             logging_level.set(int(__class__.settings["logging_level"]))
         else:
             logging_level.set(2)
+            __class__.settings["logging_level"] = '2'
 
         __class__.setting_count += 1
         self.data["data_loader"].refresh()
