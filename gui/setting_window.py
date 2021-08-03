@@ -9,6 +9,7 @@ from excel import Excel
 from contract import Contract
 from exception import *
 from product import Product
+from pathlib import Path
 
 product_type = {'框架断路器': ['RMW1', 'RMW2', 'ME', 'RMW3'],
                 '塑壳断路器': ['RMM1', 'RMM2', 'RMM3', 'RMM1L', 'RMM2L', 'RMM3L', 'RMM3D'],
@@ -24,6 +25,7 @@ product_type = {'框架断路器': ['RMW1', 'RMW2', 'ME', 'RMW3'],
 
 class SettingWindow(ChildWindow):
     setting_count = 0
+    settings = None
 
     @staticmethod
     def check():
@@ -31,12 +33,32 @@ class SettingWindow(ChildWindow):
 
     def close(self):
         __class__.setting_count -= 1
+        logging_level = str(self.data["logging_level"].get())
+        __class__.settings["logging_level"] = logging_level
+        setting_path = Path('setting.yaml')
+        with setting_path.open('w') as f:
+            f.write('\n'.join([f'{i}:{v}'for i, v in __class__.settings.items()]))
         if self.data.get("command") is not None:
             self.data["command"]()
         self.data["data_loader"].save()
         super().close()
 
     def gui_init(self, window):
+        setting_path = Path('setting.yaml')
+        if not __class__.settings:
+            __class__.settings = {}
+            if setting_path.exists():
+                with setting_path.open('r') as f:
+                    for line in f.readlines():
+                        setting = line.strip().split(':')
+                        __class__.settings[setting[0]] = setting[1]
+        logging_level = tkinter.IntVar()
+        self.data["logging_level"] = logging_level
+        if 'logging_level' in __class__.settings:
+            logging_level.set(int(__class__.settings["logging_level"]))
+        else:
+            logging_level.set(2)
+
         __class__.setting_count += 1
         self.data["data_loader"].refresh()
         menu_frame = tkinter.Frame(self.window, bg="#262626", bd=0)
@@ -79,9 +101,18 @@ class SettingWindow(ChildWindow):
 
         panel_list = dict()
         base_setting_frame = tkinter.Frame(self.window, bg="#323232", bd=0, padx=20, pady=20)
-        base_setting_label = tkinter.Label(base_setting_frame, text="无可用设置", font="黑体 25", fg="#646464",
-                                           bg="#323232")
-        base_setting_label.pack()
+        base_line01 = tkinter.Frame(base_setting_frame, bg="#464646", padx=20, pady=10)
+        logging_level_label = tkinter.Label(base_line01, text="日志等级:", fg="#A0A0A0", bg="#464646")
+        base_line01.pack(side="top", fill="x")
+        logging_level_label.pack(side="left")
+        self.data["logging_level_rb"] = list()
+        choice_list = [("Debug", 0), ("Info", 1), ("Warning", 2), ("Error", 3), ("Fatal", 4)]
+        for i in choice_list:
+            choice = tkinter.Radiobutton(base_line01, text=i[0], value=i[1], variable=logging_level, bg="#464646",
+                                         fg="#9A9A9A", selectcolor="#262626", activebackground="#464646",
+                                         activeforeground="#9A9A9A")
+            choice.pack(side="left")
+            self.data["logging_level_rb"].append(choice)
         panel_list["base_setting"] = base_setting_frame
 
         product_manager_frame = tkinter.Frame(self.window, bg="#323232", bd=0, padx=20, pady=20)
