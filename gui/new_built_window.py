@@ -326,8 +326,7 @@ class NewBuiltWindow(ChildWindow):
             others_c = list()
             for i2 in range(6):
                 content = self.info_list["info_detail_require%s" % (6 + i2)].get("1.0", "end-1c")
-                if content != "":
-                    others_c.append(content)
+                others_c.append(content)
             supplier_info = list()
             for i2 in range(5):
                 supplier_info.append(self.info_list["supplier_detail_require%s" % i2].get("1.0", "end-1c"))

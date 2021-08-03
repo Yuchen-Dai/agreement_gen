@@ -650,11 +650,14 @@ class MainWindow(Window):
                     self.info_menu.place(relx=1, x=-498, rely=1, y=-70, width=510, height=75)
                     self.info_canvas.place(relx=1, x=-500, y=67, width=500, height=-64, relheight=1)
                     if i["type"] == "contract":
-                        def create_contract(evt):
-                            self.open_contract(i["agm_code"])
+                        def get_open_function(number):
+
+                            def function(evt):
+                                self.open_contract(number)
+                            return function
 
                         self.info_list["info_menu_create"].unbind("<Button-1>")
-                        self.info_list["info_menu_create"].bind("<Button-1>", create_contract)
+                        self.info_list["info_menu_create"].bind("<Button-1>", get_open_function(i["agm_code"]))
                         self.info_list["info_menu_create"].config(text="打开")
                         self.info_list["agm_time_year"].config(state="normal", highlightbackground="#A0A0A0",
                                                                highlightcolor="#A0A0A0")
@@ -744,9 +747,6 @@ class MainWindow(Window):
         others.append(self.info_list["info_detail_require9"].get("1.0", "end-1c"))
         others.append(self.info_list["info_detail_require10"].get("1.0", "end-1c"))
         others.append(self.info_list["info_detail_require11"].get("1.0", "end-1c"))
-        for i in others:
-            if i == "":
-                others.remove(i)
 
         supplier_location = self.info_list["supplier_detail_require0"].get("1.0", "end-1c")
         supplier_bank = self.info_list["supplier_detail_require1"].get("1.0", "end-1c")
