@@ -404,13 +404,8 @@ class MainWindow(Window):
 
         # menu_name = ["合同模板", "最近打开", "全部", "收藏"]
         # menu_icon = ["tem_icon.png", "recent_icon.png", "all_icon.png", "collect_icon.png"]
-<<<<<<< Updated upstream
-        menu_name = ["合同模板", "合同"]
-        menu_icon = ["tem_icon.png", "all_icon.png"]
-=======
         menu_name = ["合同模板", "合同", "报价单"]
         menu_icon = ["tem_icon.png",  "all_icon.png", "price_icon.png"]
->>>>>>> Stashed changes
         length = 0
         for i in range(len(menu_name)):
             now_length = len(menu_name[i]) * 15 + 90
