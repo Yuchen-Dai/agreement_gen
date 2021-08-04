@@ -13,7 +13,8 @@ class QuoteLoader:
         self.data_dir = data_dir
 
         # load quotes
-        quotes_path = Path(self.data_dir)/ 'quote'
+        quotes_path = Path(self.data_dir) / 'quote'
+
         if quotes_path.exists():
             for f in quotes_path.iterdir():
                 qid = f.stem
@@ -197,3 +198,10 @@ class QuoteLoader:
         """ Get today's date: (year, month, day)"""
         today = datetime.date.today()
         return str(today.year), str(today.month), str(today.day)
+
+
+if __name__ == '__main__':
+    import os
+    os.chdir('../')
+    ql = QuoteLoader()
+    ql.get_quote_list(('2021','08',None))

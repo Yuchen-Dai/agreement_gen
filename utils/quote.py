@@ -2,8 +2,7 @@ import datetime
 import logging
 import pickle
 from pathlib import Path
-
-from exception import IllegalDate
+from exception import IllegalDate, FileExceed
 
 
 class Quote:
@@ -38,10 +37,11 @@ class Quote:
             pre_six = '{}{:0>2d}{:0>2d}'.format(str(date[0])[-2:], int(date[1]), int(date[2]))
             pre_four = pre_six[:4]
             biggest = 1
-            this_month = [i for i in p.iterdir() if i.name.startswith(pre_four)]
+            this_month = [i for i in p.iterdir() if i.stem.startswith(pre_four)]
             for i in this_month:
-                number = int(i.name[-4:-1])
-                if number > biggest:
+                number = int(i.stem[-4:-1])
+                print(i.stem)
+                if number >= biggest:
                     biggest = number + 1
             if biggest > 999:
                 raise FileExceed(f'Contracts for this month {pre_six} exceed 100.')
@@ -63,6 +63,9 @@ class Quote:
         assert p.exists(), f"No existing file: {p}"
         logging.debug(f"Delete quote: {p.resolve()}")
         p.unlink()
+
+    def get_name(self):
+        return self.name if self.name else self.qid
 
     @staticmethod
     def load(qid, data_dir):
