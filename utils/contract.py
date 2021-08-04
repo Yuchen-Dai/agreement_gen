@@ -164,7 +164,9 @@ class Contract:
         return f'双方协商解决，协商不成可向供方所在地人民法院提起诉讼。'
 
     def get_qita(self):  # 十三、其它约定事情
-        return self.others
+        for i in self.others:
+            if i:
+                yield i
 
     def set_template(self, set_t: bool):
         self._is_template = set_t

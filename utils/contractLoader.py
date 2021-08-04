@@ -1,7 +1,7 @@
 from contract import Contract
 from pathlib import Path
 import datetime
-
+import logging
 from excel import Excel
 from exception import FileExceed, IllegalContractNumber, ContractNumberAlreadyExist, IllegalDate
 import pickle
@@ -106,7 +106,7 @@ class ContractLoader:
         :return: 1: Fail 0: Success
         """
         e = Excel(self.contracts[contract_cid])
-        e.run(output_type=output_type, file_dir=file_dir)
+        e.run(output_type=1, file_dir=file_dir)
 
     def save_contract(self, cid):
         """
@@ -128,7 +128,7 @@ class ContractLoader:
                  2：Discount should left blank or in format of 0.xxx
                  3: Product already in table
         """
-        if not all([i in '0123456789' for i in quantity]):
+        if not all([i in '0123456789' for i in quantity]) or not quantity:
             return 1
         if not re.match(r"^((0?\.[0-9]+)|1)?$", discount):
             return 2
@@ -449,7 +449,7 @@ class ContractLoader:
             last_two = '{:0>2d}'.format(int(last_two))
             if len(last_two) != 2 or last_two == '00':
                 raise IllegalContractNumber
-            if last_two in [i[-2:] for i in self.contracts]:
+            if last_two in [i[-2:] for i in self.contracts if i[:4] == pre_six[:4]]:
                 raise ContractNumberAlreadyExist
         return pre_six + last_two
 
@@ -483,7 +483,6 @@ def isLegalCid(cid):
 
 if __name__ == '__main__':
     import os
-    import logging
 
     os.chdir('../')
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',

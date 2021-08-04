@@ -11,9 +11,10 @@ class Excel:
     def __init__(self, contract):
         self.c = contract
 
-    def run(self, file_dir, output_type):  # todo 类型2报价单需要添加
+    def run(self, file_dir='Output/Expenses', output_type=None):  # todo 类型2报价单需要添加
         border = 1
-        p = Path(file_dir+".xlsx")
+        if not file_dir.endswith('.xlsx'):
+            p = Path(file_dir + ".xlsx")
         # if not p.exists():
         #     logging.info(f'No existing output directory, create: {p.resolve()}')
         #     return 1
@@ -24,6 +25,7 @@ class Excel:
         left_bottom = workbook.add_format({'left': border, 'bottom': border, 'align': 'left', 'valign': 'vcenter'})
         left = workbook.add_format({'left': border, 'align': 'left', 'valign': 'vcenter'})
         right = workbook.add_format({'right': border, 'align': 'left', 'valign': 'vcenter'})
+        vcenter = workbook.add_format({'valign': 'vcenter'})
 
         merge_format0 = workbook.add_format({
             'bold': True,
@@ -59,18 +61,18 @@ class Excel:
 
         merge_format4_bold = workbook.add_format({
             'bold': True,
+            'align': 'left',
             'valign': 'vcenter',
             'font': '宋体',  # 字体
             'font_size': 11,
         })
-        merge_format4_bold.set_text_wrap()
 
         merge_format4 = workbook.add_format({
-            'font': '宋体',  # 字体
+            'font': '宋体',
+            'align': 'left',
             'valign': 'vcenter',
             'font_size': 11,
         })
-        merge_format4.set_text_wrap()
 
         merge_format5 = workbook.add_format({
             'align': 'left',  # 水平居中
@@ -136,13 +138,14 @@ class Excel:
 
         # sheet1
         sheet1 = workbook.add_worksheet('销售合同')
+        sheet1.set_margins()
         sheet1.set_row(0, 30)
-        sheet1.set_column(0, 0, 5)
-        sheet1.set_column(1, 1, 25)
-        sheet1.set_column(2, 2, 30)
-        sheet1.set_column(3, 5, 10)
-        sheet1.set_column(6, 6, 15)
-        sheet1.set_column(7, 7, 27)
+        sheet1.set_column(0, 0, 4)
+        sheet1.set_column(1, 1, 15)
+        sheet1.set_column(2, 2, 25)
+        sheet1.set_column(3, 5, 5)
+        sheet1.set_column(6, 6, 10)
+        sheet1.set_column(7, 7, 14)
 
         sheet1.merge_range(0, 0, 0, 7, '购销合同', merge_format0)
         write_nonbold_bold(sheet1, 2, 0, 2, 5, merge_format4, merge_format4_bold, '供方：', self.c.get_supplier())
@@ -167,38 +170,38 @@ class Excel:
         sheet1.write(row, 6, self.c.get_total(), number_format2_bold)
         sheet1.write(row, 7, '含13%增值税', format1_bold)
         write_nonbold_bold(sheet1, row + 1, 0, row + 1, 7, merge_format4, merge_format4_bold,
-                           '二、质量要求技术标准：', self.c.get_zhiliang())
+                           '二、质量要求技术标准：', self.c.get_zhiliang(), vcenter)
         write_nonbold_bold(sheet1, row + 2, 0, row + 2, 7, merge_format4, merge_format4_bold,
-                           '三、交（提）货时间及地点方式：', self.c.get_jiaohuo())
+                           '三、交（提）货时间及地点方式：', self.c.get_jiaohuo(), vcenter)
         write_nonbold_bold(sheet1, row + 3, 0, row + 3, 7, merge_format4, merge_format4_bold,
-                           '四、运输方式及到达站点和费用负担：', self.c.get_yunshu())
+                           '四、运输方式及到达站点和费用负担：', self.c.get_yunshu(), vcenter)
         write_nonbold_bold(sheet1, row + 4, 0, row + 4, 7, merge_format4, merge_format4_bold,
-                           '五、合理损耗及计算方法：', self.c.get_heli())
+                           '五、合理损耗及计算方法：', self.c.get_heli(), vcenter)
         write_nonbold_bold(sheet1, row + 5, 0, row + 5, 7, merge_format4, merge_format4_bold,
-                           '六、包装标准，包装物的供应及回收：', self.c.get_baozhuang())
+                           '六、包装标准，包装物的供应及回收：', self.c.get_baozhuang(), vcenter)
         write_nonbold_bold(sheet1, row + 6, 0, row + 6, 7, merge_format4, merge_format4_bold,
-                           '七、验收标准及提出异议时间：', self.c.get_yanshou())
-        sheet1.merge_range(row + 7, 0, row + 7, 7, '八、标的物所有权自供方收到货款之日起转移给需方，在需方未履行（支付款项/100%货款）义务前，',
-                           merge_format4)
+                           '七、验收标准及提出异议时间：', self.c.get_yanshou(), vcenter)
+        sheet1.merge_range(row + 7, 0, row + 7, 7, '八、标的物所有权自供方收到货款之日起转移给需方，在需方未履行（支付款项/100%货款）'
+                                                   '义务前，', merge_format4)
         sheet1.merge_range(row + 8, 0, row + 8, 7, '    标的物仍属于供方所有，标的物毁损，灭失等风险自交付时起由需方承担。',
                            merge_format4)
         write_nonbold_bold(sheet1, row + 9, 0, row + 9, 7, merge_format4, merge_format4_bold,
-                           '九、结算方式及期限：', self.c.get_jiesuan())
+                           '九、结算方式及期限：', self.c.get_jiesuan(), vcenter)
         write_nonbold_bold(sheet1, row + 10, 0, row + 10, 7, merge_format4, merge_format4_bold,
-                           '十、如需提供担保，另立合同担保书，作为本合同附件：', self.c.get_ruxu())
+                           '十、如需提供担保，另立合同担保书，作为本合同附件：', self.c.get_ruxu(), vcenter)
         write_nonbold_bold(sheet1, row + 11, 0, row + 11, 7, merge_format4, merge_format4_bold,
-                           '十一、违约责任：', self.c.get_weiyue())
+                           '十一、违约责任：', self.c.get_weiyue(), vcenter)
         write_nonbold_bold(sheet1, row + 12, 0, row + 12, 7, merge_format4, merge_format4_bold,
-                           '十二、解决合同纠纷的方式：', self.c.get_jiejue())
+                           '十二、解决合同纠纷的方式：', self.c.get_jiejue(), vcenter)
         row += 13
         flag = True
         for i in self.c.get_qita():
             if flag:
                 write_nonbold_bold(sheet1, row, 0, row, 7, merge_format4, merge_format4_bold,
-                                   '十三、其它约定事情:', i)
+                                   '十三、其它约定事情:', i, vcenter)
                 flag = False
             else:
-                sheet1.merge_range(row, 0, row, 7, f'                 {i}', merge_format4_bold)
+                sheet1.merge_range(row, 0, row, 7, f'                {i}', merge_format4_bold)
             row += 1
 
         row += 1
@@ -243,11 +246,15 @@ class Excel:
 
         # sheet2
         sheet2 = workbook.add_worksheet('合同清单')
+        sheet2.set_margins()
         sheet2.set_row(0, 30)
-        sheet2.set_column(0, 0, 5)
+        sheet2.set_column(0, 0, 4)
         sheet2.set_column(1, 1, 15)
-        sheet2.set_column(2, 2, 30)
-        sheet2.set_column(3, 10, 10)
+        sheet2.set_column(2, 2, 22)
+        sheet2.set_column(3, 4, 4)
+        sheet2.set_column(5, 7, 0)
+        sheet2.set_column(8, 9, 10)
+        sheet2.set_column(10, 10, 14)
 
         sheet2.merge_range(0, 0, 0, 10, '购销合同清单', merge_format1)
         sheet2.merge_range(1, 0, 1, 10, f'合同编号：{self.c.get_contract_num()}', merge_format2)
@@ -275,15 +282,14 @@ class Excel:
         sheet2.write_formula(row, col + 4, f'=SUM(E4:E{row})', format1_bold)
         sheet2.write_formula(row, col + 9, f'=SUM(J4:J{row})', number_format2_bold)
         sheet2.merge_range(row + 1, 0, row + 1, 10, f'合计人民币金额（大写）：{self.c.get_total_daxie()}', merge_format3)
-        write_nonbold_bold(sheet2, row + 3, 0, row + 3, 3, merge_format4, merge_format4_bold, '单位名称（章）：',
-                           self.c.get_supplier())
-        write_nonbold_bold(sheet2, row + 3, 4, row + 3, 10, merge_format4, merge_format4_bold, '单位名称（章）：',
-                           self.c.get_buyer())
-        sheet2.merge_range(row + 5, 0, row + 5, 3, '日期：', merge_format4)
-        sheet2.merge_range(row + 5, 4, row + 5, 10, '日期：', merge_format4)
+        write_nonbold_bold(sheet2, row + 3, 0, row + 3, 2, merge_format4, merge_format4_bold, '单位名称（章）：',
+                           self.c.get_supplier(), vcenter)
+        write_nonbold_bold(sheet2, row + 3, 3, row + 3, 10, merge_format4, merge_format4_bold, '单位名称（章）：',
+                           self.c.get_buyer(), vcenter)
+        sheet2.merge_range(row + 5, 0, row + 5, 2, '日期：', merge_format4)
+        sheet2.merge_range(row + 5, 3, row + 5, 10, '日期：', merge_format4)
         sheet2.insert_image(row, 1, 'img\\stamp1.png')
-        for i in range(2, row + 7):
-            sheet2.set_row(i, 20)
+
         workbook.close()
 
 
@@ -311,9 +317,10 @@ if __name__ == '__main__':
 
     c = Contract(supplier='广州市森源电气有限公司', buyer='中山市湘华电力科技有限公司', brand='广州人民',
                  sign_date=('2021', '7', '23'), location='广州',
-                 contract_number = Contract.generate_contract_num(Contract.get_today()))
-    c.add_item(dl[1], 20, 0.8)
-    c.add_item(dl[0], 10, 0.9)
+                 contract_number='00000009')
+    c.others = ['123333', '22333333']
+    c.add_item(dl[1], 20, 0.8, '')
+    c.add_item(dl[0], 10, 0.9, '')
 
     test = Excel(c)
     test.run()

@@ -44,7 +44,7 @@ class DataLoader:
             del self.data['products'][pid]
             self._modify = True
 
-    def save(self, data_dir='data'):
+    def save(self, data_dir='data'):  # todo 无法删除product，需要修复
         p = Path(data_dir)
         if not p.exists():
             logging.info(f"Create data directory: {p.resolve}")
