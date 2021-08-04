@@ -1,17 +1,33 @@
 from excel import Excel
+from quote import Quote
+from pathlib import Path
 import re
+import datetime
+import logging
+
 
 
 class QuoteLoader:
-    def __init__(self, data_dir='data/quotes'):
+    def __init__(self, data_dir='data'):
         self.quotes = {}
         self.data_dir = data_dir
 
         # load quotes
-        pass
+        quotes_path = Path(self.data_dir)/ 'quote'
+        if quotes_path.exists():
+            for f in quotes_path.iterdir():
+                qid = f.stem
+                if f.suffix == '.data':
+                    self.quotes[qid] = Quote.load(qid, self.data_dir)
 
     def refresh(self):
-        pass
+        self.quotes = {}
+        quotes_path = Path(self.data_dir) / 'quote'
+        if quotes_path.exists():
+            for f in quotes_path.iterdir():
+                qid = f.stem
+                if f.suffix == '.data':
+                    self.quotes[qid] = Quote.load(qid, self.data_dir)
 
     def export_excel(self, qid, output_type, file_dir):
         """
@@ -92,7 +108,13 @@ class QuoteLoader:
         """
         year = date[0]
         month = date[1]
-        pass  # todo
+        if not year:
+            return list({('00000000', f'20{i[:2]}') for i in self.quotes})
+        elif not month:
+            return list({('00000000', f'{i[2:4]}') for i in self.quotes if i[:2] == year[-2:]})
+        else:
+            return [(i, v.get_name()) for i, v in self.quotes.items()
+                    if i[:2] == year[-2:] and i[2:4] == '{:0>2d}'.format(int(month))]
 
     def create_quote(self, project_name, date, buyer_name, buyer_contact, buyer_tel,
                      quote_contact, quote_tel, qq, name):
@@ -108,11 +130,17 @@ class QuoteLoader:
         :param name:
         :return:
         """
-        pass
+        q = Quote(project_name=project_name, date=date, buyer_name=buyer_name, buyer_contact=buyer_contact,
+                  buyer_tel=buyer_tel, quote_contact=quote_contact, quote_tel=quote_tel, qq=qq, name=name)
+        q.save(self.data_dir)
+        self.quotes[q.get_qid()] = q
+        logging.info(f"Create contract: {q.get_qid()}")
+        return q.get_qid()
 
-    def overrider_quote(self, project_name, date, buyer_name, buyer_contact, buyer_tel,
-                     quote_contact, quote_tel, qq):
+    def overrider_quote(self, qid, project_name, date, buyer_name, buyer_contact, buyer_tel,
+                        quote_contact, quote_tel, qq):
         """
+        :param qid:
         :param project_name:
         :param date: (year, month, day)
         :param buyer_name:
@@ -123,16 +151,28 @@ class QuoteLoader:
         :param qq:
         :return:
         """
-        pass
+        if qid in self.quotes:
+            q = self.quotes[qid]
+            q.project_name = project_name
+            q.date = date
+            q.buyer_name = buyer_name
+            q.buyer_contact = buyer_contact
+            q.buyer_tel = buyer_tel
+            q.quote_contact = quote_contact
+            q.quote_tel = quote_tel
+            q.qq = qq
+            q.save(self.data_dir)
 
     def get_quote(self, qid):
         """
         :param qid:
         :return: project_name, date, buyer_name, buyer_contact, buyer_tel,
-                     quote_contact, quote_tel, qq
+                     quote_contact, quote_tel, qq, name, qid
         """
-        pass
-        return '',('','',''),'','','','','','',''
+        if qid in self.quotes:
+            q = self.quotes[qid]
+            return q.project_name, q.date, q.buyer_name, q.buyer_contact, q.buyer_tel, \
+                   q.quote_contact, q.quote_tel, q.qq, q.name, qid
 
     def rename(self, qid, name):
         """
@@ -140,14 +180,17 @@ class QuoteLoader:
         :param name:
         :return:
         """
-        pass
+        if qid in self.quotes:
+            self.quotes[qid].rename(name)
 
     def del_quote(self, qid):
         """
         :param qid:
         :return:
         """
-        pass
+        if qid in self.quotes:
+            self.quotes[qid].delete(self.data_dir)
+            del self.quotes[qid]
 
     @staticmethod
     def get_today():
