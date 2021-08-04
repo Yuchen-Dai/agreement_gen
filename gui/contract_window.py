@@ -44,45 +44,6 @@ class ContractWindow(ChildWindow):
 
     def gui_init(self, window):
         __class__.contract_window_count += 1
-        try:
-            combostyle = tkinter.ttk.Style()
-            combostyle.theme_create('combostyle', parent='clam',
-                                    settings={'TCombobox':
-                                                  {'configure':
-                                                       {'selectbackground': '#646464',
-                                                        'fieldbackground': '#646464',
-                                                        'background': '#646464',
-                                                        'foreground': "#A0A0A0",
-                                                        'arrowsize': 15,
-                                                        'lightcolor': "#646464",
-                                                        'arrowcolor': "#A0A0A0",
-                                                        'selectforeground': "#929292",
-                                                        'padding': 6
-                                                        }}}
-                                    )
-            combostyle.theme_use('combostyle')
-
-            style = tkinter.ttk.Style()
-            style.element_create("Custom.Treeheading.border", "from", "default")
-            style.layout("Custom.Treeview.Heading", [
-                ("Custom.Treeheading.cell", {'sticky': 'nswe'}),
-                ("Custom.Treeheading.border", {'sticky': 'nswe', 'children': [
-                    ("Custom.Treeheading.padding", {'sticky': 'nswe', 'children': [
-                        ("Custom.Treeheading.image", {'side': 'right', 'sticky': ''}),
-                        ("Custom.Treeheading.text", {'sticky': 'we'})
-                    ]})
-                ]}),
-            ])
-            head_font = ('黑体', '12')
-            content_font = ('宋体', '12')
-            style.configure("Custom.Treeview.Heading",
-                            background="#646464", foreground="#E4E4E4", relief="flat", font=head_font)
-            style.configure("Custom.Treeview", background="#323232", foreground="#A0A0A0", fieldbackground="#323232",
-                            highlightthickness=0, font=content_font)
-            style.map("Custom.Treeview.Heading",
-                      relief=[('active', 'groove'), ('pressed', 'sunken')])
-        except BaseException:
-            print("主题已添加")
 
         widget_list = dict()
         self.data["widget_list"] = widget_list

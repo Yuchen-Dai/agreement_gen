@@ -1,6 +1,7 @@
 import tkinter
 from child_window import ChildWindow
 from warning_window import WarningWindow
+from quote_choose_window import QuoteChooseWindow
 from assembly import CustomText
 from exception import *
 from tkinter import font
@@ -41,6 +42,19 @@ class NewBuiltWindow(ChildWindow):
         cancel_button.configure(font=cancel_font)
         sure_button.pack(side="right", padx=20)
         cancel_button.pack(side="left", padx=20)
+
+        quote_frame = tkinter.Frame(menu_frame, bg="#323232")
+        quote_frame.pack(side="bottom", fill="both", expand=1)
+        quote_choose_button = tkinter.Label(quote_frame, text="<选择报价单>", bg="#323232", fg="#649AFA", cursor="hand2")
+        quote_choose_button.pack(side="bottom", expand=1)
+
+        def quote_recall(qid):
+            print(f"qid:{qid}")
+
+        def choose_quote(evt):
+            quote_window = QuoteChooseWindow(master=window, command=quote_recall)
+
+        quote_choose_button.bind("<Button-1>", choose_quote)
 
         warning_frame = tkinter.Frame(window, bg="#262626")
         tkinter.Label(warning_frame, text="请先确认所有信息无误", font="黑体 13", fg="#A0A0A0", bg="#262626").pack(expand=1)

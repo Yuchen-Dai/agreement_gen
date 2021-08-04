@@ -11,6 +11,7 @@ from rename_window import RenameWindow
 from contract_window import ContractWindow
 from contractLoader import ContractLoader
 from dataLoader import DataLoader
+from exception import *
 import logging
 
 
@@ -34,7 +35,7 @@ class Window:
         self.window.configure(bg="#323232")
         self.window.update()
         self.gui_init(self.window)
-        self.window.report_callback_exception = self.root_error_call_back
+        # self.window.report_callback_exception = self.root_error_call_back
         self.window.mainloop()
 
     def gui_init(self, window):
@@ -47,7 +48,9 @@ class MainWindow(Window):
         self.tem_canvas = None
         self.info_frame = None
         self.info_canvas = None
+        self.quote_frame = None
         self.info_menu = None
+        self.info_mode = None
         self.tem_info = None
         self.chosen_file_id = None
         self.setting_button = None
@@ -55,7 +58,9 @@ class MainWindow(Window):
         self.item_menu = None
         self.chosen_contract = None
         self.tem_canvas_space = 0
-        self.now_path = list()
+        self.contract_path = list()
+        self.quote_path = list()
+        self.folder_type = None
         self.file_list = list()
         self.menu_list = list()
         self.info_list = dict()
@@ -67,6 +72,46 @@ class MainWindow(Window):
         super().__init__()
 
     def gui_init(self, window):
+        try:
+            combostyle = tkinter.ttk.Style()
+            combostyle.theme_create('combostyle', parent='clam',
+                                    settings={'TCombobox':
+                                                  {'configure':
+                                                       {'selectbackground': '#646464',
+                                                        'fieldbackground': '#646464',
+                                                        'background': '#646464',
+                                                        'foreground': "#A0A0A0",
+                                                        'arrowsize': 15,
+                                                        'lightcolor': "#646464",
+                                                        'arrowcolor': "#A0A0A0",
+                                                        'selectforeground': "#929292",
+                                                        'padding': 6
+                                                        }}}
+                                    )
+            combostyle.theme_use('combostyle')
+
+            style = tkinter.ttk.Style()
+            style.element_create("Custom.Treeheading.border", "from", "default")
+            style.layout("Custom.Treeview.Heading", [
+                ("Custom.Treeheading.cell", {'sticky': 'nswe'}),
+                ("Custom.Treeheading.border", {'sticky': 'nswe', 'children': [
+                    ("Custom.Treeheading.padding", {'sticky': 'nswe', 'children': [
+                        ("Custom.Treeheading.image", {'side': 'right', 'sticky': ''}),
+                        ("Custom.Treeheading.text", {'sticky': 'we'})
+                    ]})
+                ]}),
+            ])
+            head_font = ('黑体', '12')
+            content_font = ('宋体', '12')
+            style.configure("Custom.Treeview.Heading",
+                            background="#646464", foreground="#E4E4E4", relief="flat", font=head_font)
+            style.configure("Custom.Treeview", background="#323232", foreground="#A0A0A0", fieldbackground="#323232",
+                            highlightthickness=0, font=content_font)
+            style.map("Custom.Treeview.Heading",
+                      relief=[('active', 'groove'), ('pressed', 'sunken')])
+        except BaseException:
+            print("主题已添加")
+
         warning_label = tkinter.Label(window, bg="#323232", font="黑体 22", text="无可用选项", fg="#646464")
         info_canvas = tkinter.Canvas(window, bg="#323232", scrollregion=(0, 0, 0, 1850))
         info_canvas.place(relx=1, x=-500, y=67, width=500, height=-64, relheight=1)
@@ -359,8 +404,13 @@ class MainWindow(Window):
 
         # menu_name = ["合同模板", "最近打开", "全部", "收藏"]
         # menu_icon = ["tem_icon.png", "recent_icon.png", "all_icon.png", "collect_icon.png"]
+<<<<<<< Updated upstream
         menu_name = ["合同模板", "合同"]
         menu_icon = ["tem_icon.png", "all_icon.png"]
+=======
+        menu_name = ["合同模板", "合同", "报价单"]
+        menu_icon = ["tem_icon.png",  "all_icon.png", "price_icon.png"]
+>>>>>>> Stashed changes
         length = 0
         for i in range(len(menu_name)):
             now_length = len(menu_name[i]) * 15 + 90
@@ -537,9 +587,10 @@ class MainWindow(Window):
             self.item_menu.post(pos[0], pos[1])
 
     def clear_info(self):
-        for i in self.info_list:
-            if type(self.info_list[i]) is tkinter.Entry or type(self.info_list[i]) is tkinter.Text:
-                self.info_list[i].delete("1.0", "end")
+        if self.info_mode == "ct":
+            for i in self.info_list:
+                if type(self.info_list[i]) is tkinter.Entry or type(self.info_list[i]) is tkinter.Text:
+                    self.info_list[i].delete("1.0", "end")
 
     def open_setting_menu(self, evt):
         setting_menu = SettingWindow(master=self.window, width=1280, height=800, resizable=True, title="设置",
@@ -556,65 +607,54 @@ class MainWindow(Window):
         self.window.deiconify()
 
     def fill_info(self, cid):
-        # supplier_name = contract.get_supplier()
-        # buyer_name = contract.get_buyer()
-        # sign_date = contract.get_sign_date()
-        # location = contract.get_location()
-        # brand = contract.get_brand()
-        # delivery_date = contract.delivery_date
-        # delivery_place = contract.get_location()
-        # payment_method = contract.payment_method
-        # comments = contract.comments
-        # others = contract.get_qita()
-        # supplier_info = contract.get_supplier_info()
-        # buyer_info = contract.get_buyer_info()
-        contract = self.contract_loader.get_contract(cid)
+        if self.info_mode == "ct":
+            contract = self.contract_loader.get_contract(cid)
 
-        supplier_name = contract[0]
-        buyer_name = contract[1]
-        sign_date = contract[3]
-        location = contract[6]
-        brand = contract[2]
-        delivery_date = contract[4]
-        delivery_place = contract[5]
-        payment_method = contract[7]
-        comments = contract[8]
-        others = contract[9]
-        supplier_location = contract[10]
-        supplier_bank = contract[11]
-        supplier_account = contract[12]
-        supplier_tax_num = contract[13]
-        supplier_tel = contract[14]
-        buyer_location = contract[15]
-        buyer_bank = contract[16]
-        buyer_account = contract[17]
-        buyer_tax_num = contract[18]
-        buyer_tel = contract[19]
+            supplier_name = contract[0]
+            buyer_name = contract[1]
+            sign_date = contract[3]
+            location = contract[6]
+            brand = contract[2]
+            delivery_date = contract[4]
+            delivery_place = contract[5]
+            payment_method = contract[7]
+            comments = contract[8]
+            others = contract[9]
+            supplier_location = contract[10]
+            supplier_bank = contract[11]
+            supplier_account = contract[12]
+            supplier_tax_num = contract[13]
+            supplier_tel = contract[14]
+            buyer_location = contract[15]
+            buyer_bank = contract[16]
+            buyer_account = contract[17]
+            buyer_tax_num = contract[18]
+            buyer_tel = contract[19]
 
-        self.info_list["agm_time_year"].insert("1.0", sign_date[0])
-        self.info_list["agm_time_month"].insert("1.0", sign_date[1])
-        self.info_list["agm_time_day"].insert("1.0", sign_date[2])
-        self.info_list["agm_supplier_entry"].insert("1.0", str(supplier_name))
-        self.info_list["agm_demander_entry"].insert("1.0", str(buyer_name))
-        self.info_list["info_detail_require0"].insert("1.0", str(location))
-        self.info_list["info_detail_require1"].insert("1.0", str(brand))
-        self.info_list["info_detail_require2"].insert("1.0", str(delivery_date))
-        self.info_list["info_detail_require3"].insert("1.0", str(delivery_place))
-        self.info_list["info_detail_require4"].insert("1.0", str(payment_method))
-        self.info_list["info_detail_require5"].insert("1.0", str(comments))
-        for i in range(len(others)):
-            self.info_list["info_detail_require%s" % (6 + i)].insert("1.0", others[i])
-        self.info_list["supplier_detail_require0"].insert("1.0", str(supplier_location))
-        self.info_list["supplier_detail_require1"].insert("1.0", str(supplier_bank))
-        self.info_list["supplier_detail_require2"].insert("1.0", str(supplier_account))
-        self.info_list["supplier_detail_require3"].insert("1.0", str(supplier_tax_num))
-        self.info_list["supplier_detail_require4"].insert("1.0", str(supplier_tel))
+            self.info_list["agm_time_year"].insert("1.0", sign_date[0])
+            self.info_list["agm_time_month"].insert("1.0", sign_date[1])
+            self.info_list["agm_time_day"].insert("1.0", sign_date[2])
+            self.info_list["agm_supplier_entry"].insert("1.0", str(supplier_name))
+            self.info_list["agm_demander_entry"].insert("1.0", str(buyer_name))
+            self.info_list["info_detail_require0"].insert("1.0", str(location))
+            self.info_list["info_detail_require1"].insert("1.0", str(brand))
+            self.info_list["info_detail_require2"].insert("1.0", str(delivery_date))
+            self.info_list["info_detail_require3"].insert("1.0", str(delivery_place))
+            self.info_list["info_detail_require4"].insert("1.0", str(payment_method))
+            self.info_list["info_detail_require5"].insert("1.0", str(comments))
+            for i in range(len(others)):
+                self.info_list["info_detail_require%s" % (6 + i)].insert("1.0", others[i])
+            self.info_list["supplier_detail_require0"].insert("1.0", str(supplier_location))
+            self.info_list["supplier_detail_require1"].insert("1.0", str(supplier_bank))
+            self.info_list["supplier_detail_require2"].insert("1.0", str(supplier_account))
+            self.info_list["supplier_detail_require3"].insert("1.0", str(supplier_tax_num))
+            self.info_list["supplier_detail_require4"].insert("1.0", str(supplier_tel))
 
-        self.info_list["demander_detail_require0"].insert("1.0", str(buyer_location))
-        self.info_list["demander_detail_require1"].insert("1.0", str(buyer_bank))
-        self.info_list["demander_detail_require2"].insert("1.0", str(buyer_account))
-        self.info_list["demander_detail_require3"].insert("1.0", str(buyer_tax_num))
-        self.info_list["demander_detail_require4"].insert("1.0", str(buyer_tel))
+            self.info_list["demander_detail_require0"].insert("1.0", str(buyer_location))
+            self.info_list["demander_detail_require1"].insert("1.0", str(buyer_bank))
+            self.info_list["demander_detail_require2"].insert("1.0", str(buyer_account))
+            self.info_list["demander_detail_require3"].insert("1.0", str(buyer_tax_num))
+            self.info_list["demander_detail_require4"].insert("1.0", str(buyer_tel))
 
     def disabled_fo_button(self):
         self.info_list["info_menu_save"].config(image=self.info_list["save_disabled_img"], cursor="arrow")
@@ -630,12 +670,12 @@ class MainWindow(Window):
                 self.chosen_file_id = file_id
                 self.tem_canvas.itemconfigure(i["frame"], width=3, outline="#649AFA")
                 self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989")
-                if i["type"] != "contract" and i["type"] != "template":
+                if i["type"] != "contract" and i["type"] != "template" and i["type"] != "quote":
                     self.info_menu.place_forget()
                     self.info_canvas.place_forget()
                     self.chosen_contract = None
                     if i["type"] == "folder":
-                        input_folder = self.now_path.copy()
+                        input_folder = self.contract_path.copy()
                         while len(input_folder) < 3:
                             input_folder.append(None)
                         total_sells = self.contract_loader.get_statistics(input_folder)
@@ -644,7 +684,8 @@ class MainWindow(Window):
                     else:
                         self.warning_label.place(relx=1, x=-320, rely=0.5, y=-100)
                         self.warning_label.config(text="无可用选项")
-                else:
+                elif i["type"] == "contract" or i["type"] == "template":
+                    self.info_mode = "ct"
                     self.chosen_contract = i["agm_code"]
                     self.warning_label.place_forget()
                     self.info_menu.place(relx=1, x=-498, rely=1, y=-70, width=510, height=75)
@@ -701,6 +742,11 @@ class MainWindow(Window):
                         self.info_list["agm_number_entry"].insert("1.0", "<自动>")
                         self.info_list["agm_number_entry"].config(state="disabled")
                     self.fill_info(self.chosen_contract)
+                else:
+                    self.info_mode = "q"
+                    self.info_menu.place(relx=1, x=-498, rely=1, y=-70, width=510, height=75)
+                    self.info_canvas.place_forget()
+                    pass
             else:
                 self.tem_canvas.itemconfigure(i["frame"], width=2, outline="#454545")
                 self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989")
@@ -729,54 +775,47 @@ class MainWindow(Window):
         self.info_list["info_menu_save"].bind("<Button-1>", self.info_save)
 
     def info_save(self, evt):
-        year = self.info_list["agm_time_year"].get("1.0", "end-1c")
-        month = self.info_list["agm_time_month"].get("1.0", "end-1c")
-        day = self.info_list["agm_time_day"].get("1.0", "end-1c")
-        supplier_name = self.info_list["agm_supplier_entry"].get("1.0", "end-1c")
-        buyer_name = self.info_list["agm_demander_entry"].get("1.0", "end-1c")
-        location = self.info_list["info_detail_require0"].get("1.0", "end-1c")
-        brand = self.info_list["info_detail_require1"].get("1.0", "end-1c")
-        delivery_date = self.info_list["info_detail_require2"].get("1.0", "end-1c")
-        delivery_place = self.info_list["info_detail_require3"].get("1.0", "end-1c")
-        payment_method = self.info_list["info_detail_require4"].get("1.0", "end-1c")
-        comments = self.info_list["info_detail_require5"].get("1.0", "end-1c")
-        others = list()
-        others.append(self.info_list["info_detail_require6"].get("1.0", "end-1c"))
-        others.append(self.info_list["info_detail_require7"].get("1.0", "end-1c"))
-        others.append(self.info_list["info_detail_require8"].get("1.0", "end-1c"))
-        others.append(self.info_list["info_detail_require9"].get("1.0", "end-1c"))
-        others.append(self.info_list["info_detail_require10"].get("1.0", "end-1c"))
-        others.append(self.info_list["info_detail_require11"].get("1.0", "end-1c"))
+        if self.info_mode == "ct":
+            year = self.info_list["agm_time_year"].get("1.0", "end-1c")
+            month = self.info_list["agm_time_month"].get("1.0", "end-1c")
+            day = self.info_list["agm_time_day"].get("1.0", "end-1c")
+            supplier_name = self.info_list["agm_supplier_entry"].get("1.0", "end-1c")
+            buyer_name = self.info_list["agm_demander_entry"].get("1.0", "end-1c")
+            location = self.info_list["info_detail_require0"].get("1.0", "end-1c")
+            brand = self.info_list["info_detail_require1"].get("1.0", "end-1c")
+            delivery_date = self.info_list["info_detail_require2"].get("1.0", "end-1c")
+            delivery_place = self.info_list["info_detail_require3"].get("1.0", "end-1c")
+            payment_method = self.info_list["info_detail_require4"].get("1.0", "end-1c")
+            comments = self.info_list["info_detail_require5"].get("1.0", "end-1c")
+            others = list()
+            others.append(self.info_list["info_detail_require6"].get("1.0", "end-1c"))
+            others.append(self.info_list["info_detail_require7"].get("1.0", "end-1c"))
+            others.append(self.info_list["info_detail_require8"].get("1.0", "end-1c"))
+            others.append(self.info_list["info_detail_require9"].get("1.0", "end-1c"))
+            others.append(self.info_list["info_detail_require10"].get("1.0", "end-1c"))
+            others.append(self.info_list["info_detail_require11"].get("1.0", "end-1c"))
 
-        supplier_location = self.info_list["supplier_detail_require0"].get("1.0", "end-1c")
-        supplier_bank = self.info_list["supplier_detail_require1"].get("1.0", "end-1c")
-        supplier_account = self.info_list["supplier_detail_require2"].get("1.0", "end-1c")
-        supplier_tax_num = self.info_list["supplier_detail_require3"].get("1.0", "end-1c")
-        supplier_tel = self.info_list["supplier_detail_require4"].get("1.0", "end-1c")
+            supplier_location = self.info_list["supplier_detail_require0"].get("1.0", "end-1c")
+            supplier_bank = self.info_list["supplier_detail_require1"].get("1.0", "end-1c")
+            supplier_account = self.info_list["supplier_detail_require2"].get("1.0", "end-1c")
+            supplier_tax_num = self.info_list["supplier_detail_require3"].get("1.0", "end-1c")
+            supplier_tel = self.info_list["supplier_detail_require4"].get("1.0", "end-1c")
 
-        buyer_location = self.info_list["demander_detail_require0"].get("1.0", "end-1c")
-        buyer_bank = self.info_list["demander_detail_require1"].get("1.0", "end-1c")
-        buyer_account = self.info_list["demander_detail_require2"].get("1.0", "end-1c")
-        buyer_tax_num = self.info_list["demander_detail_require3"].get("1.0", "end-1c")
-        buyer_tel = self.info_list["demander_detail_require4"].get("1.0", "end-1c")
+            buyer_location = self.info_list["demander_detail_require0"].get("1.0", "end-1c")
+            buyer_bank = self.info_list["demander_detail_require1"].get("1.0", "end-1c")
+            buyer_account = self.info_list["demander_detail_require2"].get("1.0", "end-1c")
+            buyer_tax_num = self.info_list["demander_detail_require3"].get("1.0", "end-1c")
+            buyer_tel = self.info_list["demander_detail_require4"].get("1.0", "end-1c")
 
-        self.contract_loader.override_contract(self.chosen_contract, supplier_name, buyer_name, brand,
-                                               (year, month, day), delivery_date, delivery_place, location,
-                                               payment_method, comments, others, supplier_location, supplier_bank,
-                                               supplier_account, supplier_tax_num, supplier_tel, buyer_location,
-                                               buyer_bank, buyer_account, buyer_tax_num, buyer_tel)
-
-        # if (not year.isnumeric() or "." in year or len(year) != 4) and year != "<自动>":
-        #     warning_window = WarningWindow(text="日期年份格式错误", master=self.window)
-        #     return
-        # if (not month.isnumeric() or "." in month or int(month) > 12 or int(month) < 1) and month != "<自动>":
-        #     warning_window = WarningWindow(text="日期月份格式错误", master=self.window)
-        #     return
-        # if (not day.isnumeric() or "." in day or int(day) > 31 or int(day) < 1) and day != "<自动>":
-        #     warning_window = WarningWindow(text="日期格式错误", master=self.window)
-        #     return
-
-        self.disabled_fo_button()
+            try:
+                self.contract_loader.override_contract(self.chosen_contract, supplier_name, buyer_name, brand,
+                                                       (year, month, day), delivery_date, delivery_place, location,
+                                                       payment_method, comments, others, supplier_location, supplier_bank,
+                                                       supplier_account, supplier_tax_num, supplier_tel, buyer_location,
+                                                       buyer_bank, buyer_account, buyer_tax_num, buyer_tel)
+                self.disabled_fo_button()
+            except IllegalDate:
+                warning_window = WarningWindow(master=self.window, text="日期格式错误，保存失败。")
 
     def info_back(self, evt):
         self.clear_info()
@@ -838,19 +877,32 @@ class MainWindow(Window):
             self.choose_file(0)
         elif value == "合同":
             self.tem_info.place(y=70, relwidth=1, width=-516, height=40)
-            # self.now_path = list()
-            self.contract_refresh(self.now_path)
+            self.folder_type = "contract"
+            self.folder_refresh(self.contract_path, "contract")
+        elif value == "报价单":
+            self.tem_info.place(y=70, relwidth=1, width=-516, height=40)
+            self.folder_type = "quote"
+            self.folder_refresh(self.quote_path, "quote")
 
     def open_folder(self, folder):
-        self.now_path.append(folder)
-        self.contract_refresh(self.now_path)
+        if self.folder_type == "contract":
+            self.contract_path.append(folder)
+            self.folder_refresh(self.contract_path, self.folder_type)
+        elif self.folder_type == "quote":
+            self.quote_path.append(folder)
+            self.folder_refresh(self.quote_path, self.folder_type)
 
     def back_folder(self):
-        if len(self.now_path) > 0:
-            self.now_path.pop()
-        self.contract_refresh(self.now_path)
+        if self.folder_type == "contract":
+            if len(self.contract_path) > 0:
+                self.contract_path.pop()
+            self.folder_refresh(self.contract_path, self.folder_type)
+        elif self.folder_type == "quote":
+            if len(self.quote_path) > 0:
+                self.quote_path.pop()
+            self.folder_refresh(self.quote_path, self.folder_type)
 
-    def contract_refresh(self, folder):
+    def folder_refresh(self, folder, folder_type):
         self.clear_agm()
         self.tem_canvas_space = 40
         path_text = "当前路径: "
@@ -861,19 +913,32 @@ class MainWindow(Window):
         input_folder = folder.copy()
         while len(input_folder) < 3:
             input_folder.append(None)
-        contract_list = self.contract_loader.get_contract_list(tuple(input_folder))
+        if folder_type == "contract":
+            file_list = self.contract_loader.get_contract_list(tuple(input_folder))
+            file_type = "contract"
+            file_img = "img/agreement_file.png"
+        elif folder_type == "quote":
+            file_list = self.contract_loader.get_contract_list(tuple(input_folder))
+            file_type = "quote"
+            file_img = "img/quote_file.png"
+        else:
+            print(f"warning: unacceptable folder type '{folder_type}'")
+            return
         if input_folder[0] is not None:
             self.add_agm(name="返回", img="img/back_file.png", agm_type="folder_back", number="")
-        for i in contract_list:
-            contract_type = "folder" if i[0] == "00000000" else "contract"
+        for i in file_list:
+            contract_type = "folder" if i[0] == "00000000" else file_type
             contract_code = i[1] if i[0] == "00000000" else i[0]
             contract_number = "" if i[0] == "00000000" else i[0]
-            contract_img = "img/folder_file.png" if i[0] == "00000000" else "img/agreement_file.png"
+            contract_img = "img/folder_file.png" if i[0] == "00000000" else file_img
             contract_name = i[1]
             self.add_agm(name=contract_name, agm_code=contract_code, agm_type=contract_type, number=contract_number,
                          img=contract_img)
         if input_folder[0] is None:
-            self.add_agm(name="创建合同", img="img/file_add.png", agm_type="add_contract", number="")
+            if file_type == "contract":
+                self.add_agm(name="创建合同", img="img/file_add.png", agm_type="add_contract", number="")
+            elif file_type == "quote":
+                self.add_agm(name="创建报价单", img="img/file_add.png", agm_type="add_quote", number="")
         self.choose_file(0)
 
     def size_change(self, evt):
