@@ -129,9 +129,9 @@ class QuoteLoader:
         year = date[0]
         month = date[1]
         if not year:
-            return list({('00000000', f'20{i[:2]}') for i in self.quotes})
+            return sorted({('00000000', f'20{i[:2]}') for i in self.quotes}, key=lambda x: x[1])
         elif not month:
-            return list({('00000000', f'{i[2:4]}') for i in self.quotes if i[:2] == year[-2:]})
+            return sorted({('00000000', f'{i[2:4]}') for i in self.quotes if i[:2] == year[-2:]}, key=lambda x: x[1])
         else:
             return [(i, v.get_name()) for i, v in self.quotes.items()
                     if i[:2] == year[-2:] and i[2:4] == '{:0>2d}'.format(int(month))]
@@ -153,7 +153,7 @@ class QuoteLoader:
         """
         q = Quote(project_name=project_name, date=date, buyer_name=buyer_name, buyer_contact=buyer_contact,
                   buyer_tel=buyer_tel, quote_contact=quote_contact, quote_tel=quote_tel, qq=qq, name=name,
-                  comment = comment)
+                  comment=comment)
         q.save(self.data_dir)
         qid = q.get_qid()
         self.quotes[qid] = q
