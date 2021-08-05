@@ -129,16 +129,17 @@ class QuoteLoader:
         :param quote_tel:
         :param qq:
         :param name:
-        :return:
+        :return: (year, month, None), qid
         """
         q = Quote(project_name=project_name, date=date, buyer_name=buyer_name, buyer_contact=buyer_contact,
                   buyer_tel=buyer_tel, quote_contact=quote_contact, quote_tel=quote_tel, qq=qq, name=name)
         q.save(self.data_dir)
-        self.quotes[q.get_qid()] = q
-        logging.info(f"Create contract: {q.get_qid()}")
-        return q.get_qid()
+        qid = q.get_qid()
+        self.quotes[qid] = q
+        logging.info(f"Create contract: {qid}")
+        return (f'20{qid[:2]}', qid[2:4], None), qid
 
-    def overrider_quote(self, qid, project_name, date, buyer_name, buyer_contact, buyer_tel,
+    def override_quote(self, qid, project_name, date, buyer_name, buyer_contact, buyer_tel,
                         quote_contact, quote_tel, qq):
         """
         :param qid:
@@ -155,7 +156,7 @@ class QuoteLoader:
         if qid in self.quotes:
             q = self.quotes[qid]
             q.project_name = project_name
-            q.date = date
+            q.set_date(date)
             q.buyer_name = buyer_name
             q.buyer_contact = buyer_contact
             q.buyer_tel = buyer_tel

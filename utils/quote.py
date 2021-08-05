@@ -23,8 +23,17 @@ class Quote:
         self.qid = None
         self._modify = True
 
+    def rename(self, name):
+        self.name = name
+
     def get_qid(self):
         return self.qid
+    
+    def set_date(self, date):
+        try:
+            self.sign_date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
+        except ValueError:
+            raise IllegalDate
 
     def save(self, dir):
         p = Path(dir) / 'quote'
