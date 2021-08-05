@@ -1,10 +1,10 @@
 from excel import Excel
 from quote import Quote
 from pathlib import Path
+from collections import defaultdict
 import re
 import datetime
 import logging
-
 
 
 class QuoteLoader:
@@ -102,6 +102,21 @@ class QuoteLoader:
         q = self.quotes[qid]
         return q.get_total_quantity(), q.get_total()
 
+    def get_quote_tree(self):
+        """
+        Tree view of quote
+        :return: dictionary
+        """
+        tree = defaultdict(dict)
+        for i, q in self.quotes.items():
+            year = f'20{i[:2]}'
+            month = i[2:4]
+            if month in tree[year]:
+                tree[year][month].append((q.get_qid(), q.get_name()))
+            else:
+                tree[year][month] = [(q.get_qid(), q.get_name())]
+        return tree
+
     def get_quote_list(self, date):
         """
         :param date: (year, month ,None)
@@ -140,7 +155,7 @@ class QuoteLoader:
         return (f'20{qid[:2]}', qid[2:4], None), qid
 
     def override_quote(self, qid, project_name, date, buyer_name, buyer_contact, buyer_tel,
-                        quote_contact, quote_tel, qq):
+                       quote_contact, quote_tel, qq):
         """
         :param qid:
         :param project_name:
@@ -191,9 +206,8 @@ class QuoteLoader:
         :param qid:
         :return:
         """
-        if qid in self.quotes:
-            self.quotes[qid].delete(self.data_dir)
-            del self.quotes[qid]
+        self.quotes[qid].delete(self.data_dir)
+        del self.quotes[qid]
 
     @staticmethod
     def get_today():
@@ -204,7 +218,9 @@ class QuoteLoader:
 
 if __name__ == '__main__':
     import os
+
     os.chdir('../')
     ql = QuoteLoader()
-    a = ql.get_quote_list(('2021','08',None))
-    print(a)
+    a = ql.get_quote_list(('2021', '08', None))
+    b = ql.get_quote_tree()
+    print(b)

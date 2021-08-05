@@ -62,6 +62,7 @@ class Quote:
     def set_date(self, date):
         try:
             self.date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
+            self._modify = True
         except ValueError:
             raise IllegalDate
 
@@ -102,9 +103,9 @@ class Quote:
     def delete(self, dir):
         qid = self.qid
         p = Path(dir) / 'quote' / f'{qid}.data'
-        assert p.exists(), f"No existing file: {p}"
-        logging.debug(f"Delete quote: {p.resolve()}")
-        p.unlink()
+        if p.exists():
+            logging.debug(f"Delete quote: {p.resolve()}")
+            p.unlink()
 
     def get_name(self):
         return self.name if self.name else self.qid

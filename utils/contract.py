@@ -222,9 +222,9 @@ class Contract:
         else:
             p = p / 'contract'
         p = p / f'{str(cid)}.data'
-        assert p.exists(), f"No existing file: {p}"
-        logging.debug(f"Delete contract: {p.resolve()}")
-        p.unlink()
+        if p.exists():
+            logging.debug(f"Delete contract: {p.resolve()}")
+            p.unlink()
 
     @staticmethod
     def load(cid, dir='data/contract'):
