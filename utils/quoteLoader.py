@@ -186,10 +186,9 @@ class QuoteLoader:
         :return: project_name, date, buyer_name, buyer_contact, buyer_tel,
                      quote_contact, quote_tel, qq, name, qid
         """
-        if qid in self.quotes:
-            q = self.quotes[qid]
-            return q.project_name, q.get_date(), q.buyer_name, q.buyer_contact, q.buyer_tel, \
-                   q.quote_contact, q.quote_tel, q.qq, q.name, qid
+        q = self.quotes[qid]
+        return q.project_name, q.get_date(), q.buyer_name, q.buyer_contact, q.buyer_tel, \
+               q.quote_contact, q.quote_tel, q.qq, q.name, qid
 
     def rename(self, qid, name):
         """
