@@ -2,6 +2,7 @@ from child_window import ChildWindow
 from dataLoader import DataLoader
 from warning_window import WarningWindow
 from setting_window import SettingWindow
+from exception import *
 import tkinter
 import tkinter.ttk
 import tkinter.filedialog
@@ -366,13 +367,19 @@ class ContractWindow(ChildWindow):
             file_path = tkinter.filedialog.asksaveasfilename(title=u'保存合同', filetypes=[("excel表格", ".xlsx")],
                                                              initialfile=contract_number + contract_name,
                                                              parent=window)
-            self.contract_loader.export_excel(self.cid, 0, file_path)
+            try:
+                self.contract_loader.export_excel(self.cid, 0, file_path)
+            except FileOccupied:
+                warning_window = WarningWindow(master=window, text="导出失败：目标文件正在被使用。")
 
         def export_as_quotation():
             file_path = tkinter.filedialog.asksaveasfilename(title=u'保存报价单', filetypes=[("excel表格", ".xlsx")],
                                                              initialfile=contract_number + contract_name,
                                                              parent=window)
-            self.contract_loader.export_excel(self.cid, 0, file_path)
+            try:
+                self.contract_loader.export_excel(self.cid, 0, file_path)
+            except FileOccupied:
+                warning_window = WarningWindow(master=window, text="导出失败：目标文件正在被使用。")
 
         def export_as_pdf():
             warning_window = WarningWindow(master=self.window, text="此功能还在开发中。")

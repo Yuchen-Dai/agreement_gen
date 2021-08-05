@@ -486,6 +486,12 @@ class MainWindow(Window):
         quote_time_sp02 = tkinter.Label(quote_time_frame, bg="#323232", fg="#A0A0A0", text="月")
         quote_time_sp03 = tkinter.Label(quote_time_frame, bg="#323232", fg="#A0A0A0", text="日")
 
+        quote_comments_label = tkinter.Label(quote_frame, bg="#323232", fg="#A0A0A0", text="备注:")
+        quote_comments_entry = tkinter.Text(quote_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                            highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                            insertbackground="#A0A0A0",
+                                            height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+
         quote_buyer_label = tkinter.Label(quote_frame, bg="#323232", fg="#A0A0A0", text="客户名称:")
         quote_buyer_entry = tkinter.Text(quote_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
                                          highlightcolor="#649AFA", bd=0, highlightthickness=1,
@@ -532,25 +538,28 @@ class MainWindow(Window):
         quote_time_day.pack(side="left")
         quote_time_sp03.pack(side="left")
         quote_time_frame.grid(column=1, row=1, pady=5, sticky=tkinter.W)
-        tkinter.Frame(quote_frame, bg="#323232", height=20).grid(column=0, row=2, sticky=tkinter.W)
-        quote_buyer_label.grid(column=0, row=3, pady=5, sticky=tkinter.W)
-        quote_buyer_entry.grid(column=1, row=3, pady=5, sticky=tkinter.W)
-        quote_btel_label.grid(column=0, row=4, pady=5, sticky=tkinter.W)
-        quote_btel_entry.grid(column=1, row=4, pady=5, sticky=tkinter.W)
-        quote_bcontact_label.grid(column=0, row=5, pady=5, sticky=tkinter.W)
-        quote_bcontact_entry.grid(column=1, row=5, pady=5, sticky=tkinter.W)
-        tkinter.Frame(quote_frame, bg="#323232", height=20).grid(column=0, row=6, sticky=tkinter.W)
-        quote_qtel_label.grid(column=0, row=7, pady=5, sticky=tkinter.W)
-        quote_qtel_entry.grid(column=1, row=7, pady=5, sticky=tkinter.W)
-        quote_qq_label.grid(column=0, row=8, pady=5, sticky=tkinter.W)
-        quote_qq_entry.grid(column=1, row=8, pady=5, sticky=tkinter.W)
-        quote_qcontact_label.grid(column=0, row=9, pady=5, sticky=tkinter.W)
-        quote_qcontact_entry.grid(column=1, row=9, pady=5, sticky=tkinter.W)
+        quote_comments_label.grid(column=0, row=2, pady=5, sticky=tkinter.W)
+        quote_comments_entry.grid(column=1, row=2, pady=5, sticky=tkinter.W)
+        tkinter.Frame(quote_frame, bg="#323232", height=20).grid(column=0, row=3, sticky=tkinter.W)
+        quote_buyer_label.grid(column=0, row=4, pady=5, sticky=tkinter.W)
+        quote_buyer_entry.grid(column=1, row=5, pady=5, sticky=tkinter.W)
+        quote_btel_label.grid(column=0, row=5, pady=5, sticky=tkinter.W)
+        quote_btel_entry.grid(column=1, row=5, pady=5, sticky=tkinter.W)
+        quote_bcontact_label.grid(column=0, row=6, pady=5, sticky=tkinter.W)
+        quote_bcontact_entry.grid(column=1, row=6, pady=5, sticky=tkinter.W)
+        tkinter.Frame(quote_frame, bg="#323232", height=20).grid(column=0, row=7, sticky=tkinter.W)
+        quote_qtel_label.grid(column=0, row=8, pady=5, sticky=tkinter.W)
+        quote_qtel_entry.grid(column=1, row=8, pady=5, sticky=tkinter.W)
+        quote_qq_label.grid(column=0, row=9, pady=5, sticky=tkinter.W)
+        quote_qq_entry.grid(column=1, row=9, pady=5, sticky=tkinter.W)
+        quote_qcontact_label.grid(column=0, row=10, pady=5, sticky=tkinter.W)
+        quote_qcontact_entry.grid(column=1, row=10, pady=5, sticky=tkinter.W)
 
         self.info_list["quote_project_entry"] = quote_project_entry
         self.info_list["quote_time_day"] = quote_time_day
         self.info_list["quote_time_month"] = quote_time_month
         self.info_list["quote_time_year"] = quote_time_year
+        self.info_list["quote_comments_entry"] = quote_comments_entry
         self.info_list["quote_buyer_entry"] = quote_buyer_entry
         self.info_list["quote_btel_entry"] = quote_btel_entry
         self.info_list["quote_bcontact_entry"] = quote_bcontact_entry
@@ -793,6 +802,7 @@ class MainWindow(Window):
             quote_contact = quote[5]
             quote_tel = quote[6]
             qq = quote[7]
+            comments = quote[8]
 
             self.info_list["quote_project_entry"].insert("1.0", project_name)
             self.info_list["quote_time_day"].insert("1.0", day)
@@ -804,6 +814,7 @@ class MainWindow(Window):
             self.info_list["quote_qtel_entry"].insert("1.0", quote_tel)
             self.info_list["quote_qq_entry"].insert("1.0", qq)
             self.info_list["quote_qcontact_entry"].insert("1.0", quote_contact)
+            self.info_list["quote_comments_entry"].insert("1.0", comments)
 
     def disabled_fo_button(self):
         self.info_list["info_menu_save"].config(image=self.info_list["save_disabled_img"], cursor="arrow")
@@ -987,10 +998,11 @@ class MainWindow(Window):
             quote_tel = self.info_list["quote_qtel_entry"].get("1.0", "end-1c")
             qq = self.info_list["quote_qq_entry"].get("1.0", "end-1c")
             quote_contact = self.info_list["quote_qcontact_entry"].get("1.0", "end-1c")
+            comments = self.info_list["quote_comments_entry"].get("1.0", "end-1c")
 
             try:
                 self.quote_loader.override_quote(self.chosen_contract, project_name, (year, month, day), buyer_name,
-                                                 buyer_tel, buyer_contact, quote_tel, qq, quote_contact)
+                                                 buyer_tel, buyer_contact, quote_tel, qq, quote_contact, comments)
                 self.disabled_fo_button()
             except IllegalDate:
                 warning_window = WarningWindow(master=self.window, text="日期格式错误。")
@@ -1127,7 +1139,7 @@ class MainWindow(Window):
         quote_tel = SettingWindow.settings["quote_tel"]
         quote_qq = SettingWindow.settings["quote_qq"]
         self.quote_path = list(self.quote_loader.create_quote("", self.quote_loader.get_today(), "", "", "",
-                                                              quote_contact, quote_tel, quote_qq, "新建报价单")[0])[:-1]
+                                                              quote_contact, quote_tel, quote_qq, "新建报价单", "")[0])[:-1]
         self.folder_refresh(self.quote_path, self.folder_type, -1)
 
     def size_change(self, evt):

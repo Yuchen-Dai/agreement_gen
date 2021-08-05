@@ -196,7 +196,7 @@ class QuoteLoader:
         """
         q = self.quotes[qid]
         return q.project_name, q.get_date(), q.buyer_name, q.buyer_contact, q.buyer_tel, \
-               q.quote_contact, q.quote_tel, q.qq, q.commente, q.name, qid
+               q.quote_contact, q.quote_tel, q.qq, q.comment, q.name, qid
 
     def rename(self, qid, name):
         """
