@@ -79,7 +79,7 @@ class DataLoader:
         return product_list
 
     @staticmethod
-    def search(product_list, name=None, model=None, keyword=None):
+    def search(product_list, name=None, model=None, keyword=None):  # todo 有问题，需要维护
         """ Search by keyword in products' model and products' name"""
         result = []
         for p in product_list:

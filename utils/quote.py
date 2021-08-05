@@ -10,7 +10,7 @@ class Quote:
                  quote_contact='', quote_tel='', qq='', name=''):
         self.project_name = project_name
         try:
-            self.sign_date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
+            self.date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
         except ValueError:
             raise IllegalDate
         self.buyer_name = buyer_name
@@ -23,18 +23,50 @@ class Quote:
         self.qid = None
         self._modify = True
 
+        self.table = []  # [(product_id, quantity, discount)]
+
+    def add_item(self, product, quantity, discount, comments):
+        logging.debug(f"Add line: {product}")
+        self.table.append((product, quantity, discount, comments))
+        self.table.sort(key=lambda x: x[0])
+        self._modify = True
+
+    def del_item(self, line_number):
+        logging.debug(f"Del line: {line_number}")
+        del self.table[line_number]
+        self._modify = True
+
+    def get_total_quantity(self):
+        total = 0
+        for line in self.table:
+            total += line[1]
+        return total
+
+    def get_total(self):
+        total = 0
+        for line in self.table:
+            p = line[0]
+            total += line[1] * (p.get_raw_price() * line[2] + p.get_adjunct_price())
+        return total
+
     def rename(self, name):
         self.name = name
         self._modify = True
 
+    def get_table(self):
+        return self.table
+
     def get_qid(self):
         return self.qid
-    
+
     def set_date(self, date):
         try:
-            self.sign_date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
+            self.date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
         except ValueError:
             raise IllegalDate
+
+    def get_date(self):
+        return str(self.date.year), str(self.date.month), str(self.date.day)
 
     def save(self, dir):
         p = Path(dir) / 'quote'

@@ -114,7 +114,7 @@ class ContractLoader:
         :param cid: Contract to be saved
         :return: None
         """
-        self.contracts[cid].save()
+        self.contracts[cid].save(self.data_dir)
 
     def add_product(self, cid, product, quantity: str, discount: str, comments: str):
         """

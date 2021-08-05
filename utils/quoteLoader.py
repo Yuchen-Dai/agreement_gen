@@ -46,7 +46,7 @@ class QuoteLoader:
         :param qid: Quote to be saved
         :return: None
         """
-        self.quotes[qid].save()
+        self.quotes[qid].save(self.data_dir)
 
     def add_product(self, qid, product, quantity: str, discount: str, comments: str):
         """
@@ -173,7 +173,7 @@ class QuoteLoader:
         """
         if qid in self.quotes:
             q = self.quotes[qid]
-            return q.project_name, q.date, q.buyer_name, q.buyer_contact, q.buyer_tel, \
+            return q.project_name, q.get_date(), q.buyer_name, q.buyer_contact, q.buyer_tel, \
                    q.quote_contact, q.quote_tel, q.qq, q.name, qid
 
     def rename(self, qid, name):
@@ -206,4 +206,5 @@ if __name__ == '__main__':
     import os
     os.chdir('../')
     ql = QuoteLoader()
-    ql.get_quote_list(('2021','08',None))
+    a = ql.get_quote_list(('2021','08',None))
+    print(a)
