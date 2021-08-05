@@ -10,10 +10,12 @@ from tkinter import font
 class NewBuiltWindow(ChildWindow):
     new_built_count = 0
 
-    def __init__(self, master, cid, cl, command, width=500, height=800, minsize_x=400, minsize_y=400, title="新建合同",
+    def __init__(self, master, cid, cl, ql, command, width=500, height=800, minsize_x=400, minsize_y=400, title="新建合同",
                  resizable=False):
         self.template_cid = cid
         self.contract_loader = cl
+        self.quote_loader = ql
+        self.chosen_quote = None
         self.command = command
         self.info_list = dict()
         self.detail_data = dict()
@@ -49,10 +51,16 @@ class NewBuiltWindow(ChildWindow):
         quote_choose_button.pack(side="bottom", expand=1)
 
         def quote_recall(qid):
-            print(f"qid:{qid}")
+            if qid == "noChoice":
+                self.chosen_quote = None
+                quote_choose_button.config(text="<选择报价单>")
+            else:
+                self.chosen_quote = qid
+                name = self.quote_loader.get(qid)[-2]
+                quote_choose_button.config(text=f"<{name}>")
 
         def choose_quote(evt):
-            quote_window = QuoteChooseWindow(master=window, command=quote_recall)
+            quote_window = QuoteChooseWindow(master=window, quote_loader=self.quote_loader, command=quote_recall)
 
         quote_choose_button.bind("<Button-1>", choose_quote)
 

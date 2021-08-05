@@ -4,9 +4,10 @@ from child_window import ChildWindow
 
 
 class QuoteChooseWindow(ChildWindow):
-    def __init__(self, master, command):
+    def __init__(self, master, quote_loader, command):
         self.command = command
-        super().__init__(master, 500, 800, 500, 800, False)
+        self.quote_loader = quote_loader
+        super().__init__(master, 500, 800, 500, 800, False, "选择报价单")
 
     def gui_init(self, window):
         button_disabled_img = tkinter.PhotoImage(file="img/button_disabled.png", width=110, height=50)
@@ -28,12 +29,22 @@ class QuoteChooseWindow(ChildWindow):
         quote_tree_view.pack(side="top", expand=1, fill="both")
 
         no_choice = quote_tree_view.insert("", 0, "no_choice", text="不选择报价单", values=("noChoice",))
-        test_year01 = quote_tree_view.insert("", 1, "year01", text="2020", values=("2020",))
-        test_month01 = quote_tree_view.insert(test_year01, 0, "month01", text="01", values=("2020", "01"))
-        test_month02 = quote_tree_view.insert(test_year01, 1, "month02", text="02", values=("2020", "02"))
-        test_file01 = quote_tree_view.insert(test_month01, 0, "file01", text="测试数据01", values=("2020", "01", "001"))
-        test_file02 = quote_tree_view.insert(test_month01, 1, "file02", text="测试数据02", values=("2020", "01", "002"))
-        test_file03 = quote_tree_view.insert(test_month02, 0, "file03", text="测试数据03", values=("2020", "02", "003"))
+        quotes = self.quote_loader.get_quote_tree()
+        now_year = 1
+        for year in quotes:
+            year_root = quote_tree_view.insert("", now_year, year, text=year, values=(year,))
+            now_month = 0
+            for month in quotes[year]:
+                month_root = quote_tree_view.insert(year_root, now_month, month, text=month, values=(year, month))
+                now_quote = 0
+                for quote in quotes[year][month]:
+                    quote_qid = quote[0]
+                    quote_name = quote[1]
+                    quote_item = quote_tree_view.insert(month_root, now_quote, quote_qid, text=quote_name,
+                                                        values=(year, month, quote_qid))
+                    now_quote += 1
+                now_month += 1
+            now_year += 1
 
         collect_img = tkinter.PhotoImage(file="img/tv_chosen.png", width=15, height=15)
         self.data["collect_img"] = collect_img

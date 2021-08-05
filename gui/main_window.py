@@ -445,6 +445,7 @@ class MainWindow(Window):
         def refresh_file(evt):
             self.contract_loader.refresh()
             self.data_loader.refresh()
+            self.quote_loader.refresh()
             self.refresh_agm()
 
         refresh_button.bind("<Button-1>", refresh_file)
@@ -524,11 +525,11 @@ class MainWindow(Window):
         quote_project_label.grid(column=0, row=0, pady=5, sticky=tkinter.W)
         quote_project_entry.grid(column=1, row=0, pady=5, sticky=tkinter.W)
         quote_time_label.grid(column=0, row=1, pady=5, sticky=tkinter.W)
-        quote_time_day.pack(side="left")
+        quote_time_year.pack(side="left")
         quote_time_sp01.pack(side="left")
         quote_time_month.pack(side="left")
         quote_time_sp02.pack(side="left")
-        quote_time_year.pack(side="left")
+        quote_time_day.pack(side="left")
         quote_time_sp03.pack(side="left")
         quote_time_frame.grid(column=1, row=1, pady=5, sticky=tkinter.W)
         tkinter.Frame(quote_frame, bg="#323232", height=20).grid(column=0, row=2, sticky=tkinter.W)
@@ -686,6 +687,7 @@ class MainWindow(Window):
 
             def delete_recall():
                 self.quote_loader.delete(self.file_list[file_id]["agm_code"])
+                self.refresh_agm()
 
             def delete_qoe():
                 warning_window = WarningWindow(master=self.window, text="确定要删除该文件吗？", command=delete_recall)
@@ -892,6 +894,8 @@ class MainWindow(Window):
                     self.fill_info(self.chosen_contract)
                 else:
                     self.info_mode = "q"
+                    self.fill_info(i["agm_code"])
+                    self.chosen_contract = i["agm_code"]
 
                     def get_open_function(number):
                         def function(evt):
@@ -916,7 +920,7 @@ class MainWindow(Window):
             new_file_cid = self.create_contract(data)
             self.open_contract(new_file_cid)
 
-        new_built_window = NewBuiltWindow(self.window, cid, self.contract_loader, command=recall)
+        new_built_window = NewBuiltWindow(self.window, cid, self.contract_loader, self.quote_loader, command=recall)
 
     def create_contract(self, data):
         return self.contract_loader.create_contract(data[0], data[1], data[2], data[3], data[4], data[5], data[6],
