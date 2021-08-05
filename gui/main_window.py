@@ -1121,7 +1121,7 @@ class MainWindow(Window):
     def create_and_choose_quote(self):
         self.folder_type = "quote"
         self.quote_path = list(self.quote_loader.create_quote("", self.quote_loader.get_today(), "", "", "", "", "", "",
-                                                              "新建报价单")[0])
+                                                              "新建报价单")[0])[:-1]
         self.folder_refresh(self.quote_path, self.folder_type, -1)
 
     def size_change(self, evt):

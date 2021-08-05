@@ -428,7 +428,8 @@ class ContractWindow(ChildWindow):
         for i in contract_product.get_children():
             contract_product.delete(i)
         for i in range(len(product_list)):
-            contract_product.insert('', i, values=product_list[i], tags=(i, "all"), iid=i)
+            id_tag = str(i)
+            contract_product.insert('', i, values=product_list[i], tags=(id_tag, "all"), iid=id_tag)
 
         total = self.contract_loader.get_table_total(self.cid)
         self.select(contract_product)
