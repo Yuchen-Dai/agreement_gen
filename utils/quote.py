@@ -7,7 +7,7 @@ from exception import IllegalDate, FileExceed
 
 class Quote:
     def __init__(self, project_name='', date=('1970', '01', '01',), buyer_name='', buyer_contact='', buyer_tel='',
-                 quote_contact='', quote_tel='', qq='', name=''):
+                 quote_contact='', quote_tel='', qq='', name='', comment = ''):
         self.project_name = project_name
         try:
             self.date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
@@ -20,10 +20,35 @@ class Quote:
         self.quote_tel = quote_tel
         self.qq = qq
         self.name = name
+        self.comment = comment
         self.qid = None
         self._modify = True
 
         self.table = []  # [(product_id, quantity, discount)]
+
+    def get_comment(self):
+        return self.comment if self.comment else ' '
+
+    def get_qq(self):
+        return self.qq if self.qq else ' '
+
+    def get_quote_tel(self):
+        return self.quote_tel if self.quote_tel else ' '
+
+    def get_quote_contact(self):
+        return self.quote_contact if self.quote_contact else ' '
+
+    def get_buyer_tel(self):
+        return self.buyer_tel if self.buyer_tel else ' '
+
+    def get_buyer_contact(self):
+        return self.buyer_contact if self.buyer_contact else ' '
+
+    def get_project_name(self):
+        return self.project_name if self.project_name else ' '
+
+    def get_buyer_name(self):
+        return self.buyer_name if self.buyer_name else ' '
 
     def add_item(self, product, quantity, discount, comments):
         logging.debug(f"Add line: {product}")

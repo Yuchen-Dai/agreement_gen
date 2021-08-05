@@ -136,6 +136,7 @@ class Excel:
         })
 
         if output_type == 1:
+            # 销售合同
             # sheet1
             sheet1 = workbook.add_worksheet('销售合同')
             sheet1.set_margins()
@@ -150,7 +151,8 @@ class Excel:
             sheet1.merge_range(0, 0, 0, 7, '购销合同', merge_format0)
             write_nonbold_bold(sheet1, 2, 0, 2, 5, merge_format4, merge_format4_bold, '供方：', self.c.get_supplier())
             write_nonbold_bold(sheet1, 3, 0, 3, 5, merge_format4, merge_format4_bold, '需方：', self.c.get_buyer())
-            write_nonbold_bold(sheet1, 2, 6, 2, 7, merge_format4, merge_format4_bold, '合同编号：', self.c.get_contract_num())
+            write_nonbold_bold(sheet1, 2, 6, 2, 7, merge_format4, merge_format4_bold, '合同编号：',
+                               self.c.get_contract_num())
             write_nonbold_bold(sheet1, 3, 6, 3, 7, merge_format4, merge_format4_bold, '签订地点：', self.c.get_location())
             write_nonbold_bold(sheet1, 4, 6, 4, 7, merge_format4, merge_format4_bold, '签订时间：', self.c.get_sign_date())
             sheet1.merge_range(4, 0, 4, 5, '一、产品名称、商标、型号、厂家、数量、金额、供货时间', merge_format5)
@@ -289,8 +291,55 @@ class Excel:
             sheet2.merge_range(row + 5, 0, row + 5, 2, '日期：', merge_format4)
             sheet2.merge_range(row + 5, 3, row + 5, 10, '日期：', merge_format4)
             sheet2.insert_image(row, 1, 'img\\stamp1.png')
+
         elif output_type == 2:
-            pass
+            # 报价单
+            row = 0
+            sheet1 = workbook.add_worksheet('报价单')
+            sheet1.set_margins()
+            sheet1.set_row(0, 30)
+            sheet1.set_column(0, 0, 4)
+            sheet1.set_column(1, 1, 15)
+            sheet1.set_column(2, 2, 22)
+            sheet1.set_column(3, 4, 4)
+            sheet1.set_column(5, 7, 0)
+            sheet1.set_column(8, 9, 10)
+            sheet1.set_column(10, 10, 14)
+
+            sheet1.merge_range(0, 0, 0, 10, '广州市森源电气有限公司报价单', merge_format1)
+            write_nonbold_bold(sheet1, 2, 0, 2, 2, merge_format4, merge_format4_bold, '客户名称：', self.c.get_buyer_name())
+            write_nonbold_bold(sheet1, 2, 3, 2, 10, merge_format4, merge_format4_bold, '报价单号：', self.c.get_qid())
+            write_nonbold_bold(sheet1, 3, 0, 3, 2, merge_format4, merge_format4_bold, '项目名称：',
+                               self.c.get_project_name())
+            write_nonbold_bold(sheet1, 3, 3, 3, 10, merge_format4, merge_format4_bold, '报价联系人：',
+                               self.c.get_quote_contact())
+            write_nonbold_bold(sheet1, 4, 0, 4, 2, merge_format4, merge_format4_bold, '客户联系人：',
+                               self.c.get_buyer_contact())
+            write_nonbold_bold(sheet1, 4, 3, 4, 10, merge_format4, merge_format4_bold, '电话/传真：', self.c.get_quote_tel())
+            write_nonbold_bold(sheet1, 5, 0, 5, 2, merge_format4, merge_format4_bold, '客户电话/传真：',
+                               self.c.get_buyer_tel())
+            write_nonbold_bold(sheet1, 5, 3, 5, 10, merge_format4, merge_format4_bold, 'QQ：', self.c.get_qq())
+            sheet1.merge_range(6, 0, 6, 10, '贵司垂询的产品报价如下：', merge_format4)
+
+            for col in range(11):
+                sheet1.write(7, col, ['序号', '产品名称', '型号及规格', '单位', '数量', '面价', '折扣',
+                                      '附件', '单价', '金额', '备注'][col], format1_bold)
+            row = 8
+            col = 0
+            for product, number, discount, comment in self.c.get_table():
+                sheet1.write(row, col, row - 7, format1)  # 序号
+                sheet1.write(row, col + 1, product.get_name(), format1)  # 产品名称
+                sheet1.write(row, col + 2, product.get_specs(), format1)  # 型号及规格
+                sheet1.write(row, col + 3, product.get_unit(), format1)  # 单位
+                sheet1.write(row, col + 4, number, format1)  # 数量
+                sheet1.write_number(row, col + 5, product.get_raw_price(), number_format1)  # 面价
+                sheet1.write(row, col + 6, discount, format1)  # 折扣
+                sheet1.write_number(row, col + 7, product.get_adjunct_price(), number_format1)  # 附件
+                sheet1.write_formula(row, col + 8, f'=F{row + 1}*G{row + 1}+H{row + 1}', number_format1)  # 单价
+                sheet1.write_formula(row, col + 9, f'=E{row + 1}*I{row + 1}', number_format1)  # 金额
+                sheet1.write(row, col + 10, comment, format1)  # 备注
+                row += 1
+
         workbook.close()
 
 

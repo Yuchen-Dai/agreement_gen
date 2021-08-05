@@ -39,6 +39,7 @@ class QuoteLoader:
         """
         e = Excel(self.quotes[qid])
         e.run(output_type=2, file_dir=file_dir)
+        self.quotes[qid].save(self.data_dir)
 
     def save(self, qid):
         """
@@ -136,8 +137,9 @@ class QuoteLoader:
                     if i[:2] == year[-2:] and i[2:4] == '{:0>2d}'.format(int(month))]
 
     def create_quote(self, project_name, date, buyer_name, buyer_contact, buyer_tel,
-                     quote_contact, quote_tel, qq, name):
+                     quote_contact, quote_tel, qq, name, comment):
         """
+        :param comment:
         :param project_name:
         :param date: (year, month, day)
         :param buyer_name:
@@ -150,7 +152,8 @@ class QuoteLoader:
         :return: (year, month, None), qid
         """
         q = Quote(project_name=project_name, date=date, buyer_name=buyer_name, buyer_contact=buyer_contact,
-                  buyer_tel=buyer_tel, quote_contact=quote_contact, quote_tel=quote_tel, qq=qq, name=name)
+                  buyer_tel=buyer_tel, quote_contact=quote_contact, quote_tel=quote_tel, qq=qq, name=name,
+                  comment = comment)
         q.save(self.data_dir)
         qid = q.get_qid()
         self.quotes[qid] = q
@@ -158,8 +161,9 @@ class QuoteLoader:
         return (f'20{qid[:2]}', qid[2:4], None), qid
 
     def override_quote(self, qid, project_name, date, buyer_name, buyer_contact, buyer_tel,
-                       quote_contact, quote_tel, qq):
+                       quote_contact, quote_tel, qq, comment):
         """
+        :param comment:
         :param qid:
         :param project_name:
         :param date: (year, month, day)
@@ -181,6 +185,7 @@ class QuoteLoader:
             q.quote_contact = quote_contact
             q.quote_tel = quote_tel
             q.qq = qq
+            q.comment = comment
             q.save(self.data_dir)
 
     def get(self, qid):
