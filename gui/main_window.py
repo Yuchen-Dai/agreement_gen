@@ -43,7 +43,7 @@ class Window:
 
 
 class MainWindow(Window):
-    def __init__(self, data_loader, contract_loader):
+    def __init__(self, data_loader, contract_loader, quote_loader):
         self.menu_canvas = None
         self.tem_canvas = None
         self.info_frame = None
@@ -68,6 +68,7 @@ class MainWindow(Window):
         self.detail_data = dict()
         self.data_loader = data_loader
         self.contract_loader = contract_loader
+        self.quote_loader = quote_loader
 
         super().__init__()
 
@@ -116,6 +117,7 @@ class MainWindow(Window):
         info_canvas = tkinter.Canvas(window, bg="#323232", scrollregion=(0, 0, 0, 1850))
         info_canvas.place(relx=1, x=-500, y=67, width=500, height=-64, relheight=1)
         info_frame = tkinter.Frame(info_canvas, bg="#323232", bd=20, highlightbackground="#323232")
+        quote_frame = tkinter.Frame(window, bg="#323232", bd=20, highlightbackground="#323232")
         info_frame.place(x=0, y=0, relwidth=1)
         info_canvas.create_window((0, 0), window=info_frame, anchor="nw")
         menu_canvas = tkinter.Canvas(window, bg="#323232", bd=0, highlightbackground="#454545")
@@ -130,6 +132,7 @@ class MainWindow(Window):
         self.tem_canvas = tem_canvas
         self.info_canvas = info_canvas
         self.info_frame = info_frame
+        self.quote_frame = quote_frame
 
         tem_path = tkinter.Label(tem_info, bg="#464646", fg="#A0A0A0", text="当前路径: /")
         tem_path.pack(side="left")
@@ -461,6 +464,99 @@ class MainWindow(Window):
         def create_click(evt):
             self.new_built()
 
+        quote_project_label = tkinter.Label(quote_frame, bg="#323232", fg="#A0A0A0", text="项目名称:")
+        quote_project_entry = tkinter.Text(quote_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                           highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                           insertbackground="#A0A0A0",
+                                           height=1, width=15, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+        quote_time_label = tkinter.Label(quote_frame, bg="#323232", fg="#A0A0A0", text="日期:")
+        quote_time_frame = tkinter.Frame(quote_frame, bg="#323232")
+        quote_time_year = tkinter.Text(quote_time_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                       highlightcolor="#649AFA", bd=0, highlightthickness=1, insertbackground="#A0A0A0",
+                                       height=1, width=6, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+        quote_time_month = tkinter.Text(quote_time_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                        highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                        insertbackground="#A0A0A0",
+                                        height=1, width=6, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+        quote_time_day = tkinter.Text(quote_time_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                      highlightcolor="#649AFA", bd=0, highlightthickness=1, insertbackground="#A0A0A0",
+                                      height=1, width=6, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+        quote_time_sp01 = tkinter.Label(quote_time_frame, bg="#323232", fg="#A0A0A0", text="年")
+        quote_time_sp02 = tkinter.Label(quote_time_frame, bg="#323232", fg="#A0A0A0", text="月")
+        quote_time_sp03 = tkinter.Label(quote_time_frame, bg="#323232", fg="#A0A0A0", text="日")
+
+        quote_buyer_label = tkinter.Label(quote_frame, bg="#323232", fg="#A0A0A0", text="客户名称:")
+        quote_buyer_entry = tkinter.Text(quote_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                         highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                         insertbackground="#A0A0A0",
+                                         height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+
+        quote_btel_label = tkinter.Label(quote_frame, bg="#323232", fg="#A0A0A0", text="客户电话/传真:", font="黑体 12")
+        quote_btel_entry = tkinter.Text(quote_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                        highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                        insertbackground="#A0A0A0",
+                                        height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+
+        quote_bcontact_label = tkinter.Label(quote_frame, bg="#323232", fg="#A0A0A0", text="客户联系人:")
+        quote_bcontact_entry = tkinter.Text(quote_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                            highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                            insertbackground="#A0A0A0",
+                                            height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+
+        quote_qtel_label = tkinter.Label(quote_frame, bg="#323232", fg="#A0A0A0", text="报价电话/传真:", font="黑体 12")
+        quote_qtel_entry = tkinter.Text(quote_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                        highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                        insertbackground="#A0A0A0",
+                                        height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+
+        quote_qq_label = tkinter.Label(quote_frame, bg="#323232", fg="#A0A0A0", text="报价QQ:")
+        quote_qq_entry = tkinter.Text(quote_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                      highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                      insertbackground="#A0A0A0",
+                                      height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+
+        quote_qcontact_label = tkinter.Label(quote_frame, bg="#323232", fg="#A0A0A0", text="报价联系人:")
+        quote_qcontact_entry = tkinter.Text(quote_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                            highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                            insertbackground="#A0A0A0",
+                                            height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+
+        quote_project_label.grid(column=0, row=0, pady=5, sticky=tkinter.W)
+        quote_project_entry.grid(column=1, row=0, pady=5, sticky=tkinter.W)
+        quote_time_label.grid(column=0, row=1, pady=5, sticky=tkinter.W)
+        quote_time_day.pack(side="left")
+        quote_time_sp01.pack(side="left")
+        quote_time_month.pack(side="left")
+        quote_time_sp02.pack(side="left")
+        quote_time_year.pack(side="left")
+        quote_time_sp03.pack(side="left")
+        quote_time_frame.grid(column=1, row=1, pady=5, sticky=tkinter.W)
+        tkinter.Frame(quote_frame, bg="#323232", height=20).grid(column=0, row=2, sticky=tkinter.W)
+        quote_buyer_label.grid(column=0, row=3, pady=5, sticky=tkinter.W)
+        quote_buyer_entry.grid(column=1, row=3, pady=5, sticky=tkinter.W)
+        quote_btel_label.grid(column=0, row=4, pady=5, sticky=tkinter.W)
+        quote_btel_entry.grid(column=1, row=4, pady=5, sticky=tkinter.W)
+        quote_bcontact_label.grid(column=0, row=5, pady=5, sticky=tkinter.W)
+        quote_bcontact_entry.grid(column=1, row=5, pady=5, sticky=tkinter.W)
+        tkinter.Frame(quote_frame, bg="#323232", height=20).grid(column=0, row=6, sticky=tkinter.W)
+        quote_qtel_label.grid(column=0, row=7, pady=5, sticky=tkinter.W)
+        quote_qtel_entry.grid(column=1, row=7, pady=5, sticky=tkinter.W)
+        quote_qq_label.grid(column=0, row=8, pady=5, sticky=tkinter.W)
+        quote_qq_entry.grid(column=1, row=8, pady=5, sticky=tkinter.W)
+        quote_qcontact_label.grid(column=0, row=9, pady=5, sticky=tkinter.W)
+        quote_qcontact_entry.grid(column=1, row=9, pady=5, sticky=tkinter.W)
+
+        self.info_list["quote_project_entry"] = quote_project_entry
+        self.info_list["quote_time_day"] = quote_time_day
+        self.info_list["quote_time_month"] = quote_time_month
+        self.info_list["quote_time_year"] = quote_time_year
+        self.info_list["quote_buyer_entry"] = quote_buyer_entry
+        self.info_list["quote_btel_entry"] = quote_btel_entry
+        self.info_list["quote_bcontact_entry"] = quote_bcontact_entry
+        self.info_list["quote_qtel_entry"] = quote_qtel_entry
+        self.info_list["quote_qq_entry"] = quote_qq_entry
+        self.info_list["quote_qcontact_entry"] = quote_qcontact_entry
+
         info_menu_create.bind("<Button-1>", create_click)
         self.setting_button.bind("<Button-1>", self.open_setting_menu)
         self.window.bind("<Configure>", self.size_change)
@@ -580,6 +676,32 @@ class MainWindow(Window):
             self.item_menu.delete(0, 10)
             self.item_menu.add_command(label="返回上一级目录", command=folder_back)
             self.item_menu.post(pos[0], pos[1])
+        elif file_type == "add_quote":
+            self.item_menu.delete(0, 10)
+            self.item_menu.add_command(label="创建报价单", command=self.create_and_choose_quote())
+            self.item_menu.post(pos[0], pos[1])
+        elif file_type == "quote":
+            def open_qoe():
+                self.open_contract(self.file_list[file_id]["agm_code"])
+
+            def delete_qoe():
+                self.quote_loader.delete(file_id)
+
+            def quote_rename_recall(cid, new_name):
+                self.quote_loader.rename(cid, new_name)
+                self.refresh_agm()
+
+            def rename_qoe():
+                qid = self.file_list[file_id]["agm_code"]
+                rename_window = RenameWindow(master=self.window, cid=qid, command=quote_rename_recall, width=530,
+                                             height=100,
+                                             minsize_y=100)
+
+            self.item_menu.delete(0, 10)
+            self.item_menu.add_command(label="打开报价单", command=open_qoe)
+            self.item_menu.add_command(label="重命名", command=rename_qoe)
+            self.item_menu.add_command(label="删除", command=delete_qoe)
+            self.item_menu.post(pos[0], pos[1])
 
     def clear_info(self):
         if self.info_mode == "ct":
@@ -592,8 +714,12 @@ class MainWindow(Window):
                                      data_loader=self.data_loader)
 
     def open_contract(self, cid):
-        contract_window = ContractWindow(master=self.window, cid=cid, data_loader=self.data_loader,
-                                         contract_loader=self.contract_loader)
+        if len(cid) == 10:
+            contract_window = ContractWindow(master=self.window, cid=cid, data_loader=self.data_loader,
+                                             contract_loader=self.quote_loader)
+        elif len(cid) == 8:
+            contract_window = ContractWindow(master=self.window, cid=cid, data_loader=self.data_loader,
+                                             contract_loader=self.contract_loader)
 
     def hide_window(self):
         self.window.withdraw()
@@ -662,12 +788,14 @@ class MainWindow(Window):
         for i in self.file_list:
             if i["id_number"] == file_id:
                 self.clear_info()
+                self.warning_label.place_forget()
+                self.info_menu.place_forget()
+                self.info_canvas.place_forget()
+                self.quote_frame.place_forget()
                 self.chosen_file_id = file_id
                 self.tem_canvas.itemconfigure(i["frame"], width=3, outline="#649AFA")
                 self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989")
                 if i["type"] != "contract" and i["type"] != "template" and i["type"] != "quote":
-                    self.info_menu.place_forget()
-                    self.info_canvas.place_forget()
                     self.chosen_contract = None
                     if i["type"] == "folder":
                         input_folder = self.contract_path.copy()
@@ -682,7 +810,6 @@ class MainWindow(Window):
                 elif i["type"] == "contract" or i["type"] == "template":
                     self.info_mode = "ct"
                     self.chosen_contract = i["agm_code"]
-                    self.warning_label.place_forget()
                     self.info_menu.place(relx=1, x=-498, rely=1, y=-70, width=510, height=75)
                     self.info_canvas.place(relx=1, x=-500, y=67, width=500, height=-64, relheight=1)
                     if i["type"] == "contract":
@@ -739,9 +866,18 @@ class MainWindow(Window):
                     self.fill_info(self.chosen_contract)
                 else:
                     self.info_mode = "q"
+
+                    def get_open_function(number):
+                        def function(evt):
+                            self.open_contract(number)
+                        return function
+
+                    self.info_list["info_menu_create"].unbind("<Button-1>")
+                    self.info_list["info_menu_create"].bind("<Button-1>", get_open_function(i["agm_code"]))
+                    self.info_list["info_menu_create"].config(text="打开")
+                    self.quote_frame.place(relx=1, x=-500, y=67, width=500, height=-64, relheight=1)
                     self.info_menu.place(relx=1, x=-498, rely=1, y=-70, width=510, height=75)
-                    self.info_canvas.place_forget()
-                    pass
+
             else:
                 self.tem_canvas.itemconfigure(i["frame"], width=2, outline="#454545")
                 self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989")
@@ -897,7 +1033,7 @@ class MainWindow(Window):
                 self.quote_path.pop()
             self.folder_refresh(self.quote_path, self.folder_type)
 
-    def folder_refresh(self, folder, folder_type):
+    def folder_refresh(self, folder, folder_type, file_chosen=0):
         self.clear_agm()
         self.tem_canvas_space = 40
         path_text = "当前路径: "
@@ -913,7 +1049,7 @@ class MainWindow(Window):
             file_type = "contract"
             file_img = "img/agreement_file.png"
         elif folder_type == "quote":
-            file_list = self.contract_loader.get_contract_list(tuple(input_folder))
+            file_list = self.quote_loader.get_quote_list(tuple(input_folder))
             file_type = "quote"
             file_img = "img/quote_file.png"
         else:
@@ -934,7 +1070,14 @@ class MainWindow(Window):
                 self.add_agm(name="创建合同", img="img/file_add.png", agm_type="add_contract", number="")
             elif file_type == "quote":
                 self.add_agm(name="创建报价单", img="img/file_add.png", agm_type="add_quote", number="")
-        self.choose_file(0)
+        if file_chosen < 0:
+            file_chosen = len(file_list) + file_chosen
+        self.choose_file(file_chosen)
+
+    def create_and_choose_quote(self):
+        self.folder_type = "q"
+        self.quote_path = self.quote_loader.create_quote()
+        self.folder_refresh(self.quote_path, self.folder_type, -1)
 
     def size_change(self, evt):
         if self.window.winfo_width() != self.now_size[0] or self.window.winfo_height() != self.now_size[1]:
@@ -987,6 +1130,8 @@ class MainWindow(Window):
         if file_type == "add_template":
             self.contract_loader.create_template()
             self.refresh_agm()
+        elif file_type == "add_quote":
+            self.create_and_choose_quote()
         elif file_type == "template":
             self.create(id_number)
         elif file_type == "add_contract":
