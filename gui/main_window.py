@@ -33,9 +33,10 @@ class Window:
         self.window.geometry("%sx%s+%d+%d" % (width, height, (screen_width - width) / 2, (screen_height - height) / 2))
         self.window.minsize(900, 500)
         self.window.configure(bg="#323232")
+        self.window.iconphoto(True, tkinter.PhotoImage(file='img/icon_16.png'))
         self.window.update()
         self.gui_init(self.window)
-        # self.window.report_callback_exception = self.root_error_call_back
+        self.window.report_callback_exception = self.root_error_call_back
         self.window.mainloop()
 
     def gui_init(self, window):
@@ -838,6 +839,7 @@ class MainWindow(Window):
                     self.chosen_contract = None
                     if i["type"] == "folder" and self.folder_type == "contract":
                         input_folder = self.contract_path.copy()
+                        input_folder.append(i["agm_code"])
                         while len(input_folder) < 3:
                             input_folder.append(None)
                         total_turnover, total_sells = self.contract_loader.get_statistics(input_folder)

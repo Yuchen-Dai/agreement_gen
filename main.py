@@ -3,7 +3,6 @@ from dataLoader import DataLoader
 from contractLoader import ContractLoader
 from quoteLoader import QuoteLoader
 from setting_window import SettingWindow
-from pathlib import Path
 import logging
 
 logging_dict = {'0': logging.DEBUG, '1': logging.INFO, '2': logging.WARNING, '3': logging.ERROR,
@@ -16,7 +15,6 @@ logging.basicConfig(filename='logger.log',
                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
                     level=logging_level)
-
 dl = DataLoader.load()
 cl = ContractLoader()
 ql = QuoteLoader()
