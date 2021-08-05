@@ -408,7 +408,7 @@ class NewBuiltWindow(ChildWindow):
 
         # 填充内容
         if self.template_cid is not None:
-            contract = self.contract_loader.get_contract(self.template_cid)
+            contract = self.contract_loader.get(self.template_cid)
 
             supplier_name = contract[0]
             buyer_name = contract[1]

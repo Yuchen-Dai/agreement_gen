@@ -33,36 +33,61 @@ class SettingWindow(ChildWindow):
     def close(self):
         __class__.setting_count -= 1
         logging_level = str(self.data["logging_level"].get())
+        quote_contact = self.data["quote_contact_entry"].get("1.0", "end-1c")
+        quote_tel = self.data["quote_tel_entry"].get("1.0", "end-1c")
+        quote_qq = self.data["quote_qq_entry"].get("1.0", "end-1c")
+
         if logging_level != __class__.settings["logging_level"]:
             __class__.settings["logging_level"] = logging_level
             __class__.settings_modify = True
+        if logging_level != __class__.settings["quote_contact"]:
+            __class__.settings["quote_contact"] = quote_contact
+            __class__.settings_modify = True
+        if logging_level != __class__.settings["quote_tel"]:
+            __class__.settings["quote_tel"] = quote_tel
+            __class__.settings_modify = True
+        if logging_level != __class__.settings["quote_qq"]:
+            __class__.settings["quote_qq"] = quote_qq
+            __class__.settings_modify = True
+
         if __class__.settings_modify:
             __class__.settings_modify = False
             setting_path = Path('setting.yaml')
-            with setting_path.open('w') as f:
+            with setting_path.open('w', encoding='utf8') as f:
                 f.write('\n'.join([f'{i}:{v}'for i, v in __class__.settings.items()]))
         if self.data.get("command") is not None:
             self.data["command"]()
         self.data["data_loader"].save()
         super().close()
 
-    def gui_init(self, window):
+    @classmethod
+    def load_setting(cls):
         setting_path = Path('setting.yaml')
-        if not __class__.settings:
-            __class__.settings_modify = False
-            __class__.settings = {}
+        if not cls.settings:
+            cls.settings_modify = False
+            cls.settings = {}
             if setting_path.exists():
-                with setting_path.open('r') as f:
+                with setting_path.open('r', encoding='utf8') as f:
                     for line in f.readlines():
                         setting = line.strip().split(':')
-                        __class__.settings[setting[0]] = setting[1]
+                        cls.settings[setting[0]] = setting[1]
+        if 'logging_level' not in __class__.settings:
+            cls.settings["logging_level"] = '2'
+
+        if 'quote_contact' not in __class__.settings:
+            cls.settings["quote_contact"] = ""
+
+        if 'quote_tel' not in __class__.settings:
+            cls.settings["quote_tel"] = ""
+
+        if 'quote_qq' not in __class__.settings:
+            cls.settings["quote_qq"] = ""
+
+    def gui_init(self, window):
+        self.load_setting()
         logging_level = tkinter.IntVar()
+        logging_level.set(__class__.settings["logging_level"])
         self.data["logging_level"] = logging_level
-        if 'logging_level' in __class__.settings:
-            logging_level.set(int(__class__.settings["logging_level"]))
-        else:
-            logging_level.set(2)
-            __class__.settings["logging_level"] = '2'
 
         __class__.setting_count += 1
         self.data["data_loader"].refresh()
@@ -107,13 +132,56 @@ class SettingWindow(ChildWindow):
         panel_list = dict()
         base_setting_frame = tkinter.Frame(self.window, bg="#323232", bd=0, padx=20, pady=20)
         base_line01 = tkinter.Frame(base_setting_frame, bg="#464646", padx=20, pady=10)
-        logging_level_label = tkinter.Label(base_line01, text="日志等级:", fg="#A0A0A0", bg="#464646")
+        base_line01_01 = tkinter.Frame(base_line01, bg="#464646")
+        tkinter.Label(base_line01_01, bg="#464646", fg="#649AFA", text="报价单默认值", font="黑体 18").pack(side="left")
+        base_line01_01.grid(column=0, row=0, rowspan=1, pady=5, padx=5, sticky=tkinter.W)
+        quote_contact_label = tkinter.Label(base_line01, text="报价联系人:", fg="#A0A0A0", bg="#464646")
+        quote_tel_label = tkinter.Label(base_line01, text="电话/传真:", fg="#A0A0A0", bg="#464646")
+        quote_qq_label = tkinter.Label(base_line01, text="联系qq:", fg="#A0A0A0", bg="#464646")
+        quote_contact_entry = tkinter.Text(base_line01, bg="#363636", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                           highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                           insertbackground="#A0A0A0",
+                                           height=1, width=10, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+        quote_tel_entry = tkinter.Text(base_line01, bg="#363636", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                       highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                       insertbackground="#A0A0A0",
+                                       height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+        quote_qq_entry = tkinter.Text(base_line01, bg="#363636", fg="#A0A0A0", highlightbackground="#A0A0A0",
+                                      highlightcolor="#649AFA", bd=0, highlightthickness=1,
+                                      insertbackground="#A0A0A0",
+                                      height=1, width=25, wrap="none", undo=True, maxundo=-1, padx=10, pady=5)
+        quote_contact_label.grid(column=0, row=1, pady=5, padx=5, sticky=tkinter.W)
+        quote_contact_entry.grid(column=1, row=1, pady=5, padx=5, sticky=tkinter.W)
+        quote_tel_label.grid(column=0, row=2, pady=5, padx=5, sticky=tkinter.W)
+        quote_tel_entry.grid(column=1, row=2, pady=5, padx=5, sticky=tkinter.W)
+        quote_qq_label.grid(column=0, row=3, pady=5, padx=5, sticky=tkinter.W)
+        quote_qq_entry.grid(column=1, row=3, pady=5, padx=5, sticky=tkinter.W)
         base_line01.pack(side="top", fill="x")
+        tkinter.Frame(base_setting_frame, bg="#323232", height=15).pack(side="top")
+
+        def return_break(evt):
+            return "break"
+
+        quote_contact_entry.bind("<Return>", return_break)
+        quote_tel_entry.bind("<Return>", return_break)
+        quote_qq_entry.bind("<Return>", return_break)
+
+        quote_contact_entry.insert("1.0", __class__.settings["quote_contact"])
+        quote_tel_entry.insert("1.0", __class__.settings["quote_tel"])
+        quote_qq_entry.insert("1.0", __class__.settings["quote_qq"])
+
+        self.data["quote_contact_entry"] = quote_contact_entry
+        self.data["quote_tel_entry"] = quote_tel_entry
+        self.data["quote_qq_entry"] = quote_qq_entry
+
+        base_line02 = tkinter.Frame(base_setting_frame, bg="#464646", padx=20, pady=10)
+        logging_level_label = tkinter.Label(base_line02, text="日志等级:", fg="#A0A0A0", bg="#464646")
+        base_line02.pack(side="top", fill="x")
         logging_level_label.pack(side="left")
         self.data["logging_level_rb"] = list()
         choice_list = [("Debug", 0), ("Info", 1), ("Warning", 2), ("Error", 3), ("Fatal", 4)]
         for i in choice_list:
-            choice = tkinter.Radiobutton(base_line01, text=i[0], value=i[1], variable=logging_level, bg="#464646",
+            choice = tkinter.Radiobutton(base_line02, text=i[0], value=i[1], variable=logging_level, bg="#464646",
                                          fg="#9A9A9A", selectcolor="#262626", activebackground="#464646",
                                          activeforeground="#9A9A9A")
             choice.pack(side="left")

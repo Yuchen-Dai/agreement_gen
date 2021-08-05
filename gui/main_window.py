@@ -685,7 +685,7 @@ class MainWindow(Window):
                 self.open_contract(self.file_list[file_id]["agm_code"])
 
             def delete_recall():
-                self.quote_loader.delete(file_id)
+                self.quote_loader.delete(self.file_list[file_id]["agm_code"])
 
             def delete_qoe():
                 warning_window = WarningWindow(master=self.window, text="确定要删除该文件吗？", command=delete_recall)
@@ -1120,8 +1120,11 @@ class MainWindow(Window):
 
     def create_and_choose_quote(self):
         self.folder_type = "quote"
-        self.quote_path = list(self.quote_loader.create_quote("", self.quote_loader.get_today(), "", "", "", "", "", "",
-                                                              "新建报价单")[0])[:-1]
+        quote_contact = SettingWindow.settings["quote_contact"]
+        quote_tel = SettingWindow.settings["quote_tel"]
+        quote_qq = SettingWindow.settings["quote_qq"]
+        self.quote_path = list(self.quote_loader.create_quote("", self.quote_loader.get_today(), "", "", "",
+                                                              quote_contact, quote_tel, quote_qq, "新建报价单")[0])[:-1]
         self.folder_refresh(self.quote_path, self.folder_type, -1)
 
     def size_change(self, evt):
