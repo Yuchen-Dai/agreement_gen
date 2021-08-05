@@ -386,8 +386,6 @@ class NewBuiltWindow(ChildWindow):
             sure_button.unbind("<Enter>")
             sure_button.unbind("<Leave>")
 
-        sure_button.bind("<Button-1>", confirm)
-
         for i in self.info_list:
             if (type(self.info_list[i]) is tkinter.Text or type(self.info_list[i]) is CustomText)\
                     and i != "agm_number_entry":

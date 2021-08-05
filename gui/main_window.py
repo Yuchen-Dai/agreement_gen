@@ -113,7 +113,7 @@ class MainWindow(Window):
         except BaseException:
             print("主题已添加")
 
-        warning_label = tkinter.Label(window, bg="#323232", font="黑体 22", text="无可用选项", fg="#646464")
+        warning_label = tkinter.Label(window, bg="#323232", font="黑体 22", text="无可用选项", fg="#646464", justify="left")
         info_canvas = tkinter.Canvas(window, bg="#323232", scrollregion=(0, 0, 0, 1850))
         info_canvas.place(relx=1, x=-500, y=67, width=500, height=-64, relheight=1)
         info_frame = tkinter.Frame(info_canvas, bg="#323232", bd=20, highlightbackground="#323232")
@@ -840,9 +840,9 @@ class MainWindow(Window):
                         input_folder = self.contract_path.copy()
                         while len(input_folder) < 3:
                             input_folder.append(None)
-                        total_sells = self.contract_loader.get_statistics(input_folder)
+                        total_turnover, total_sells = self.contract_loader.get_statistics(input_folder)
                         self.warning_label.place(relx=1, x=-470, y=100, rely=0)
-                        self.warning_label.config(text="总成交额:{:.2f}".format(total_sells))
+                        self.warning_label.config(text="总成交额:{:.2f}\n总合同数:{:d}".format(total_turnover, total_sells))
                     else:
                         self.warning_label.place(relx=1, x=-320, rely=0.5, y=-100)
                         self.warning_label.config(text="无可用选项")
