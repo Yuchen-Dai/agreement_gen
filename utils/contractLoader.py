@@ -180,10 +180,10 @@ class ContractLoader:
         if not year:
             result = [i for i in self.contracts.values()]
         elif not month:
-            return [i for i in self.contracts.values() if i.cid[:2] == year[-2:]]
+            result = [i for i in self.contracts.values() if i.cid[:2] == year[-2:]]
         else:
-            return [i for i in self.contracts.values() if i.cid[:2] == year[-2:]
-                    and i.cid[2:4] == '{:0>2d}'.format(int(month))]
+            result = [i for i in self.contracts.values() if i.cid[:2] == year[-2:]
+                      and i.cid[2:4] == '{:0>2d}'.format(int(month))]
         return sum([i.get_total() for i in result]), len(result)
 
     def get_contract_list(self, date):
