@@ -284,7 +284,7 @@ class ContractLoader:
     def create_contract(self, supplier, buyer, brand, sign_date, delivery_date, delivery_location,
                         location, payment_method, comments, others, supplier_location, supplier_bank,
                         supplier_account, supplier_tax_num, supplier_tel, buyer_location, buyer_bank, buyer_account,
-                        buyer_tax_num, buyer_tel, name, contract_number):
+                        buyer_tax_num, buyer_tel, name, contract_number, table):
         """
         :param supplier: str
         :param buyer: str
@@ -334,6 +334,8 @@ class ContractLoader:
         c.buyer_tel = buyer_tel
         c.name = name
         c.cid = contract_number
+        if table:
+            c.table = table
         c.set_template(False)
         c.save(self.data_dir)
         self.contracts[c.cid] = c

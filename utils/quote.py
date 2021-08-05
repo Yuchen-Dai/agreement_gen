@@ -83,7 +83,6 @@ class Quote:
             this_month = [i for i in p.iterdir() if i.stem.startswith(pre_four)]
             for i in this_month:
                 number = int(i.stem[-4:-1])
-                print(i.stem)
                 if number >= biggest:
                     biggest = number + 1
             if biggest > 999:
