@@ -3,7 +3,7 @@ import os
 import datetime
 import pickle
 from pathlib import Path
-from exception import ContractNumberAlreadyExist, IllegalDate, FileExceed
+from utils.exception import ContractNumberAlreadyExist, IllegalDate, FileExceed
 
 
 class Contract:

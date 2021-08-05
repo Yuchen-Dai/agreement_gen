@@ -1,12 +1,12 @@
 import tkinter
 import tkinter.ttk
 import re
-from child_window import ChildWindow
-from warning_window import WarningWindow
-from assembly import StandardBar
-from dataLoader import DataLoader
-from exception import *
-from product import Product
+from gui.child_window import ChildWindow
+from gui.warning_window import WarningWindow
+from gui.assembly import StandardBar
+from utils.dataLoader import DataLoader
+from utils.exception import *
+from utils.product import Product
 from pathlib import Path
 
 product_type = {'框架断路器': ['RMW1', 'RMW2', 'ME', 'RMW3'],

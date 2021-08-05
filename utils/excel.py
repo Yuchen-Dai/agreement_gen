@@ -1,8 +1,8 @@
-from dataLoader import DataLoader
-from contract import Contract
+from utils.dataLoader import DataLoader
+from utils.contract import Contract
 from pathlib import Path
-from product import Product
-from exception import FileOccupied
+from utils.product import Product
+from utils.exception import FileOccupied
 
 import xlsxwriter, os, logging
 

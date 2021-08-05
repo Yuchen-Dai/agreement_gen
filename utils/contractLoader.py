@@ -1,9 +1,9 @@
-from contract import Contract
+from utils.contract import Contract
 from pathlib import Path
 import datetime
 import logging
-from excel import Excel
-from exception import FileExceed, IllegalContractNumber, ContractNumberAlreadyExist, IllegalDate
+from utils.excel import Excel
+from utils.exception import FileExceed, IllegalContractNumber, ContractNumberAlreadyExist, IllegalDate
 import pickle
 import re
 
@@ -495,6 +495,7 @@ if __name__ == '__main__':
     #     c.set_template(False)
     #     c.save()
     cl = ContractLoader()
+    print(cl.get_contract_list())
     # print(cl.get_template_list())
     # cl.move_template_to_front('00000011')
     # print(cl.get_template_list())

@@ -1,4 +1,4 @@
-from exception import ProductNotExist, ProductAlreadyExist
+from utils.exception import ProductNotExist, ProductAlreadyExist
 from pathlib import Path
 import pickle
 import os

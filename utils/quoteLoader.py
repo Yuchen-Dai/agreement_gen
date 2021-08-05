@@ -1,5 +1,5 @@
-from excel import Excel
-from quote import Quote
+from utils.excel import Excel
+from utils.quote import Quote
 from pathlib import Path
 from collections import defaultdict
 import re

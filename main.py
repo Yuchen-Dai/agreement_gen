@@ -1,8 +1,8 @@
-from main_window import MainWindow
-from dataLoader import DataLoader
-from contractLoader import ContractLoader
-from quoteLoader import QuoteLoader
-from setting_window import SettingWindow
+from gui.main_window import MainWindow
+from gui.setting_window import SettingWindow
+from utils.dataLoader import DataLoader
+from utils.contractLoader import ContractLoader
+from utils.quoteLoader import QuoteLoader
 import logging
 
 logging_dict = {'0': logging.DEBUG, '1': logging.INFO, '2': logging.WARNING, '3': logging.ERROR,

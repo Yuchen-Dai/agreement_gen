@@ -1,6 +1,6 @@
 import tkinter
 import tkinter.ttk
-from child_window import ChildWindow
+from gui.child_window import ChildWindow
 
 
 class QuoteChooseWindow(ChildWindow):

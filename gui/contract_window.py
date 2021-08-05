@@ -1,8 +1,8 @@
-from child_window import ChildWindow
-from dataLoader import DataLoader
-from warning_window import WarningWindow
-from setting_window import SettingWindow
-from exception import *
+from gui.child_window import ChildWindow
+from utils.dataLoader import DataLoader
+from gui.warning_window import WarningWindow
+from gui.setting_window import SettingWindow
+from utils.exception import *
 import tkinter
 import tkinter.ttk
 import tkinter.filedialog

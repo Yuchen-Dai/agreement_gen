@@ -2,7 +2,7 @@ import datetime
 import logging
 import pickle
 from pathlib import Path
-from exception import IllegalDate, FileExceed
+from utils.exception import IllegalDate, FileExceed
 
 
 class Quote:
@@ -156,4 +156,5 @@ if __name__ == '__main__':
     import os
     os.chdir('../')
     q = Quote()
-    q.save('data')
+    # q.save('data')
+    print(q.get_date())

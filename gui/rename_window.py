@@ -1,5 +1,5 @@
-from child_window import ChildWindow
-from warning_window import WarningWindow
+from gui.child_window import ChildWindow
+from gui.warning_window import WarningWindow
 import tkinter
 
 

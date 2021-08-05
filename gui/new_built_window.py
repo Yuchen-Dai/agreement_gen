@@ -1,9 +1,9 @@
 import tkinter
-from child_window import ChildWindow
-from warning_window import WarningWindow
-from quote_choose_window import QuoteChooseWindow
-from assembly import CustomText
-from exception import *
+from gui.child_window import ChildWindow
+from gui.warning_window import WarningWindow
+from gui.quote_choose_window import QuoteChooseWindow
+from gui.assembly import CustomText
+from utils.exception import *
 from tkinter import font
 
 
