@@ -362,7 +362,7 @@ class NewBuiltWindow(ChildWindow):
                 warning_window = WarningWindow(master=self.window, text="生成合同失败，\n具体原因见合同编号栏。")
                 return
 
-            quote_table = None if self.chosen_quote is None else self.quote_loader.get_table()
+            quote_table = None if self.chosen_quote is None else self.quote_loader.get_table(self.chosen_quote)
 
             data = (supplier_name_c, buyer_name_c, brand_c, (
                 year, month, day), delivery_date_c, delivery_place_c, location_c,
