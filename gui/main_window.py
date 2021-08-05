@@ -684,8 +684,11 @@ class MainWindow(Window):
             def open_qoe():
                 self.open_contract(self.file_list[file_id]["agm_code"])
 
-            def delete_qoe():
+            def delete_recall():
                 self.quote_loader.delete(file_id)
+
+            def delete_qoe():
+                warning_window = WarningWindow(master=self.window, text="确定要删除该文件吗？", command=delete_recall)
 
             def quote_rename_recall(cid, new_name):
                 self.quote_loader.rename(cid, new_name)
@@ -704,10 +707,9 @@ class MainWindow(Window):
             self.item_menu.post(pos[0], pos[1])
 
     def clear_info(self):
-        if self.info_mode == "ct":
-            for i in self.info_list:
-                if type(self.info_list[i]) is tkinter.Entry or type(self.info_list[i]) is tkinter.Text:
-                    self.info_list[i].delete("1.0", "end")
+        for i in self.info_list:
+            if type(self.info_list[i]) is tkinter.Entry or type(self.info_list[i]) is tkinter.Text:
+                self.info_list[i].delete("1.0", "end")
 
     def open_setting_menu(self, evt):
         setting_menu = SettingWindow(master=self.window, width=1280, height=800, resizable=True, title="设置",
@@ -729,7 +731,7 @@ class MainWindow(Window):
 
     def fill_info(self, cid):
         if self.info_mode == "ct":
-            contract = self.contract_loader.get_contract(cid)
+            contract = self.contract_loader.get(cid)
 
             supplier_name = contract[0]
             buyer_name = contract[1]
@@ -776,6 +778,30 @@ class MainWindow(Window):
             self.info_list["demander_detail_require2"].insert("1.0", str(buyer_account))
             self.info_list["demander_detail_require3"].insert("1.0", str(buyer_tax_num))
             self.info_list["demander_detail_require4"].insert("1.0", str(buyer_tel))
+        elif self.info_mode == "q":
+            quote = self.quote_loader.get(cid)
+
+            project_name = quote[0]
+            year = quote[1][0]
+            month = quote[1][1]
+            day = quote[1][2]
+            buyer_name = quote[2]
+            buyer_contact = quote[3]
+            buyer_tel = quote[4]
+            quote_contact = quote[5]
+            quote_tel = quote[6]
+            qq = quote[7]
+
+            self.info_list["quote_project_entry"].insert("1.0", project_name)
+            self.info_list["quote_time_day"].insert("1.0", day)
+            self.info_list["quote_time_month"].insert("1.0", month)
+            self.info_list["quote_time_year"].insert("1.0", year)
+            self.info_list["quote_buyer_entry"].insert("1.0", buyer_name)
+            self.info_list["quote_btel_entry"].insert("1.0", buyer_tel)
+            self.info_list["quote_bcontact_entry"].insert("1.0", buyer_contact)
+            self.info_list["quote_qtel_entry"].insert("1.0", quote_tel)
+            self.info_list["quote_qq_entry"].insert("1.0", qq)
+            self.info_list["quote_qcontact_entry"].insert("1.0", quote_contact)
 
     def disabled_fo_button(self):
         self.info_list["info_menu_save"].config(image=self.info_list["save_disabled_img"], cursor="arrow")
@@ -797,13 +823,13 @@ class MainWindow(Window):
                 self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989")
                 if i["type"] != "contract" and i["type"] != "template" and i["type"] != "quote":
                     self.chosen_contract = None
-                    if i["type"] == "folder":
+                    if i["type"] == "folder" and self.folder_type == "contract":
                         input_folder = self.contract_path.copy()
                         while len(input_folder) < 3:
                             input_folder.append(None)
                         total_sells = self.contract_loader.get_statistics(input_folder)
                         self.warning_label.place(relx=1, x=-470, y=100, rely=0)
-                        self.warning_label.config(text="总销售额:{:.2f}".format(total_sells))
+                        self.warning_label.config(text="总成交额:{:.2f}".format(total_sells))
                     else:
                         self.warning_label.place(relx=1, x=-320, rely=0.5, y=-100)
                         self.warning_label.config(text="无可用选项")
@@ -833,7 +859,7 @@ class MainWindow(Window):
                         self.info_list["agm_time_day"].delete("1.0", "end-1c")
                         self.info_list["agm_number_entry"].config(state="normal")
                         self.info_list["agm_number_entry"].delete("1.0", "end-1c")
-                        contract_number = self.contract_loader.get_contract(self.chosen_contract)[-1]
+                        contract_number = self.contract_loader.get(self.chosen_contract)[-1]
                         self.info_list["agm_number_entry"].insert("1.0", contract_number)
                         self.info_list["agm_number_entry"].config(state="disabled")
                     else:
@@ -947,6 +973,24 @@ class MainWindow(Window):
                 self.disabled_fo_button()
             except IllegalDate:
                 warning_window = WarningWindow(master=self.window, text="日期格式错误，保存失败。")
+        elif self.info_mode == "q":
+            project_name = self.info_list["quote_project_entry"].get("1.0", "end-1c")
+            day = self.info_list["quote_time_day"].get("1.0", "end-1c")
+            month = self.info_list["quote_time_month"].get("1.0", "end-1c")
+            year = self.info_list["quote_time_year"].get("1.0", "end-1c")
+            buyer_name = self.info_list["quote_buyer_entry"].get("1.0", "end-1c")
+            buyer_tel = self.info_list["quote_btel_entry"].get("1.0", "end-1c")
+            buyer_contact = self.info_list["quote_bcontact_entry"].get("1.0", "end-1c")
+            quote_tel = self.info_list["quote_qtel_entry"].get("1.0", "end-1c")
+            qq = self.info_list["quote_qq_entry"].get("1.0", "end-1c")
+            quote_contact = self.info_list["quote_qcontact_entry"].get("1.0", "end-1c")
+
+            try:
+                self.quote_loader.override_quote(self.chosen_contract, project_name, (year, month, day), buyer_name,
+                                                 buyer_tel, buyer_contact, quote_tel, qq, quote_contact)
+                self.disabled_fo_button()
+            except IllegalDate:
+                warning_window = WarningWindow(master=self.window, text="日期格式错误。")
 
     def info_back(self, evt):
         self.clear_info()
@@ -1071,12 +1115,13 @@ class MainWindow(Window):
             elif file_type == "quote":
                 self.add_agm(name="创建报价单", img="img/file_add.png", agm_type="add_quote", number="")
         if file_chosen < 0:
-            file_chosen = len(file_list) + file_chosen
+            file_chosen = len(file_list) + file_chosen + 1
         self.choose_file(file_chosen)
 
     def create_and_choose_quote(self):
-        self.folder_type = "q"
-        self.quote_path = self.quote_loader.create_quote()
+        self.folder_type = "quote"
+        self.quote_path = list(self.quote_loader.create_quote("", self.quote_loader.get_today(), "", "", "", "", "", "",
+                                                              "新建报价单")[0])
         self.folder_refresh(self.quote_path, self.folder_type, -1)
 
     def size_change(self, evt):
@@ -1141,6 +1186,8 @@ class MainWindow(Window):
         elif file_type == "folder_back":
             self.back_folder()
         elif file_type == "contract":
+            self.open_contract(self.file_list[id_number]["agm_code"])
+        elif file_type == "quote":
             self.open_contract(self.file_list[id_number]["agm_code"])
 
     def file_click(self, id_number):

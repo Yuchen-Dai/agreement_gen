@@ -35,7 +35,7 @@ class ContractWindow(ChildWindow):
     def close(self):
         __class__.contract_window_count -= 1
         self.master.deiconify()
-        self.contract_loader.save_contract(self.cid)
+        self.contract_loader.save(self.cid)
         super().close()
 
     @staticmethod
@@ -251,7 +251,7 @@ class ContractWindow(ChildWindow):
         self.products_read()
 
         # 以下为右侧布局
-        contract = self.contract_loader.get_contract(self.cid)
+        contract = self.contract_loader.get(self.cid)
         contract_name = contract[-2]
         contract_number = contract[-1]
 
