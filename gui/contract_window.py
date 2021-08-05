@@ -254,6 +254,7 @@ class ContractWindow(ChildWindow):
         contract = self.contract_loader.get(self.cid)
         contract_name = contract[-2]
         contract_number = contract[-1]
+        contract_type = "合同" if len(self.cid) == 8 else "报价单"
 
         top_info_frame = tkinter.Frame(contract_frame, bg="#323232")
         top_info_frame.pack(side="top", fill="x")
@@ -262,6 +263,8 @@ class ContractWindow(ChildWindow):
         tkinter.Frame(top_info_frame, bg="#323232", height=10).pack(side="top", fill="x")
         tkinter.Frame(top_info_frame, bg="#323232", width=15).pack(side="left", fill="y")
         tkinter.Frame(top_info_frame, bg="#323232", width=10).pack(side="right", fill="y")
+        info_type_label = tkinter.Label(top_info_frame, bg="#464646", fg="#9A9A9A", padx=10, pady=5,
+                                        text=contract_type)
         info_number_label = tkinter.Label(top_info_frame, bg="#464646", fg="#9A9A9A", padx=10, pady=5,
                                           text=contract_number)
         info_name_label = tkinter.Label(top_info_frame, bg="#323232", fg="#A0A0A0", text=contract_name)
@@ -278,6 +281,8 @@ class ContractWindow(ChildWindow):
 
         info_setting_button.bind("<Button-1>", open_setting)
 
+        info_type_label.pack(side="left")
+        tkinter.Frame(top_info_frame, bg="#323232", width=10).pack(side="left")
         info_number_label.pack(side="left")
         tkinter.Frame(top_info_frame, bg="#323232", width=15).pack(side="left")
         info_name_label.pack(side="left")
@@ -361,13 +366,16 @@ class ContractWindow(ChildWindow):
             file_path = tkinter.filedialog.asksaveasfilename(title=u'保存合同', filetypes=[("excel表格", ".xlsx")],
                                                              initialfile=contract_number + contract_name,
                                                              parent=window)
-            self.contract_loader.export_excel(self.cid, 1, file_path)
+            self.contract_loader.export_excel(self.cid, 0, file_path)
 
         def export_as_quotation():
             file_path = tkinter.filedialog.asksaveasfilename(title=u'保存报价单', filetypes=[("excel表格", ".xlsx")],
                                                              initialfile=contract_number + contract_name,
                                                              parent=window)
-            self.contract_loader.export_excel(self.cid, 2, file_path)
+            self.contract_loader.export_excel(self.cid, 0, file_path)
+
+        def export_as_pdf():
+            warning_window = WarningWindow(master=self.window, text="此功能还在开发中。")
 
         def menu_show(evt):
             x = evt.x_root
@@ -375,8 +383,11 @@ class ContractWindow(ChildWindow):
             item_menu.post(x, y)
 
         item_menu = tkinter.Menu(window, tearoff=False, font="新宋体 13", bg="#262626", fg="#A0A0A0")
-        item_menu.add_command(label="导出为合同", command=export_as_contract)
-        item_menu.add_command(label="导出为报价单", command=export_as_quotation)
+        if len(self.cid) == 8:
+            item_menu.add_command(label="导出为excel表格", command=export_as_contract)
+        elif len(self.cid) == 10:
+            item_menu.add_command(label="导出为excel表格", command=export_as_quotation)
+            item_menu.add_command(label="导出为pdf文件", command=export_as_pdf)
         item_menu.place()
 
         contract_export.bind("<Button-1>", menu_show)

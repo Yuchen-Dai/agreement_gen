@@ -27,7 +27,7 @@ class Window:
     def __init__(self, width=1260, height=900):
         self.window = tkinter.Tk()
         self.window.option_add("*Font", "黑体 15")
-        self.window.title("合同生成器")
+        self.window.title("森源电气有限公司-合同管理")
         screen_width = self.window.winfo_screenwidth()
         screen_height = self.window.winfo_screenheight() - 70
         self.window.geometry("%sx%s+%d+%d" % (width, height, (screen_width - width) / 2, (screen_height - height) / 2))
@@ -679,7 +679,7 @@ class MainWindow(Window):
             self.item_menu.post(pos[0], pos[1])
         elif file_type == "add_quote":
             self.item_menu.delete(0, 10)
-            self.item_menu.add_command(label="创建报价单", command=self.create_and_choose_quote())
+            self.item_menu.add_command(label="创建报价单", command=self.create_and_choose_quote)
             self.item_menu.post(pos[0], pos[1])
         elif file_type == "quote":
             def open_qoe():
@@ -909,8 +909,8 @@ class MainWindow(Window):
                     self.info_menu.place(relx=1, x=-498, rely=1, y=-70, width=510, height=75)
 
             else:
-                self.tem_canvas.itemconfigure(i["frame"], width=2, outline="#454545")
-                self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989")
+                self.tem_canvas.itemconfigure(i["frame"], width=2, outline="#454545", fill="#323232")
+                self.tem_canvas.itemconfigure(i["agm_name"], fill="#898989", font="黑体 13")
 
     def new_built(self, cid=None):
         if cid is None:
@@ -926,8 +926,7 @@ class MainWindow(Window):
         return self.contract_loader.create_contract(data[0], data[1], data[2], data[3], data[4], data[5], data[6],
                                                     data[7], data[8], data[9], data[10], data[11], data[12], data[13],
                                                     data[14], data[15], data[16], data[17], data[18], data[19],
-                                                    data[20],
-                                                    data[21])
+                                                    data[20], data[21], data[22])
 
     def info_change(self, evt):
         self.info_list["info_menu_save"].config(image=self.info_list["save_enabled_img"], cursor="hand2")

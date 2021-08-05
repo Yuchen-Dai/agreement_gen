@@ -12,8 +12,8 @@ class ChildWindow():
     def error_report(self, *error):
         self.master.error_report(error)
 
-    def __init__(self, master, width=1260, height=900, minsize_x=400, minsize_y=400, resizable=False, title="合同生成器"
-                 , **data):
+    def __init__(self, master, width=1260, height=900, minsize_x=400, minsize_y=400, resizable=False,
+                 title="森源电气有限公司-合同管理", **data):
         if self.check():
             # __class__.count += 1
             super().__init__()

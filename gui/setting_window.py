@@ -180,10 +180,27 @@ class SettingWindow(ChildWindow):
         logging_level_label.pack(side="left")
         self.data["logging_level_rb"] = list()
         choice_list = [("Debug", 0), ("Info", 1), ("Warning", 2), ("Error", 3), ("Fatal", 4)]
+
+        def get_choose_function(index):
+            def function(evt):
+                widget = evt.widget
+                for item in self.data["logging_level_rb"]:
+                    item.config(fg="#7A7A7A", font="黑体 16")
+                widget.config(fg="#649AFA", font="黑体 18")
+                self.data["logging_level"].set(int(index))
+            return function
+
         for i in choice_list:
-            choice = tkinter.Radiobutton(base_line02, text=i[0], value=i[1], variable=logging_level, bg="#464646",
-                                         fg="#9A9A9A", selectcolor="#262626", activebackground="#464646",
-                                         activeforeground="#9A9A9A")
+            # choice = tkinter.Radiobutton(base_line02, text=i[0], value=i[1], variable=logging_level, bg="#464646",
+            #                              fg="#9A9A9A", selectcolor="#262626", activebackground="#464646",
+            #                              activeforeground="#9A9A9A")
+            # choice.pack(side="left")
+            # self.data["logging_level_rb"].append(choice)
+            if i[1] == self.data["logging_level"].get():
+                choice = tkinter.Label(base_line02, text=i[0], bg="#464646", fg="#649AFA", font="黑体 18", padx=20, cursor="hand2")
+            else:
+                choice = tkinter.Label(base_line02, text=i[0], bg="#464646", fg="#7A7A7A", font="黑体 16", padx=20, cursor="hand2")
+            choice.bind("<Button-1>", get_choose_function(i[1]))
             choice.pack(side="left")
             self.data["logging_level_rb"].append(choice)
         panel_list["base_setting"] = base_setting_frame
