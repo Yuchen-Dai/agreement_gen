@@ -1,5 +1,3 @@
-
-
 class ProductNotExist(Exception):
     pass
 
@@ -22,6 +20,7 @@ class IllegalContractNumber(Exception):
 
 class FileExceed(Exception):
     pass
+
 
 class FileOccupied(Exception):
     pass

@@ -344,11 +344,13 @@ class Excel:
             sheet1.write_formula(row, col + 4, f'=SUM(E4:E{row})', format1_bold)
             sheet1.write_formula(row, col + 9, f'=SUM(J4:J{row})', number_format2_bold)
             row += 1
-            write_nonbold_bold(sheet1, row, 0, row, 10, merge_format4, merge_format4_bold, '备注:', self.c.get_comment())
+            sheet1.merge_range(row, 0, row, 10, f'备注：{self.c.get_comment()}', merge_format3)
             write_nonbold_bold(sheet1, row+1, 0, row+1, 10, merge_format4, merge_format4_bold, '日期:', '.'.join(self.c.get_date()))
             write_nonbold_bold(sheet1, row+2, 0, row+2, 10, merge_format4, merge_format4_bold, '报价人:', self.c.get_quote_contact())
-
-        workbook.close()
+        try:
+            workbook.close()
+        except xlsxwriter.exceptions.FileCreateError:
+            raise FileOccupied
 
 
 def write_nonbold_bold(sheet, frow, fcol, lrow, lcol, format_nonbold, format_bold, s1, s2, merge_format=None):
