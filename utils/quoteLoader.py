@@ -79,6 +79,9 @@ class QuoteLoader:
         """
         self.quotes[qid].del_item(line_number)
 
+    def get_table(self, qid):
+        return self.quotes[qid].get_table()
+
     def get_table_info(self, qid):
         """
         :param qid: Contract of table

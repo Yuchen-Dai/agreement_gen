@@ -9,6 +9,7 @@ class DataLoader:
 
     def __init__(self):
         self.data = {'products': {}, 'id_count': 0}
+        self.deleted = []
         self._modify = True
 
     def refresh(self, data_dir = 'data'):
@@ -41,6 +42,7 @@ class DataLoader:
             raise ProductNotExist(f"Product id not exist: {pid}")
         else:
             logging.info(f"Delete product id: {pid}, {self.data['products'][pid]}")
+            self.deleted.append(self.data['products'][pid])
             del self.data['products'][pid]
             self._modify = True
 
@@ -54,11 +56,12 @@ class DataLoader:
             with p.open('rb') as f:
                 cloud_data = pickle.load(f)
                 for product in cloud_data['products'].values():
-                    if product not in self.data['products'].values():
+                    if product not in self.data['products'].values() and product not in self.deleted:
                         logging.info(f"Update product from cloud:{product}")
                         self.data['products'][self.data['id_count']] = product
                         self.data['id_count'] += 1
                         self._modify = True
+        self.deleted = []
         if self._modify:
             self._modify = False
             logging.info(f"Save data: {p.resolve()}")
