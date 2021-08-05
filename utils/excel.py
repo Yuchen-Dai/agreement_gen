@@ -1,9 +1,8 @@
-import logging
 from dataLoader import DataLoader
 from contract import Contract
-from quote import Quote
 from pathlib import Path
 from product import Product
+from exception import FileOccupied
 
 import xlsxwriter, os, logging
 
@@ -339,6 +338,15 @@ class Excel:
                 sheet1.write_formula(row, col + 9, f'=E{row + 1}*I{row + 1}', number_format1)  # 金额
                 sheet1.write(row, col + 10, comment, format1)  # 备注
                 row += 1
+            for i in range(11):
+                sheet1.write(row, i, None, format1_bold)
+            sheet1.write(row, col + 1, '合计', format1_bold)
+            sheet1.write_formula(row, col + 4, f'=SUM(E4:E{row})', format1_bold)
+            sheet1.write_formula(row, col + 9, f'=SUM(J4:J{row})', number_format2_bold)
+            row += 1
+            write_nonbold_bold(sheet1, row, 0, row, 10, merge_format4, merge_format4_bold, '备注:', self.c.get_comment())
+            write_nonbold_bold(sheet1, row+1, 0, row+1, 10, merge_format4, merge_format4_bold, '日期:', '.'.join(self.c.get_date()))
+            write_nonbold_bold(sheet1, row+2, 0, row+2, 10, merge_format4, merge_format4_bold, '报价人:', self.c.get_quote_contact())
 
         workbook.close()
 
