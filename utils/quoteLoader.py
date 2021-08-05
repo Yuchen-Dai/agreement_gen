@@ -40,7 +40,7 @@ class QuoteLoader:
         e = Excel(self.quotes[qid])
         e.run(output_type=2, file_dir=file_dir)
 
-    def save_quote(self, qid):
+    def save(self, qid):
         """
         在基础信息不变，修改了table时,调用此方法
         :param qid: Quote to be saved
@@ -165,7 +165,7 @@ class QuoteLoader:
             q.qq = qq
             q.save(self.data_dir)
 
-    def get_quote(self, qid):
+    def get(self, qid):
         """
         :param qid:
         :return: project_name, date, buyer_name, buyer_contact, buyer_tel,
@@ -184,8 +184,9 @@ class QuoteLoader:
         """
         if qid in self.quotes:
             self.quotes[qid].rename(name)
+            self.quotes[qid].save(self.data_dir)
 
-    def del_quote(self, qid):
+    def delete(self, qid):
         """
         :param qid:
         :return:

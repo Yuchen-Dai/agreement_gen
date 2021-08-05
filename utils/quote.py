@@ -25,6 +25,7 @@ class Quote:
 
     def rename(self, name):
         self.name = name
+        self._modify = True
 
     def get_qid(self):
         return self.qid

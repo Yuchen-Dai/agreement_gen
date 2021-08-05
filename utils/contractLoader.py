@@ -108,7 +108,7 @@ class ContractLoader:
         e = Excel(self.contracts[contract_cid])
         e.run(output_type=1, file_dir=file_dir)
 
-    def save_contract(self, cid):
+    def save(self, cid):
         """
         保存指定合同（在基础信息不变，修改了table时,调用此方法）
         :param cid: Contract to be saved
@@ -364,7 +364,7 @@ class ContractLoader:
             self.template_order.insert(0, template_cid)
             self._save_template_order()
 
-    def get_contract(self, cid):
+    def get(self, cid):
         """
         :return: All of contract in tuple: supplier, buyer, brand, sign_date, delivery_date, delivery_location,
                           location, payment_method, comments, others, supplier_location, supplier_bank,
