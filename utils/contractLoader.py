@@ -173,17 +173,18 @@ class ContractLoader:
     def get_statistics(self, date):
         """
         :param date: (year, month ,None)
-        :return: total of specific date
+        :return: total of specific date, number of contract
         """
         year = date[0]
         month = date[1]
         if not year:
-            return sum([i.get_total() for i in self.contracts.values()])
+            result = [i for i in self.contracts.values()]
         elif not month:
-            return sum([i.get_total() for i in self.contracts.values() if i.cid[:2] == year[-2:]])
+            return [i for i in self.contracts.values() if i.cid[:2] == year[-2:]]
         else:
-            return sum([i.get_total() for i in self.contracts.values() if i.cid[:2] == year[-2:]
-                        and i.cid[2:4] == '{:0>2d}'.format(int(month))])
+            return [i for i in self.contracts.values() if i.cid[:2] == year[-2:]
+                    and i.cid[2:4] == '{:0>2d}'.format(int(month))]
+        return sum([i.get_total() for i in result]), len(result)
 
     def get_contract_list(self, date):
         """

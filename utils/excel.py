@@ -240,7 +240,7 @@ class Excel:
                                '电话：', supplier_info[5], left_bottom)
             write_nonbold_bold(sheet1, row + 9, 3, row + 9, 7, merge_format4,
                                merge_format4, '电话：', buyer_info[5], right_bottom)
-            sheet1.insert_image(row + 1, 0, 'img\\stamp1.png', {'x_offset': 40})
+            sheet1.insert_image(row + 1, 0, 'img\\stamp1.png', {'x_offset': 40, 'x_scale': 1, 'y_scale': 1})
 
             for i in range(1, row + 11):
                 sheet1.set_row(i, 20)
@@ -289,7 +289,7 @@ class Excel:
                                self.c.get_buyer(), vcenter)
             sheet2.merge_range(row + 5, 0, row + 5, 2, '日期：', merge_format4)
             sheet2.merge_range(row + 5, 3, row + 5, 10, '日期：', merge_format4)
-            sheet2.insert_image(row, 1, 'img\\stamp1.png')
+            sheet2.insert_image(row, 1, 'img\\stamp1.png', {'x_scale': 1, 'y_scale': 1})
 
         elif output_type == 2:
             # 报价单
