@@ -1,6 +1,7 @@
 from main_window import MainWindow
 from dataLoader import DataLoader
 from contractLoader import ContractLoader
+from quoteLoader import QuoteLoader
 from pathlib import Path
 import logging
 
@@ -25,4 +26,5 @@ logging.basicConfig(filename='logger.log',
 
 dl = DataLoader.load()
 cl = ContractLoader()
-main_window = MainWindow(dl, cl)
+ql = QuoteLoader()
+main_window = MainWindow(dl, cl, ql)
