@@ -27,7 +27,7 @@ class Window:
     def __init__(self, width=1260, height=900):
         self.window = tkinter.Tk()
         self.window.option_add("*Font", "黑体 15")
-        self.window.title("森源电气有限公司-合同管理")
+        self.window.title("森源电气有限公司-合同管理V0.1")
         screen_width = self.window.winfo_screenwidth()
         screen_height = self.window.winfo_screenheight() - 70
         self.window.geometry("%sx%s+%d+%d" % (width, height, (screen_width - width) / 2, (screen_height - height) / 2))

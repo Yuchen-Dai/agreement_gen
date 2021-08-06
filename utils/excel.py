@@ -275,7 +275,7 @@ class Excel:
                 sheet2.write_number(row, col + 7, product.get_adjunct_price(), number_format1)  # 附件
                 sheet2.write_formula(row, col + 8, f'=F{row + 1}*G{row + 1}+H{row + 1}', number_format1)  # 单价
                 sheet2.write_formula(row, col + 9, f'=E{row + 1}*I{row + 1}', number_format1)  # 金额
-                sheet2.write(row, col + 10, None, format1)  # 备注
+                sheet2.write(row, col + 10, comment, format1)  # 备注
                 row += 1
             for i in range(11):
                 sheet2.write(row, i, None, format1_bold)
