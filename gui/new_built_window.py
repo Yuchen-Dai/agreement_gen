@@ -1,4 +1,5 @@
 import tkinter
+from gui.setting_window import SettingWindow
 from gui.child_window import ChildWindow
 from gui.warning_window import WarningWindow
 from gui.quote_choose_window import QuoteChooseWindow
@@ -386,11 +387,17 @@ class NewBuiltWindow(ChildWindow):
             sure_button.unbind("<Enter>")
             sure_button.unbind("<Leave>")
 
-        for i in self.info_list:
-            if (type(self.info_list[i]) is tkinter.Text or type(self.info_list[i]) is CustomText)\
-                    and i != "agm_number_entry":
-                self.info_list[i].config(highlightbackground="#D96C6C", bg="#3A3A3A")
-                self.info_list[i].bind("<FocusIn>", entry_focus)
+        if int(SettingWindow.settings["second_confirm"]) == 1:
+            for i in self.info_list:
+                if (type(self.info_list[i]) is tkinter.Text or type(self.info_list[i]) is CustomText) \
+                        and i != "agm_number_entry":
+                    self.info_list[i].config(highlightbackground="#D96C6C", bg="#3A3A3A")
+                    self.info_list[i].bind("<FocusIn>", entry_focus)
+        else:
+            sure_button.configure(cursor="hand2", image=button_enabled_img)
+            sure_button.bind("<Button-1>", confirm)
+            sure_button.unbind("<Enter>")
+            sure_button.unbind("<Leave>")
 
         def contract_number_refresh(evt):
             year = agm_time_year.get("1.0", "end-1c")

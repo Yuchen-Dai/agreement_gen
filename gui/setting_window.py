@@ -36,18 +36,22 @@ class SettingWindow(ChildWindow):
         quote_contact = self.data["quote_contact_entry"].get("1.0", "end-1c")
         quote_tel = self.data["quote_tel_entry"].get("1.0", "end-1c")
         quote_qq = self.data["quote_qq_entry"].get("1.0", "end-1c")
+        second_confirm = str(self.data["second_confirm"])
 
         if logging_level != __class__.settings["logging_level"]:
             __class__.settings["logging_level"] = logging_level
             __class__.settings_modify = True
-        if logging_level != __class__.settings["quote_contact"]:
+        if quote_contact != __class__.settings["quote_contact"]:
             __class__.settings["quote_contact"] = quote_contact
             __class__.settings_modify = True
-        if logging_level != __class__.settings["quote_tel"]:
+        if quote_tel != __class__.settings["quote_tel"]:
             __class__.settings["quote_tel"] = quote_tel
             __class__.settings_modify = True
-        if logging_level != __class__.settings["quote_qq"]:
+        if quote_qq != __class__.settings["quote_qq"]:
             __class__.settings["quote_qq"] = quote_qq
+            __class__.settings_modify = True
+        if second_confirm != __class__.settings["second_confirm"]:
+            __class__.settings["second_confirm"] = second_confirm
             __class__.settings_modify = True
 
         if __class__.settings_modify:
@@ -82,6 +86,9 @@ class SettingWindow(ChildWindow):
 
         if 'quote_qq' not in __class__.settings:
             cls.settings["quote_qq"] = ""
+
+        if 'second_confirm' not in __class__.settings:
+            cls.settings["second_confirm"] = '1'
 
     def gui_init(self, window):
         self.load_setting()
@@ -174,9 +181,36 @@ class SettingWindow(ChildWindow):
         self.data["quote_tel_entry"] = quote_tel_entry
         self.data["quote_qq_entry"] = quote_qq_entry
 
+        def get_rb_function(index, data_key, widget_key):
+            def rb(evt):
+                widget = evt.widget
+                for item in self.data[widget_key]:
+                    item.config(fg="#7A7A7A", font="黑体 16")
+                widget.config(fg="#649AFA", font="黑体 18")
+                self.data[data_key] = index
+            return rb
+
+        self.data["second_confirm"] = int(__class__.settings["second_confirm"])
         base_line02 = tkinter.Frame(base_setting_frame, bg="#464646", padx=20, pady=10)
-        logging_level_label = tkinter.Label(base_line02, text="日志等级:", fg="#A0A0A0", bg="#464646")
+        second_confirm_label = tkinter.Label(base_line02, text="新建合同时二次确认:", fg="#A0A0A0", bg="#464646")
+        second_confirm_label.pack(side="left")
+        text_list = [(0, "关闭"), (1, "开启")]
+        self.data["second_confirm_switch"] = list()
+        for i in text_list:
+            if self.data["second_confirm"] == i[0]:
+                sec_con_rb = tkinter.Label(base_line02, text=i[1], bg="#464646", fg="#649AFA", font="黑体 18", padx=20, cursor="hand2")
+            else:
+                sec_con_rb = tkinter.Label(base_line02, text=i[1], bg="#464646", fg="#7A7A7A", font="黑体 16", padx=20, cursor="hand2")
+            sec_con_rb.pack(side="left")
+            sec_con_rb.bind("<Button-1>", get_rb_function(i[0], "second_confirm", "second_confirm_switch"))
+            self.data["second_confirm_switch"].append(sec_con_rb)
+
         base_line02.pack(side="top", fill="x")
+        tkinter.Frame(base_setting_frame, bg="#323232", height=15).pack(side="top")
+
+        base_line03 = tkinter.Frame(base_setting_frame, bg="#464646", padx=20, pady=10)
+        logging_level_label = tkinter.Label(base_line03, text="日志等级:", fg="#A0A0A0", bg="#464646")
+        base_line03.pack(side="top", fill="x")
         logging_level_label.pack(side="left")
         self.data["logging_level_rb"] = list()
         choice_list = [("Debug", 0), ("Info", 1), ("Warning", 2), ("Error", 3), ("Fatal", 4)]
@@ -197,9 +231,9 @@ class SettingWindow(ChildWindow):
             # choice.pack(side="left")
             # self.data["logging_level_rb"].append(choice)
             if i[1] == self.data["logging_level"].get():
-                choice = tkinter.Label(base_line02, text=i[0], bg="#464646", fg="#649AFA", font="黑体 18", padx=20, cursor="hand2")
+                choice = tkinter.Label(base_line03, text=i[0], bg="#464646", fg="#649AFA", font="黑体 18", padx=20, cursor="hand2")
             else:
-                choice = tkinter.Label(base_line02, text=i[0], bg="#464646", fg="#7A7A7A", font="黑体 16", padx=20, cursor="hand2")
+                choice = tkinter.Label(base_line03, text=i[0], bg="#464646", fg="#7A7A7A", font="黑体 16", padx=20, cursor="hand2")
             choice.bind("<Button-1>", get_choose_function(i[1]))
             choice.pack(side="left")
             self.data["logging_level_rb"].append(choice)
