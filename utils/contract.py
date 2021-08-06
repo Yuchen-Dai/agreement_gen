@@ -48,6 +48,9 @@ class Contract:
 
         self.table = []  # [(product_id, quantity, discount)]
 
+    def set_modify(self):
+        self._modify = True
+
     def get_table(self):
         return self.table
 

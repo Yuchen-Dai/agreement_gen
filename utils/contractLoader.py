@@ -256,6 +256,7 @@ class ContractLoader:
             c.buyer_account = buyer_account
             c.buyer_tax_num = buyer_tax_num
             c.buyer_tel = buyer_tel
+            c.set_modify()
             c.save(self.data_dir)
         elif contract_cid in self.templates:
             c = self.templates[contract_cid]
@@ -278,6 +279,7 @@ class ContractLoader:
             c.buyer_account = buyer_account
             c.buyer_tax_num = buyer_tax_num
             c.buyer_tel = buyer_tel
+            c.set_modify()
             c.save(self.data_dir)
         else:
             raise ValueError(f'{contract_cid} not exist.')
