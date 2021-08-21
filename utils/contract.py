@@ -136,7 +136,7 @@ class Contract:
         for line in self.table:
             p = line[0]
             total += line[1] * (p.get_raw_price() * line[2] + p.get_adjunct_price())
-        return total
+        return round(total, 2)
 
     def get_total_daxie(self):
         return numToBig(self.get_total())
