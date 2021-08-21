@@ -132,12 +132,30 @@ class ContractLoader:
             return 1
         if not re.match(r"^((0?\.[0-9]+)|1)?$", discount):
             return 2
-        if product in [i[0] for i in self.contracts[cid].get_table()]:
-            return 3
+        # if product in [i[0] for i in self.contracts[cid].get_table()]: //暂时不需要
+        #     return 3
         if not discount:
             discount = 1
         self.contracts[cid].add_item(product, int(quantity), float(discount), comments)
         return 0
+
+    def move_product(self, cid, start_line, destination_line):
+        """
+        Move a line to destination line.
+        :param cid: Contract to be used
+        :param start_line: Line to be moved (Index start by 0)
+        :param destination_line: Destination line (Index start by 0)
+        :return:
+        """
+        self.contracts[cid].move_product(start_line, destination_line)
+
+    def sort_products(self, cid):
+        """
+        Sort the contract's table
+        :param cid: Contract to be used
+        :return:
+        """
+        self.contracts[cid].table_sort()
 
     def remove_product(self, cid, line_number):
         """
@@ -497,7 +515,10 @@ if __name__ == '__main__':
     #     c.set_template(False)
     #     c.save()
     cl = ContractLoader()
-    print(cl.get_contract_list())
+    print(cl.get_contract_list(('2021', '08', None)))
+    print(cl.get_table_info('21080601'))
+    cl.move_product('21080601',3,6)
+    cl.save('21080601')
     # print(cl.get_template_list())
     # cl.move_template_to_front('00000011')
     # print(cl.get_template_list())
