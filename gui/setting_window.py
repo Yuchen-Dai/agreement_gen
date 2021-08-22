@@ -105,7 +105,7 @@ class SettingWindow(ChildWindow):
         choice_001.pack(fill="x", side="top")
         choice_002 = tkinter.Label(menu_frame, bg="#262626", text="产品管理", fg="#649AFA", height=3, cursor="hand2")
         choice_002.pack(fill="x", side="top")
-        choice_003 = tkinter.Label(menu_frame, bg="#262626", text="附件管理", fg="#9A9A9A", height=3, cursor="hand2")
+        choice_003 = tkinter.Label(menu_frame, bg="#262626", text="更新日志", fg="#9A9A9A", height=3, cursor="hand2")
         choice_003.pack(fill="x", side="top")
 
         def choose_001(evt):
@@ -336,11 +336,31 @@ class SettingWindow(ChildWindow):
 
         panel_list["product_manager"] = product_manager_frame
 
-        enclosure_manager_frame = tkinter.Frame(self.window, bg="#323232", bd=0, padx=20, pady=20)
-        enclosure_manager_label = tkinter.Label(enclosure_manager_frame, text="该功能已被移除", font="黑体 25", fg="#646464",
-                                                bg="#323232")
-        enclosure_manager_label.pack()
-        panel_list["enclosure_manager"] = enclosure_manager_frame
+        update_log_frame = tkinter.Frame(self.window, bg="#323232", bd=0, padx=40, pady=40)
+        update_base_frame = tkinter.Frame(update_log_frame, bg="#464646", padx=40, pady=30)
+        update_base_frame.pack(side="top", fill="y", expand=1)
+
+        update_title_line01 = tkinter.Frame(update_base_frame, bg="#464646")
+        update_title_label = tkinter.Label(update_title_line01, bg="#464646", fg="#649AFA", text="V1.1.0", font="黑体 26")
+        update_title_label.pack(side="left")
+        update_title_line01.pack(side="top", fill="x")
+        tkinter.Frame(update_base_frame, bg="#464646", height=30).pack(side="top")
+        update_content = {"新增功能": ["设置中新增\"更新日志\"", "在合同或报价单中可以拖动已添加的产品以改变顺序", "在合同修改界面下方新增\"编辑\"菜单按钮"],
+                          "功能调整": ["允许在合同或报价单中重复添加产品", "原合同或报价单内产品自动排序功能移至编辑菜单中"],
+                          "功能移除": ["移除了设置中的\"附件管理\""],
+                          "内容优化": ["优化了部分显示效果"]}
+        content_text = ""
+        for i in update_content:
+            content_text = f"{content_text}{i}:\n"
+            for i2 in update_content[i]:
+                content_text = f"{content_text} -{i2}\n"
+            content_text = f"{content_text}\n"
+
+        update_content_label = tkinter.Label(update_base_frame, bg="#464646", fg="#A0A0A0", text=content_text,
+                                             justify="left")
+        update_content_label.pack(side="top")
+
+        panel_list["enclosure_manager"] = update_log_frame
         widget_list = dict()
         widget_list["product_standard_canvas"] = product_standard_canvas
         widget_list["product_adjunctName_entry"] = product_adjunctName_entry

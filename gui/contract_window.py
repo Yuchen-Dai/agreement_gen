@@ -290,18 +290,21 @@ class ContractWindow(ChildWindow):
         info_setting_button.pack(side="right")
         tkinter.Frame(top_info_frame, bg="#323232", width=15).pack(side="left")
 
-        info_bottom_line = tkinter.Frame(contract_frame, bg="#323232", padx=10, pady=5)
+        info_bottom_line = tkinter.Frame(contract_frame, bg="#323232", padx=10, pady=10)
         contract_export = tkinter.Label(info_bottom_line, bg="#649AFA", fg="#E4E4E4", text="导出为...",
                                         cursor="hand2", padx=8, pady=4, font="黑体 14")
         product_list_delete = tkinter.Label(info_bottom_line, bg="#646464", fg="#A0A0A0", text="移除选中产品",
                                             cursor="arrow", padx=8, pady=4, font="黑体 14")
 
+        edit_image = tkinter.PhotoImage(file="img/edit_icon.png", width=35, height=35)
         lock_image = tkinter.PhotoImage(file="img/lock_icon.png", width=35, height=35)
         unlock_image = tkinter.PhotoImage(file="img/unlock_icon.png", width=35, height=35)
+        self.data["edit_image"] = edit_image
         self.data["lock_image"] = lock_image
         self.data["unlock_image"] = unlock_image
         self.data["delete_lock"] = True
         product_delete_lock = tkinter.Label(info_bottom_line, bg="#323232", image=lock_image, cursor="hand2")
+        product_edit_button = tkinter.Label(info_bottom_line, bg="#323232", image=edit_image, cursor="hand2")
 
         total_label = tkinter.Label(info_bottom_line, bg="#323232", fg="#9A9A9A", text="合计数量:-  合计金额:-")
         widget_list["total_label"] = total_label
@@ -310,6 +313,7 @@ class ContractWindow(ChildWindow):
         tkinter.Frame(info_bottom_line, bg="#323232", width=10).pack(side="right")
         product_list_delete.pack(side="right")
         product_delete_lock.pack(side="right")
+        product_edit_button.pack(side="right")
         total_label.pack(side="left")
         info_bottom_line.pack(side="bottom", fill="x")
 
@@ -317,6 +321,21 @@ class ContractWindow(ChildWindow):
         widget_list["product_delete_lock"] = product_delete_lock
 
         product_delete_lock.bind("<Button-1>", self.lock_change)
+
+        def auto_sort():
+            self.contract_loader.sort_products(self.cid)
+            self.contract_product_refresh()
+
+        product_edit_menu = tkinter.Menu(window, tearoff=False, font="新宋体 13", bg="#262626", fg="#A0A0A0")
+        product_edit_menu.add_command(label="自动排序", command=auto_sort)
+
+        def show_edit_menu(evt):
+            x = product_edit_button.winfo_rootx()
+            y = product_edit_button.winfo_rooty() - 20 * (product_edit_menu.index("end") + 1) - 10
+            product_edit_menu.post(x, y)
+
+        product_edit_button.bind("<Button-1>", show_edit_menu)
+
         contract_export.bind("<Enter>", self.button_enter)
         contract_export.bind("<Leave>", self.button_leave)
 
@@ -355,10 +374,77 @@ class ContractWindow(ChildWindow):
 
         widget_list["contract_product"] = contract_product
 
+        in_dragging = False
+        drag_start = None
+        drag_y = 0
+        drag_target = None
+
+        def drag_out(evt):
+            global drag_target
+
+            contract_product.unbind("<B1-Motion>")
+            contract_product.unbind("<ButtonRelease-1>")
+            contract_product.unbind('<Leave>')
+            contract_product.config(cursor="arrow")
+
+            if drag_target is not None:
+                contract_product.tag_configure(drag_target, background="#323232", foreground="#A0A0A0")
+
+        def drag_product_move(evt):
+            global in_dragging
+            global drag_y
+            global drag_start
+            global drag_target
+
+            if in_dragging is False and abs(drag_y - evt.y) > 20 and len(contract_product.selection()) == 1 and\
+                    contract_product.selection()[0] == drag_start:
+                in_dragging = True
+                drag_target = None
+                contract_product.config(cursor="top_side")
+
+            if in_dragging:
+                now_mouse_on = contract_product.identify_row(evt.y)
+                now_mouse_on = None if now_mouse_on == drag_start or now_mouse_on == "" else now_mouse_on
+                if drag_target is not None and drag_target != now_mouse_on:
+                    contract_product.tag_configure(drag_target, background="#323232", foreground="#A0A0A0")
+                if now_mouse_on is not None:
+                    contract_product.tag_configure(now_mouse_on, background="#464646", foreground="#A0A0A0")
+                drag_target = now_mouse_on
+
+        def drag_product_end(evt):
+            global in_dragging
+            global drag_target
+            global drag_start
+
+            contract_product.unbind("<B1-Motion>")
+            contract_product.unbind("<ButtonRelease-1>")
+            contract_product.unbind('<Leave>')
+            contract_product.config(cursor="arrow")
+
+            if in_dragging and drag_target is not None:
+                self.contract_loader.move_product(self.cid, int(drag_start), int(drag_target))
+                self.contract_product_refresh()
+                drag_select = drag_target if int(drag_start) > int(drag_target) else str(int(drag_target) - 1)
+                contract_product.selection_set(drag_select)
+
+        def drag_product_start(evt):
+            global drag_start
+            global in_dragging
+            global drag_y
+
+            in_dragging = False
+            drag_start = contract_product.identify_row(evt.y)
+            if drag_start is not None:
+                drag_y = evt.y
+                contract_product.bind("<B1-Motion>", drag_product_move)
+                contract_product.bind("<ButtonRelease-1>", drag_product_end)
+                contract_product.bind('<Leave>', drag_out)
+
         def contract_product_select(evt):
             self.select(contract_product)
 
         contract_product.bind('<<TreeviewSelect>>', contract_product_select)
+        contract_product.bind('<Button-1>', drag_product_start)
         self.contract_product_refresh()
 
         product_add_button.bind("<Button-1>", self.add_product)
@@ -385,8 +471,8 @@ class ContractWindow(ChildWindow):
             warning_window = WarningWindow(master=self.window, text="此功能还在开发中。")
 
         def menu_show(evt):
-            x = evt.x_root
-            y = evt.y_root
+            x = contract_export.winfo_rootx() - 65
+            y = contract_export.winfo_rooty() - 20 * (item_menu.index("end") + 1) - 10
             item_menu.post(x, y)
 
         item_menu = tkinter.Menu(window, tearoff=False, font="新宋体 13", bg="#262626", fg="#A0A0A0")
