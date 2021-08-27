@@ -24,7 +24,7 @@ class Quote:
         self.qid = None
         self._modify = True
 
-        self.table = []  # [(product_id, quantity, discount)]
+        self.table = []  # [(product, quantity, discount)]
 
     def get_comment(self):
         return self.comment if self.comment else ' '
@@ -53,6 +53,21 @@ class Quote:
     def add_item(self, product, quantity, discount, comments):
         logging.debug(f"Add line: {product}")
         self.table.append((product, quantity, discount, comments))
+        # self.table.sort(key=lambda x: x[0])
+        self._modify = True
+
+    def move_product(self, start_line, dest_line):
+        if start_line < dest_line:
+            self.table.insert(dest_line, self.table[start_line])
+            del self.table[start_line]
+            self._modify = True
+        elif start_line > dest_line:
+            self.table.insert(dest_line, self.table[start_line])
+            del self.table[start_line + 1]
+            self._modify = True
+
+    def table_sort(self):
+        self.table.sort(key=lambda x: x[1])
         self.table.sort(key=lambda x: x[0])
         self._modify = True
 

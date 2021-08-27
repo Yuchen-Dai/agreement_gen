@@ -46,7 +46,7 @@ class Contract:
         self._new = True
         self._modify = True
 
-        self.table = []  # [(product_id, quantity, discount)]
+        self.table = []  # [(product, quantity, discount)]
 
     def set_modify(self):
         self._modify = True
@@ -82,6 +82,7 @@ class Contract:
             self._modify = True
 
     def table_sort(self):
+        self.table.sort(key=lambda x: x[1])
         self.table.sort(key=lambda x: x[0])
         self._modify = True
 
