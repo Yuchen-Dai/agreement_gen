@@ -65,12 +65,30 @@ class QuoteLoader:
             return 1
         if not re.match(r"^((0?\.[0-9]+)|1)?$", discount):
             return 2
-        if product in [i[0] for i in self.quotes[qid].get_table()]:
-            return 3
+        # if product in [i[0] for i in self.quotes[qid].get_table()]:
+        #     return 3
         if not discount:
             discount = 1
         self.quotes[qid].add_item(product, int(quantity), float(discount), comments)
         return 0
+
+    def move_product(self, qid, start_line, destination_line):
+        """
+        Move a line to destination line.
+        :param qid: Contract to be used
+        :param start_line: Line to be moved (Index start by 0)
+        :param destination_line: Destination line (Index start by 0)
+        :return:
+        """
+        self.quotes[qid].move_product(start_line, destination_line)
+
+    def sort_products(self, qid):
+        """
+        Sort the contract's table
+        :param qid: Contract to be used
+        :return:
+        """
+        self.quotes[qid].table_sort()
 
     def remove_product(self, qid, line_number):
         """
