@@ -44,6 +44,7 @@ class ContractWindow(ChildWindow):
         return __class__.contract_window_count < 1
 
     def gui_init(self, window):
+        window.focus_force()
         __class__.contract_window_count += 1
 
         widget_list = dict()
@@ -278,7 +279,8 @@ class ContractWindow(ChildWindow):
 
         def open_setting(evt):
             setting_menu = SettingWindow(master=self.window, width=1280, height=800, resizable=True, title="设置",
-                                         data_loader=self.data_loader, command=setting_recall)
+                                         data_loader=self.data_loader, command=setting_recall, minsize_x=1000,
+                                         minsize_y=700)
 
         info_setting_button.bind("<Button-1>", open_setting)
 
@@ -485,6 +487,20 @@ class ContractWindow(ChildWindow):
 
         contract_export.bind("<Button-1>", menu_show)
 
+        def tab_select(evt):
+            if evt.keysym == "Tab":
+                for index in range(len(input_list)):
+                    if input_list[index] == evt.widget:
+                        if index != 2:
+                            input_list[index + 1].focus_set()
+                        else:
+                            input_list[0].focus_set()
+                return "break"
+
+        input_list = [amount_entry, discount_entry, comments_entry]
+        for i in input_list:
+            i.bind("<Key>", tab_select)
+
     @staticmethod
     def button_enter(evt):
         evt.widget.config(bg="#84AAFF")
@@ -522,9 +538,13 @@ class ContractWindow(ChildWindow):
                 return
             elif result == 0:
                 self.contract_product_refresh()
-                self.data["widget_list"]["amount_entry"].delete("1.0", "end")
-                self.data["widget_list"]["discount_entry"].delete("1.0", "end")
-                self.data["widget_list"]["comments_entry"].delete("1.0", "end")
+                clear_setting = [int(i) for i in SettingWindow.settings["clear_contract_entry"].split("-")]
+                if clear_setting[0] == 1:
+                    self.data["widget_list"]["amount_entry"].delete("1.0", "end")
+                if clear_setting[1] == 1:
+                    self.data["widget_list"]["discount_entry"].delete("1.0", "end")
+                if clear_setting[2] == 1:
+                    self.data["widget_list"]["comments_entry"].delete("1.0", "end")
 
     def contract_product_refresh(self):
         product_list = self.contract_loader.get_table_info(self.cid)

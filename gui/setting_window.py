@@ -1,5 +1,6 @@
 import tkinter
 import tkinter.ttk
+import tkinter.font
 import re
 from gui.child_window import ChildWindow
 from gui.warning_window import WarningWindow
@@ -37,6 +38,8 @@ class SettingWindow(ChildWindow):
         quote_tel = self.data["quote_tel_entry"].get("1.0", "end-1c")
         quote_qq = self.data["quote_qq_entry"].get("1.0", "end-1c")
         second_confirm = str(self.data["second_confirm"])
+        clear_product_entry = "-".join([str(item) for item in self.data["clear_product_entry"]])
+        clear_contract_entry = "-".join([str(item) for item in self.data["clear_contract_entry"]])
 
         if logging_level != __class__.settings["logging_level"]:
             __class__.settings["logging_level"] = logging_level
@@ -52,6 +55,12 @@ class SettingWindow(ChildWindow):
             __class__.settings_modify = True
         if second_confirm != __class__.settings["second_confirm"]:
             __class__.settings["second_confirm"] = second_confirm
+            __class__.settings_modify = True
+        if second_confirm != __class__.settings["clear_product_entry"]:
+            __class__.settings["clear_product_entry"] = clear_product_entry
+            __class__.settings_modify = True
+        if second_confirm != __class__.settings["clear_contract_entry"]:
+            __class__.settings["clear_contract_entry"] = clear_contract_entry
             __class__.settings_modify = True
 
         if __class__.settings_modify:
@@ -89,6 +98,12 @@ class SettingWindow(ChildWindow):
 
         if 'second_confirm' not in __class__.settings:
             cls.settings["second_confirm"] = '1'
+
+        if 'clear_product_entry' not in __class__.settings:
+            cls.settings["clear_product_entry"] = '1-1-1-1-1'
+
+        if 'clear_contract_entry' not in __class__.settings:
+            cls.settings["clear_contract_entry"] = '1-1-1'
 
     def gui_init(self, window):
         self.load_setting()
@@ -190,20 +205,59 @@ class SettingWindow(ChildWindow):
                 self.data[data_key] = index
             return rb
 
+        def get_mc_function(data_key, index):
+            def mc(evt):
+                widget = evt.widget
+                if self.data[data_key][index] == 0:
+                    self.data[data_key][index] = 1
+                    widget.config(fg="#649AFA", font="黑体 18")
+                else:
+                    self.data[data_key][index] = 0
+                    widget.config(fg="#7A7A7A", font="黑体 16")
+            return mc
+
+        def add_multiple_choice(title, data_key, choice_list):
+            choice_data = self.data[data_key]
+            base_line02_new = tkinter.Frame(base_line02, bg="#464646", pady=4)
+            base_line02_new.pack(side="top", fill="x")
+            mc_label = tkinter.Label(base_line02_new, text=title, fg="#A0A0A0", bg="#464646")
+            mc_label.pack(side="left")
+            for index in range(len(choice_list)):
+                if choice_data[index] == 1:
+                    mc = tkinter.Label(base_line02_new, text=choice_list[index], bg="#464646", fg="#649AFA",
+                                       font="黑体 18", padx=20,
+                                       cursor="hand2")
+                else:
+                    mc = tkinter.Label(base_line02_new, text=choice_list[index], bg="#464646", fg="#7A7A7A",
+                                       font="黑体 16", padx=20,
+                                       cursor="hand2")
+                mc.pack(side="left")
+                mc.bind("<Button-1>", get_mc_function(data_key, index))
+
         self.data["second_confirm"] = int(__class__.settings["second_confirm"])
         base_line02 = tkinter.Frame(base_setting_frame, bg="#464646", padx=20, pady=10)
-        second_confirm_label = tkinter.Label(base_line02, text="新建合同时二次确认:", fg="#A0A0A0", bg="#464646")
+        base_line02_01 = tkinter.Frame(base_line02, bg="#464646", pady=4)
+        base_line02_01.pack(side="top", fill="x")
+        second_confirm_label = tkinter.Label(base_line02_01, text="新建合同时二次确认:", fg="#A0A0A0", bg="#464646")
         second_confirm_label.pack(side="left")
         text_list = [(0, "关闭"), (1, "开启")]
         self.data["second_confirm_switch"] = list()
         for i in text_list:
             if self.data["second_confirm"] == i[0]:
-                sec_con_rb = tkinter.Label(base_line02, text=i[1], bg="#464646", fg="#649AFA", font="黑体 18", padx=20, cursor="hand2")
+                sec_con_rb = tkinter.Label(base_line02_01, text=i[1], bg="#464646", fg="#649AFA", font="黑体 18", padx=20, cursor="hand2")
             else:
-                sec_con_rb = tkinter.Label(base_line02, text=i[1], bg="#464646", fg="#7A7A7A", font="黑体 16", padx=20, cursor="hand2")
+                sec_con_rb = tkinter.Label(base_line02_01, text=i[1], bg="#464646", fg="#7A7A7A", font="黑体 16", padx=20, cursor="hand2")
             sec_con_rb.pack(side="left")
             sec_con_rb.bind("<Button-1>", get_rb_function(i[0], "second_confirm", "second_confirm_switch"))
             self.data["second_confirm_switch"].append(sec_con_rb)
+
+        self.data["clear_product_entry"] = __class__.settings["clear_product_entry"].split("-")
+        self.data["clear_product_entry"] = [int(item) for item in self.data["clear_product_entry"]]
+        add_multiple_choice("添加产品至产品库后清空:", "clear_product_entry", ["型号", "电流", "面价", "附加输入", "已添加附加"])
+
+        self.data["clear_contract_entry"] = __class__.settings["clear_contract_entry"].split("-")
+        self.data["clear_contract_entry"] = [int(item) for item in self.data["clear_contract_entry"]]
+        add_multiple_choice("添加产品至合同后清空:", "clear_contract_entry", ["数量", "折扣", "备注"])
 
         base_line02.pack(side="top", fill="x")
         tkinter.Frame(base_setting_frame, bg="#323232", height=15).pack(side="top")
@@ -340,25 +394,68 @@ class SettingWindow(ChildWindow):
         update_base_frame = tkinter.Frame(update_log_frame, bg="#464646", padx=40, pady=30)
         update_base_frame.pack(side="top", fill="y", expand=1)
 
+        now_version = "V1.2.0"
+
         update_title_line01 = tkinter.Frame(update_base_frame, bg="#464646")
-        update_title_label = tkinter.Label(update_title_line01, bg="#464646", fg="#649AFA", text="V1.1.0", font="黑体 26")
+        update_title_label = tkinter.Label(update_title_line01, bg="#464646", fg="#649AFA", text=now_version,
+                                           font="黑体 26", cursor="hand2")
+        # title_font = tkinter.font.Font(update_title_label, update_title_label.cget("font"))
+        # title_font.configure(underline=True)
+        # update_title_label.configure(font=title_font)
         update_title_label.pack(side="left")
         update_title_line01.pack(side="top", fill="x")
         tkinter.Frame(update_base_frame, bg="#464646", height=30).pack(side="top")
-        update_content = {"新增功能": ["设置中新增\"更新日志\"", "在合同或报价单中可以拖动已添加的产品以改变顺序", "在合同修改界面下方新增\"编辑\"菜单按钮"],
-                          "功能调整": ["允许在合同或报价单中重复添加产品", "原合同或报价单内产品自动排序功能移至编辑菜单中"],
-                          "功能移除": ["移除了设置中的\"附件管理\""],
-                          "内容优化": ["优化了部分显示效果"]}
-        content_text = ""
-        for i in update_content:
-            content_text = f"{content_text}{i}:\n"
-            for i2 in update_content[i]:
-                content_text = f"{content_text} -{i2}\n"
-            content_text = f"{content_text}\n"
 
-        update_content_label = tkinter.Label(update_base_frame, bg="#464646", fg="#A0A0A0", text=content_text,
-                                             justify="left")
+        # version_line = tkinter.Frame(update_log_frame, bg="#262626")
+        version_label = tkinter.Label(update_base_frame, bg="#464646", fg="#646464", text=f"当前版本:{now_version}",
+                                      font="黑体 14")
+        # version_line.pack(side="bottom", fill="x")
+        version_label.pack(side="bottom")
+
+        update_dict = {}
+        update_content_1_1_0 = {"新增功能": ["设置中新增\"更新日志\"", "在合同或报价单中可以拖动已添加的产品以改变顺序", "在合同修改界面下方新增\"编辑\"菜单按钮"],
+                                "功能调整": ["允许在合同或报价单中重复添加产品", "原合同或报价单内产品自动排序功能移至编辑菜单中"],
+                                "功能移除": ["移除了设置中的\"附件管理\""],
+                                "内容优化": ["优化了部分显示效果"]}
+        update_content_1_2_0 = {"新增功能": ["设置中新增\"添加产品至产品库后清空\"与\"添加产品至合同后清空\"选项",
+                                         "在添加产品时允许对产品自定义分组", "在筛选产品时可以使用自定义分组筛选"],
+                                "内容优化": ["优化了部分显示效果"]}
+        update_dict["V1.1.0"] = update_content_1_1_0
+        update_dict["V1.2.0"] = update_content_1_2_0
+        for d in update_dict:
+            content_text = ""
+            for i in update_dict[d]:
+                content_text = f"{content_text}{i}:\n"
+                for i2 in update_dict[d][i]:
+                    content_text = f"{content_text} -{i2}\n"
+                content_text = f"{content_text}\n"
+            update_dict[d] = content_text
+
+        update_content_label = tkinter.Text(update_base_frame, bg="#464646", fg="#A0A0A0", highlightbackground="#464646",
+                                            highlightcolor="#464646", bd=0, highlightthickness=1,
+                                            insertbackground="#464646", width=50,
+                                            spacing1=5, spacing3=5, spacing2=2)
+        update_content_label.insert("0.0", update_dict[now_version])
+        update_content_label.config(state="disabled")
         update_content_label.pack(side="top")
+
+        def get_change_func(version):
+            def change_to_version():
+                update_title_label.config(text=version)
+                update_content_label.config(state="normal")
+                update_content_label.delete("1.0", "end")
+                update_content_label.insert("0.0", update_dict[version])
+                update_content_label.config(state="disabled")
+            return change_to_version
+
+        version_menu = tkinter.Menu(window, tearoff=False, font="黑体 15", bg="#262626", fg="#A0A0A0")
+        for i in update_dict:
+            version_menu.add_command(label=i, command=get_change_func(i))
+
+        def change_version(evt):
+            version_menu.post(update_title_label.winfo_rootx(), update_title_label.winfo_rooty() - 50)
+
+        update_title_label.bind("<Button-1>", change_version)
 
         panel_list["enclosure_manager"] = update_log_frame
         widget_list = dict()
@@ -510,6 +607,33 @@ class SettingWindow(ChildWindow):
         product_search_entry.bind("<Return>", to_search)
         screen_type_cb.bind("<<ComboboxSelected>>", to_search)
 
+        def tab_select(evt):
+            if evt.keysym == "Tab":
+                if_is = False
+                if_select = False
+                for key in widget_list:
+                    item = widget_list[key]
+                    if type(item) == tkinter.Text and key != "product_search_entry":
+                        if if_is is True:
+                            item.focus_set()
+                            if_select = True
+                            break
+
+                        if item == evt.widget:
+                            if_is = True
+                            continue
+                if if_select is False:
+                    for key in widget_list:
+                        item = widget_list[key]
+                        if type(item) is tkinter.Text:
+                            item.focus_set()
+                            break
+                return "break"
+
+        for i in widget_list:
+            if type(widget_list[i]) == tkinter.Text and i != "product_search_entry":
+                widget_list[i].bind("<Key>", tab_select)
+
     def product_list_set(self, name_list, type_list, adjunct_list, price_list, adjunctPrice_list, pid_list):
         self.data["pid_list"] = pid_list
         # product_id_list = list()
@@ -537,10 +661,18 @@ class SettingWindow(ChildWindow):
         self.data["delete_lock"] = not self.data["delete_lock"]
 
     def clear(self):
-        self.data["widget_list"]["product_type_entry"].delete("1.0", "end-1c")
-        self.data["widget_list"]["product_current_entry"].delete("1.0", "end-1c")
-        self.data["widget_list"]["product_price_entry"].delete("1.0", "end-1c")
-        self.data["widget_list"]["product_standard_canvas"].delete_all()
+        clear_setting = self.data["clear_product_entry"]
+        if clear_setting[0] == 1:
+            self.data["widget_list"]["product_type_entry"].delete("1.0", "end-1c")
+        if clear_setting[1] == 1:
+            self.data["widget_list"]["product_current_entry"].delete("1.0", "end-1c")
+        if clear_setting[2] == 1:
+            self.data["widget_list"]["product_price_entry"].delete("1.0", "end-1c")
+        if clear_setting[3] == 1:
+            self.data["widget_list"]["product_adjunctName_entry"].delete("1.0", "end-1c")
+            self.data["widget_list"]["product_adjunctPrice_entry"].delete("1.0", "end-1c")
+        if clear_setting[4] == 1:
+            self.data["widget_list"]["product_standard_canvas"].delete_all()
 
     def category_return(self):
         self.data["widget_list"]["screen_name_cb"].current(0)
@@ -582,10 +714,7 @@ class SettingWindow(ChildWindow):
             warning_window = WarningWindow(self.window, "产品已存在。")
             return
         self.search()
-        self.data["widget_list"]["product_type_entry"].delete("1.0", 'end')
-        self.data["widget_list"]["product_current_entry"].delete("1.0", 'end')
-        self.data["widget_list"]["product_price_entry"].delete("1.0", 'end')
-        self.data["widget_list"]["product_standard_canvas"].delete_all()
+        self.clear()
 
     def product_load(self, product_list):
         for i in self.data["product_treeview"].get_children():

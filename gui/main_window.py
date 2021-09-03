@@ -27,7 +27,7 @@ class Window:
     def __init__(self, width=1260, height=900):
         self.window = tkinter.Tk()
         self.window.option_add("*Font", "黑体 15")
-        self.window.title("森源电气有限公司-合同管理V1.1.0")
+        self.window.title("森源电气有限公司-合同管理V1.2.0")
         screen_width = self.window.winfo_screenwidth()
         screen_height = self.window.winfo_screenheight() - 70
         self.window.geometry("%sx%s+%d+%d" % (width, height, (screen_width - width) / 2, (screen_height - height) / 2))
@@ -36,7 +36,7 @@ class Window:
         self.window.iconphoto(True, tkinter.PhotoImage(file='img/icon_16.png'))
         self.window.update()
         self.gui_init(self.window)
-        self.window.report_callback_exception = self.root_error_call_back
+        # self.window.report_callback_exception = self.root_error_call_back
         self.window.mainloop()
 
     def gui_init(self, window):
@@ -725,7 +725,7 @@ class MainWindow(Window):
 
     def open_setting_menu(self, evt):
         setting_menu = SettingWindow(master=self.window, width=1280, height=800, resizable=True, title="设置",
-                                     data_loader=self.data_loader)
+                                     data_loader=self.data_loader, minsize_x=1000, minsize_y=700)
 
     def open_contract(self, cid):
         if len(cid) == 10:
@@ -942,10 +942,25 @@ class MainWindow(Window):
                                                     data[20], data[21], data[22])
 
     def info_change(self, evt):
-        self.info_list["info_menu_save"].config(image=self.info_list["save_enabled_img"], cursor="hand2")
-        self.info_list["info_menu_back"].config(image=self.info_list["back_enabled_img"], cursor="hand2")
-        self.info_list["info_menu_back"].bind("<Button-1>", self.info_back)
-        self.info_list["info_menu_save"].bind("<Button-1>", self.info_save)
+        if evt.keysym == "Tab":
+            if_is = False
+            for key in self.info_list:
+                i = self.info_list[key]
+                if type(i) == tkinter.Text:
+                    if if_is is True:
+                        i.focus_set()
+                        # self.info_canvas.yview("moveto", 1)
+                        break
+
+                    if i == evt.widget:
+                        if_is = True
+                        continue
+            return "break"
+        else:
+            self.info_list["info_menu_save"].config(image=self.info_list["save_enabled_img"], cursor="hand2")
+            self.info_list["info_menu_back"].config(image=self.info_list["back_enabled_img"], cursor="hand2")
+            self.info_list["info_menu_back"].bind("<Button-1>", self.info_back)
+            self.info_list["info_menu_save"].bind("<Button-1>", self.info_save)
 
     def info_save(self, evt):
         if self.info_mode == "ct":
